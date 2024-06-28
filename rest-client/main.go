@@ -22,21 +22,68 @@ func NewClient(apiToken string) *TelnyxClient {
 // Struct Definitions
 
 type BillingGroup struct {
-	ID             string    `json:"id"`
-	Name           string    `json:"name"`
-	OrganizationID string    `json:"organization_id"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	RecordType     string     `json:"record_type"`
+	ID             string     `json:"id"`
+	OrganizationID string     `json:"organization_id"`
+	Name           string     `json:"name"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
+	DeletedAt      *time.Time `json:"deleted_at,omitempty"`
 }
 
 type MessagingProfile struct {
+	ID                      string              `json:"id"`
+	Name                    string              `json:"name"`
+	Enabled                 bool                `json:"enabled"`
+	WebhookURL              string              `json:"webhook_url"`
+	WebhookFailoverURL      string              `json:"webhook_failover_url"`
+	WebhookAPIVersion       string              `json:"webhook_api_version"`
+	WhitelistedDestinations []string            `json:"whitelisted_destinations"`
+	NumberPoolSettings      *NumberPoolSettings `json:"number_pool_settings,omitempty"`
+	URLShortenerSettings    *URLShortenerSettings `json:"url_shortener_settings,omitempty"`
+	AlphaSender             *string             `json:"alpha_sender,omitempty"`
+	CreatedAt               time.Time           `json:"created_at"`
+	UpdatedAt               time.Time           `json:"updated_at"`
+	V1Secret                string              `json:"v1_secret"`
+}
+
+
+type NumberPoolSettings struct {
+	TollFreeWeight   float64 `json:"toll_free_weight"`
+	LongCodeWeight   float64 `json:"long_code_weight"`
+	SkipUnhealthy    bool    `json:"skip_unhealthy"`
+	StickySender     bool    `json:"sticky_sender"`
+	Geomatch         bool    `json:"geomatch"`
+}
+
+type URLShortenerSettings struct {
+	Domain               string `json:"domain"`
+	Prefix               string `json:"prefix"`
+	ReplaceBlacklistOnly bool   `json:"replace_blacklist_only"`
+	SendWebhooks         bool   `json:"send_webhooks"`
+}
+
+type OutboundVoiceProfile struct {
 	ID                      string    `json:"id"`
 	Name                    string    `json:"name"`
+	ConnectionsCount        int       `json:"connections_count"`
+	TrafficType             string    `json:"traffic_type"`
+	ServicePlan             string    `json:"service_plan"`
+	ConcurrentCallLimit     int       `json:"concurrent_call_limit"`
 	Enabled                 bool      `json:"enabled"`
-	WebhookURL              string    `json:"webhook_url"`
-	WebhookFailoverURL      string    `json:"webhook_failover_url"`
-	WebhookAPIVersion       string    `json:"webhook_api_version"`
+	Tags                    []string  `json:"tags"`
+	UsagePaymentMethod      string    `json:"usage_payment_method"`
 	WhitelistedDestinations []string  `json:"whitelisted_destinations"`
+	MaxDestinationRate      float64   `json:"max_destination_rate"`
+	DailySpendLimit         string    `json:"daily_spend_limit"`
+	DailySpendLimitEnabled  bool      `json:"daily_spend_limit_enabled"`
+	CallRecording           struct {
+		Type                string   `json:"call_recording_type"`
+		CallerPhoneNumbers  []string `json:"call_recording_caller_phone_numbers"`
+		Channels            string   `json:"call_recording_channels"`
+		Format              string   `json:"call_recording_format"`
+	} `json:"call_recording"`
+	BillingGroupID          string    `json:"billing_group_id"`
 	CreatedAt               time.Time `json:"created_at"`
 	UpdatedAt               time.Time `json:"updated_at"`
 }
@@ -150,24 +197,6 @@ type FQDNConnection struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type OutboundVoiceProfile struct {
-	ID                      string    `json:"id"`
-	Name                    string    `json:"name"`
-	ConnectionsCount        int       `json:"connections_count"`
-	TrafficType             string    `json:"traffic_type"`
-	ServicePlan             string    `json:"service_plan"`
-	ConcurrentCallLimit     int       `json:"concurrent_call_limit"`
-	Enabled                 bool      `json:"enabled"`
-	Tags                    []string  `json:"tags"`
-	UsagePaymentMethod      string    `json:"usage_payment_method"`
-	WhitelistedDestinations []string  `json:"whitelisted_destinations"`
-	MaxDestinationRate      float64   `json:"max_destination_rate"`
-	DailySpendLimit         string    `json:"daily_spend_limit"`
-	DailySpendLimitEnabled  bool      `json:"daily_spend_limit_enabled"`
-	BillingGroupID          string    `json:"billing_group_id"`
-	CreatedAt               time.Time `json:"created_at"`
-	UpdatedAt               time.Time `json:"updated_at"`
-}
 
 type PhoneNumber struct {
 	ID                   string    `json:"id"`
