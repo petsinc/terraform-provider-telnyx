@@ -22,13 +22,13 @@ func NewClient(apiToken string) *TelnyxClient {
 // Struct Definitions
 
 type BillingGroup struct {
-	RecordType     string     `json:"record_type"`
-	ID             string     `json:"id"`
-	OrganizationID string     `json:"organization_id"`
-	Name           string     `json:"name"`
-	CreatedAt      time.Time  `json:"created_at"`
-	UpdatedAt      time.Time  `json:"updated_at"`
-	DeletedAt      *time.Time `json:"deleted_at,omitempty"`
+	RecordType     string    `json:"record_type"`
+	ID             string    `json:"id"`
+	OrganizationID string    `json:"organization_id"`
+	Name           string    `json:"name"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	DeletedAt      time.Time `json:"deleted_at,omitempty"`
 }
 
 type MessagingProfile struct {
@@ -47,13 +47,12 @@ type MessagingProfile struct {
 	V1Secret                string              `json:"v1_secret"`
 }
 
-
 type NumberPoolSettings struct {
-	TollFreeWeight   float64 `json:"toll_free_weight"`
-	LongCodeWeight   float64 `json:"long_code_weight"`
-	SkipUnhealthy    bool    `json:"skip_unhealthy"`
-	StickySender     bool    `json:"sticky_sender"`
-	Geomatch         bool    `json:"geomatch"`
+	TollFreeWeight float64 `json:"toll_free_weight"`
+	LongCodeWeight float64 `json:"long_code_weight"`
+	SkipUnhealthy  bool    `json:"skip_unhealthy"`
+	StickySender   bool    `json:"sticky_sender"`
+	Geomatch       bool    `json:"geomatch"`
 }
 
 type URLShortenerSettings struct {
@@ -64,29 +63,32 @@ type URLShortenerSettings struct {
 }
 
 type OutboundVoiceProfile struct {
-	ID                      string    `json:"id"`
-	Name                    string    `json:"name"`
-	ConnectionsCount        int       `json:"connections_count"`
-	TrafficType             string    `json:"traffic_type"`
-	ServicePlan             string    `json:"service_plan"`
-	ConcurrentCallLimit     int       `json:"concurrent_call_limit"`
-	Enabled                 bool      `json:"enabled"`
-	Tags                    []string  `json:"tags"`
-	UsagePaymentMethod      string    `json:"usage_payment_method"`
-	WhitelistedDestinations []string  `json:"whitelisted_destinations"`
-	MaxDestinationRate      float64   `json:"max_destination_rate"`
-	DailySpendLimit         string    `json:"daily_spend_limit"`
-	DailySpendLimitEnabled  bool      `json:"daily_spend_limit_enabled"`
-	CallRecording           struct {
-		Type                string   `json:"call_recording_type"`
-		CallerPhoneNumbers  []string `json:"call_recording_caller_phone_numbers"`
-		Channels            string   `json:"call_recording_channels"`
-		Format              string   `json:"call_recording_format"`
-	} `json:"call_recording"`
+	ID                      string   `json:"id,omitempty"`
+	Name                    string   `json:"name"`
+	ConnectionsCount        int      `json:"connections_count,omitempty"`
+	TrafficType             string   `json:"traffic_type"`
+	ServicePlan             string   `json:"service_plan"`
+	ConcurrentCallLimit     int      `json:"concurrent_call_limit"`
+	Enabled                 bool     `json:"enabled"`
+	Tags                    []string `json:"tags"`
+	UsagePaymentMethod      string   `json:"usage_payment_method"`
+	WhitelistedDestinations []string `json:"whitelisted_destinations"`
+	MaxDestinationRate      float64  `json:"max_destination_rate"`
+	DailySpendLimit         string   `json:"daily_spend_limit"`
+	DailySpendLimitEnabled  bool     `json:"daily_spend_limit_enabled"`
+	CallRecording           CallRecording `json:"call_recording"`
 	BillingGroupID          string    `json:"billing_group_id"`
-	CreatedAt               time.Time `json:"created_at"`
-	UpdatedAt               time.Time `json:"updated_at"`
+	CreatedAt               time.Time `json:"created_at,omitempty"`
+	UpdatedAt               time.Time `json:"updated_at,omitempty"`
 }
+
+type CallRecording struct {
+	Type               string   `json:"call_recording_type"`
+	CallerPhoneNumbers []string `json:"call_recording_caller_phone_numbers"`
+	Channels           string   `json:"call_recording_channels"`
+	Format             string   `json:"call_recording_format"`
+}
+
 
 type PhoneNumberReservation struct {
 	ID                string    `json:"id"`
@@ -197,33 +199,32 @@ type FQDNConnection struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-
 type PhoneNumber struct {
-	ID                   string    `json:"id"`
-	RecordType           string    `json:"record_type"`
-	PhoneNumber          string    `json:"phone_number"`
-	Status               string    `json:"status"`
-	Tags                 []string  `json:"tags"`
-	ExternalPin          string    `json:"external_pin"`
-	ConnectionID         string    `json:"connection_id"`
-	ConnectionName       string    `json:"connection_name"`
-	CustomerReference    string    `json:"customer_reference"`
-	MessagingProfileID   string    `json:"messaging_profile_id"`
-	MessagingProfileName string    `json:"messaging_profile_name"`
-	BillingGroupID       string    `json:"billing_group_id"`
-	EmergencyEnabled     bool      `json:"emergency_enabled"`
-	EmergencyAddressID   string    `json:"emergency_address_id"`
-	CallForwardingEnabled bool     `json:"call_forwarding_enabled"`
-	CNAMListingEnabled   bool      `json:"cnam_listing_enabled"`
-	CallerIDNameEnabled  bool      `json:"caller_id_name_enabled"`
-	CallRecordingEnabled bool      `json:"call_recording_enabled"`
-	T38FaxGatewayEnabled bool      `json:"t38_fax_gateway_enabled"`
-	NumberLevelRouting   string    `json:"number_level_routing"`
-	PhoneNumberType      string    `json:"phone_number_type"`
-	PurchasedAt          time.Time `json:"purchased_at"`
-	CreatedAt            time.Time `json:"created_at"`
-	UpdatedAt            time.Time `json:"updated_at"`
-	HDVoiceEnabled       bool      `json:"hd_voice_enabled"`
+	ID                    string    `json:"id"`
+	RecordType            string    `json:"record_type"`
+	PhoneNumber           string    `json:"phone_number"`
+	Status                string    `json:"status"`
+	Tags                  []string  `json:"tags"`
+	ExternalPin           string    `json:"external_pin"`
+	ConnectionID          string    `json:"connection_id"`
+	ConnectionName        string    `json:"connection_name"`
+	CustomerReference     string    `json:"customer_reference"`
+	MessagingProfileID    string    `json:"messaging_profile_id"`
+	MessagingProfileName  string    `json:"messaging_profile_name"`
+	BillingGroupID        string    `json:"billing_group_id"`
+	EmergencyEnabled      bool      `json:"emergency_enabled"`
+	EmergencyAddressID    string    `json:"emergency_address_id"`
+	CallForwardingEnabled bool      `json:"call_forwarding_enabled"`
+	CNAMListingEnabled    bool      `json:"cnam_listing_enabled"`
+	CallerIDNameEnabled   bool      `json:"caller_id_name_enabled"`
+	CallRecordingEnabled  bool      `json:"call_recording_enabled"`
+	T38FaxGatewayEnabled  bool      `json:"t38_fax_gateway_enabled"`
+	NumberLevelRouting    string    `json:"number_level_routing"`
+	PhoneNumberType       string    `json:"phone_number_type"`
+	PurchasedAt           time.Time `json:"purchased_at"`
+	CreatedAt             time.Time `json:"created_at"`
+	UpdatedAt             time.Time `json:"updated_at"`
+	HDVoiceEnabled        bool      `json:"hd_voice_enabled"`
 }
 
 // Helper Method
@@ -310,20 +311,29 @@ func (client *TelnyxClient) DeleteBillingGroup(billingGroupID string) error {
 
 // Outbound Voice Profile Operations
 
-func (client *TelnyxClient) CreateOutboundVoiceProfile(name, trafficType, servicePlan string, concurrentCallLimit int, enabled bool, tags []string, usagePaymentMethod string, whitelistedDestinations []string, maxDestinationRate float64, dailySpendLimit string, dailySpendLimitEnabled bool, billingGroupID string) (*OutboundVoiceProfile, error) {
+func (client *TelnyxClient) CreateOutboundVoiceProfile(profile OutboundVoiceProfile) (*OutboundVoiceProfile, error) {
 	body := map[string]interface{}{
-		"name":                      name,
-		"traffic_type":              trafficType,
-		"service_plan":              servicePlan,
-		"concurrent_call_limit":     concurrentCallLimit,
-		"enabled":                   enabled,
-		"tags":                      tags,
-		"usage_payment_method":      usagePaymentMethod,
-		"whitelisted_destinations":  whitelistedDestinations,
-		"max_destination_rate":      maxDestinationRate,
-		"daily_spend_limit":         dailySpendLimit,
-		"daily_spend_limit_enabled": dailySpendLimitEnabled,
-		"billing_group_id":          billingGroupID,
+		"name":                      profile.Name,
+		"traffic_type":              profile.TrafficType,
+		"service_plan":              profile.ServicePlan,
+		"concurrent_call_limit":     profile.ConcurrentCallLimit,
+		"enabled":                   profile.Enabled,
+		"tags":                      profile.Tags,
+		"usage_payment_method":      profile.UsagePaymentMethod,
+		"whitelisted_destinations":  profile.WhitelistedDestinations,
+		"max_destination_rate":      profile.MaxDestinationRate,
+		"daily_spend_limit":         profile.DailySpendLimit,
+		"daily_spend_limit_enabled": profile.DailySpendLimitEnabled,
+		"billing_group_id":          profile.BillingGroupID,
+	}
+
+	if profile.CallRecording.Type != "" {
+		body["call_recording"] = map[string]interface{}{
+			"call_recording_type":              profile.CallRecording.Type,
+			"call_recording_caller_phone_numbers": profile.CallRecording.CallerPhoneNumbers,
+			"call_recording_channels":          profile.CallRecording.Channels,
+			"call_recording_format":            profile.CallRecording.Format,
+		}
 	}
 	var result struct {
 		Data OutboundVoiceProfile `json:"data"`
@@ -335,21 +345,32 @@ func (client *TelnyxClient) CreateOutboundVoiceProfile(name, trafficType, servic
 	return &result.Data, nil
 }
 
-func (client *TelnyxClient) UpdateOutboundVoiceProfile(outboundVoiceProfileID, name, trafficType, servicePlan string, concurrentCallLimit int, enabled bool, tags []string, usagePaymentMethod string, whitelistedDestinations []string, maxDestinationRate float64, dailySpendLimit string, dailySpendLimitEnabled bool, billingGroupID string) (*OutboundVoiceProfile, error) {
+
+func (client *TelnyxClient) UpdateOutboundVoiceProfile(outboundVoiceProfileID string, profile OutboundVoiceProfile) (*OutboundVoiceProfile, error) {
 	body := map[string]interface{}{
-		"name":                      name,
-		"traffic_type":              trafficType,
-		"service_plan":              servicePlan,
-		"concurrent_call_limit":     concurrentCallLimit,
-		"enabled":                   enabled,
-		"tags":                      tags,
-		"usage_payment_method":      usagePaymentMethod,
-		"whitelisted_destinations":  whitelistedDestinations,
-		"max_destination_rate":      maxDestinationRate,
-		"daily_spend_limit":         dailySpendLimit,
-		"daily_spend_limit_enabled": dailySpendLimitEnabled,
-		"billing_group_id":          billingGroupID,
+		"name":                      profile.Name,
+		"traffic_type":              profile.TrafficType,
+		"service_plan":              profile.ServicePlan,
+		"concurrent_call_limit":     profile.ConcurrentCallLimit,
+		"enabled":                   profile.Enabled,
+		"tags":                      profile.Tags,
+		"usage_payment_method":      profile.UsagePaymentMethod,
+		"whitelisted_destinations":  profile.WhitelistedDestinations,
+		"max_destination_rate":      profile.MaxDestinationRate,
+		"daily_spend_limit":         profile.DailySpendLimit,
+		"daily_spend_limit_enabled": profile.DailySpendLimitEnabled,
+		"billing_group_id":          profile.BillingGroupID,
 	}
+
+	if profile.CallRecording.Type != "" {
+		body["call_recording"] = map[string]interface{}{
+			"call_recording_type":              profile.CallRecording.Type,
+			"call_recording_caller_phone_numbers": profile.CallRecording.CallerPhoneNumbers,
+			"call_recording_channels":          profile.CallRecording.Channels,
+			"call_recording_format":            profile.CallRecording.Format,
+		}
+	}
+
 	var result struct {
 		Data OutboundVoiceProfile `json:"data"`
 	}
@@ -359,6 +380,7 @@ func (client *TelnyxClient) UpdateOutboundVoiceProfile(outboundVoiceProfileID, n
 	}
 	return &result.Data, nil
 }
+
 
 func (client *TelnyxClient) DeleteOutboundVoiceProfile(outboundVoiceProfileID string) error {
 	return client.doRequest("DELETE", fmt.Sprintf("/outbound_voice_profiles/%s", outboundVoiceProfileID), nil, nil)
@@ -412,20 +434,20 @@ func (client *TelnyxClient) DeleteMessagingProfile(profileID string) error {
 
 func (client *TelnyxClient) CreateFQDNConnection(connectionName, transportProtocol, webhookEventURL, webhookEventFailoverURL, outboundVoiceProfileID string) (*FQDNConnection, error) {
 	body := map[string]interface{}{
-		"active":                             true,
-		"anchorsite_override":                "Latency",
-		"connection_name":                    connectionName,
-		"transport_protocol":                 transportProtocol,
+		"active":                               true,
+		"anchorsite_override":                  "Latency",
+		"connection_name":                      connectionName,
+		"transport_protocol":                   transportProtocol,
 		"default_on_hold_comfort_noise_enabled": true,
-		"dtmf_type":                          "RFC 2833",
-		"encode_contact_header_enabled":      true,
-		"encrypted_media":                    "SRTP",
-		"onnet_t38_passthrough_enabled":      true,
-		"webhook_event_url":                  webhookEventURL,
-		"webhook_event_failover_url":         webhookEventFailoverURL,
-		"webhook_api_version":                "1",
-		"webhook_timeout_secs":               25,
-		"outbound_voice_profile_id":          outboundVoiceProfileID,
+		"dtmf_type":                            "RFC 2833",
+		"encode_contact_header_enabled":        true,
+		"encrypted_media":                      "SRTP",
+		"onnet_t38_passthrough_enabled":        true,
+		"webhook_event_url":                    webhookEventURL,
+		"webhook_event_failover_url":           webhookEventFailoverURL,
+		"webhook_api_version":                  "1",
+		"webhook_timeout_secs":                 25,
+		"outbound_voice_profile_id":            outboundVoiceProfileID,
 	}
 	var result struct {
 		Data FQDNConnection `json:"data"`
@@ -439,20 +461,20 @@ func (client *TelnyxClient) CreateFQDNConnection(connectionName, transportProtoc
 
 func (client *TelnyxClient) UpdateFQDNConnection(connectionID, connectionName, transportProtocol, webhookEventURL, webhookEventFailoverURL, outboundVoiceProfileID string) (*FQDNConnection, error) {
 	body := map[string]interface{}{
-		"active":                             true,
-		"anchorsite_override":                "Latency",
-		"connection_name":                    connectionName,
-		"transport_protocol":                 transportProtocol,
+		"active":                               true,
+		"anchorsite_override":                  "Latency",
+		"connection_name":                      connectionName,
+		"transport_protocol":                   transportProtocol,
 		"default_on_hold_comfort_noise_enabled": true,
-		"dtmf_type":                          "RFC 2833",
-		"encode_contact_header_enabled":      true,
-		"encrypted_media":                    "SRTP",
-		"onnet_t38_passthrough_enabled":      true,
-		"webhook_event_url":                  webhookEventURL,
-		"webhook_event_failover_url":         webhookEventFailoverURL,
-		"webhook_api_version":                "1",
-		"webhook_timeout_secs":               25,
-		"outbound_voice_profile_id":          outboundVoiceProfileID,
+		"dtmf_type":                            "RFC 2833",
+		"encode_contact_header_enabled":        true,
+		"encrypted_media":                      "SRTP",
+		"onnet_t38_passthrough_enabled":        true,
+		"webhook_event_url":                    webhookEventURL,
+		"webhook_event_failover_url":           webhookEventFailoverURL,
+		"webhook_api_version":                  "1",
+		"webhook_timeout_secs":                 25,
+		"outbound_voice_profile_id":            outboundVoiceProfileID,
 	}
 	var result struct {
 		Data FQDNConnection `json:"data"`
@@ -518,7 +540,7 @@ func (client *TelnyxClient) CreateNumberOrder(phoneNumbers []string, connectionI
 
 func (client *TelnyxClient) UpdateNumberOrder(numberOrderID, customerReference string, regulatoryRequirements []map[string]string) (*PhoneNumberOrder, error) {
 	body := map[string]interface{}{
-		"customer_reference":     customerReference,
+		"customer_reference":      customerReference,
 		"regulatory_requirements": regulatoryRequirements,
 	}
 	var result struct {
@@ -539,7 +561,7 @@ func (client *TelnyxClient) CreateNumberReservation(phoneNumbers []string, custo
 		phoneNumbersMap = append(phoneNumbersMap, map[string]string{"phone_number": phoneNumber})
 	}
 	body := map[string]interface{}{
-		"phone_numbers":       phoneNumbersMap,
+		"phone_numbers":      phoneNumbersMap,
 		"customer_reference": customerReference,
 	}
 	var result struct {
@@ -592,7 +614,27 @@ func (runner *TestRunner) PerformCreates() {
 		billingGroup.ID, billingGroup.Name, billingGroup.CreatedAt)
 
 	// Create an Outbound Voice Profile
-	outboundVoiceProfile, err := runner.client.CreateOutboundVoiceProfile("test", "conversational", "global", 10, true, []string{"test-profile"}, "rate-deck", []string{"US"}, 10.0, "100.00", true, billingGroup.ID)
+	outboundVoiceProfile, err := runner.client.CreateOutboundVoiceProfile(OutboundVoiceProfile{
+		Name:                    "Test Outbound Profile",
+		TrafficType:             "conversational",
+		ServicePlan:             "global",
+		ConcurrentCallLimit:     10,
+		Enabled:                 true,
+		Tags:                    []string{"test-profile"},
+		UsagePaymentMethod:      "rate-deck",
+		WhitelistedDestinations: []string{"US"},
+		MaxDestinationRate:      10.0,
+		DailySpendLimit:         "100.00",
+		DailySpendLimitEnabled:  true,
+		BillingGroupID:          runner.billingGroupID,
+		CallRecording: CallRecording{
+			Type:               "all",
+			CallerPhoneNumbers: []string{},
+			Channels:           "single",
+			Format:             "wav",
+		},
+	})
+	
 	if err != nil {
 		fmt.Printf("Error creating outbound voice profile: %v\n", err)
 		os.Exit(1)
@@ -634,7 +676,27 @@ func (runner *TestRunner) PerformUpdates() {
 		updatedMessagingProfile.ID, updatedMessagingProfile.Name, updatedMessagingProfile.Enabled, updatedMessagingProfile.WebhookURL, updatedMessagingProfile.WebhookFailoverURL, updatedMessagingProfile.WebhookAPIVersion, updatedMessagingProfile.WhitelistedDestinations, updatedMessagingProfile.CreatedAt, updatedMessagingProfile.UpdatedAt)
 
 	// Update the Outbound Voice Profile
-	updatedOutboundVoiceProfile, err := runner.client.UpdateOutboundVoiceProfile(runner.outboundVoiceProfileID, "office-updated", "conversational", "global", 10, true, []string{"office-profile-updated"}, "rate-deck", []string{"US"}, 10.0, "200.00", true, runner.billingGroupID)
+	updatedOutboundVoiceProfile, err := runner.client.UpdateOutboundVoiceProfile(runner.outboundVoiceProfileID, OutboundVoiceProfile{
+		Name:                    "Test Outbound Profile Updated",
+		TrafficType:             "conversational",
+		ServicePlan:             "global",
+		ConcurrentCallLimit:     10,
+		Enabled:                 true,
+		Tags:                    []string{"test-profile"},
+		UsagePaymentMethod:      "rate-deck",
+		WhitelistedDestinations: []string{"US"},
+		MaxDestinationRate:      10.0,
+		DailySpendLimit:         "100.00",
+		DailySpendLimitEnabled:  true,
+		BillingGroupID:          runner.billingGroupID,
+		CallRecording: CallRecording{
+			Type:               "all",
+			CallerPhoneNumbers: []string{},
+			Channels:           "single",
+			Format:             "wav",
+		},
+	})
+	
 	if err != nil {
 		fmt.Printf("Error updating outbound voice profile: %v\n", err)
 		os.Exit(1)
