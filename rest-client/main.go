@@ -183,7 +183,7 @@ type OutboundSettings struct {
 type FQDN struct {
 	ID            string    `json:"id"`
 	RecordType    string    `json:"record_type"`
-	ConnectionID  string    `json:"connection_id"`
+	ConnectionID  int       `json:"connection_id"`
 	FQDN          string    `json:"fqdn"`
 	Port          int       `json:"port"`
 	DNSRecordType string    `json:"dns_record_type"`
@@ -206,11 +206,11 @@ type FQDNConnection struct {
 	OnnetT38PassthroughEnabled       bool             `json:"onnet_t38_passthrough_enabled"`
 	IosPushCredentialID              *string          `json:"ios_push_credential_id,omitempty"`
 	AndroidPushCredentialID          *string          `json:"android_push_credential_id,omitempty"`
-	MicrosoftTeamsSbc				 bool			   `json:"microsoft_teams_sbc`
+	MicrosoftTeamsSbc                bool             `json:"microsoft_teams_sbc`
 	WebhookEventURL                  string           `json:"webhook_event_url"`
-	WebhookEventFailoverURL          string          `json:"webhook_event_failover_url,omitempty"`
+	WebhookEventFailoverURL          string           `json:"webhook_event_failover_url,omitempty"`
 	WebhookAPIVersion                string           `json:"webhook_api_version"`
-	WebhookTimeoutSecs               int             `json:"webhook_timeout_secs,omitempty"`
+	WebhookTimeoutSecs               int              `json:"webhook_timeout_secs,omitempty"`
 	RTCPSettings                     RTCPSettings     `json:"rtcp_settings"`
 	Inbound                          InboundSettings  `json:"inbound"`
 	Outbound                         OutboundSettings `json:"outbound"`
@@ -218,6 +218,7 @@ type FQDNConnection struct {
 	UpdatedAt                        time.Time        `json:"updated_at"`
 	Username                         *string          `json:"user_name,omitempty"`
 	Password                         *string          `json:"password,omitempty"`
+	FQDNOutboundAuthentication       string           `json:"fqdn_outbound_authentication`
 	SipUriCallingPreference          *string          `json:"sip_uri_calling_preference,omitempty"`
 }
 
@@ -513,7 +514,6 @@ func (client *TelnyxClient) CreateCredentialConnection(profile FQDNConnection) (
 		},
 	}
 
-
 	var result struct {
 		Data FQDNConnection `json:"data"`
 	}
@@ -527,6 +527,8 @@ func (client *TelnyxClient) CreateCredentialConnection(profile FQDNConnection) (
 // Update Credential Connection
 func (client *TelnyxClient) UpdateCredentialConnection(credentialConnectionID string, profile FQDNConnection) (*FQDNConnection, error) {
 	body := map[string]interface{}{
+		"user_name":                             profile.Username,
+		"password":                              profile.Password,
 		"active":                                profile.Active,
 		"anchorsite_override":                   profile.AnchorsiteOverride,
 		"connection_name":                       profile.ConnectionName,
@@ -536,13 +538,14 @@ func (client *TelnyxClient) UpdateCredentialConnection(credentialConnectionID st
 		"encode_contact_header_enabled":         profile.EncodeContactHeaderEnabled,
 		"encrypted_media":                       profile.EncryptedMedia,
 		"onnet_t38_passthrough_enabled":         profile.OnnetT38PassthroughEnabled,
-		"username_name":                         profile.Username,
-		"password":                              profile.Password,
-		"sip_uri_calling_preference":            profile.SipUriCallingPreference,
+		"ios_push_credential_id":                profile.IosPushCredentialID,
+		"android_push_credential_id":            profile.AndroidPushCredentialID,
+		"microsoft_teams_sbc":                   profile.MicrosoftTeamsSbc,
 		"webhook_event_url":                     profile.WebhookEventURL,
 		"webhook_event_failover_url":            profile.WebhookEventFailoverURL,
 		"webhook_api_version":                   profile.WebhookAPIVersion,
 		"webhook_timeout_secs":                  profile.WebhookTimeoutSecs,
+		"fqdn_outbound_authentication":          profile.FQDNOutboundAuthentication,
 		"rtcp_settings": map[string]interface{}{
 			"port":                  profile.RTCPSettings.Port,
 			"capture_enabled":       profile.RTCPSettings.CaptureEnabled,
@@ -602,8 +605,8 @@ func (client *TelnyxClient) DeleteCredentialConnection(credentialConnectionID st
 
 func (client *TelnyxClient) CreateFQDNConnection(profile FQDNConnection) (*FQDNConnection, error) {
 	body := map[string]interface{}{
-		"user_name":							 "hptest12345",
-		"password":								"hptest54321",
+		"user_name":                             profile.Username,
+		"password":                              profile.Password,
 		"active":                                profile.Active,
 		"anchorsite_override":                   profile.AnchorsiteOverride,
 		"connection_name":                       profile.ConnectionName,
@@ -616,10 +619,11 @@ func (client *TelnyxClient) CreateFQDNConnection(profile FQDNConnection) (*FQDNC
 		"ios_push_credential_id":                profile.IosPushCredentialID,
 		"android_push_credential_id":            profile.AndroidPushCredentialID,
 		"microsoft_teams_sbc":                   profile.MicrosoftTeamsSbc,
-		"webhook_event_url":          profile.WebhookEventURL,
-		"webhook_event_failover_url": profile.WebhookEventFailoverURL,
-		"webhook_api_version":        profile.WebhookAPIVersion,
-		"webhook_timeout_secs":       profile.WebhookTimeoutSecs,
+		"webhook_event_url":                     profile.WebhookEventURL,
+		"webhook_event_failover_url":            profile.WebhookEventFailoverURL,
+		"webhook_api_version":                   profile.WebhookAPIVersion,
+		"webhook_timeout_secs":                  profile.WebhookTimeoutSecs,
+		"fqdn_outbound_authentication":          profile.FQDNOutboundAuthentication,
 		"rtcp_settings": map[string]interface{}{
 			"port":                  profile.RTCPSettings.Port,
 			"capture_enabled":       profile.RTCPSettings.CaptureEnabled,
@@ -662,16 +666,6 @@ func (client *TelnyxClient) CreateFQDNConnection(profile FQDNConnection) (*FQDNC
 		},
 	}
 
-	
-	// Pretty print the body as JSON
-	prettyJSON, lol := json.MarshalIndent(body, "", "  ")
-	if lol != nil {
-		fmt.Println("Failed to generate JSON:", lol)
-		return nil, lol
-	}
-	fmt.Println("Request Body JSON:")
-	fmt.Println(string(prettyJSON))
-
 	var result struct {
 		Data FQDNConnection `json:"data"`
 	}
@@ -708,7 +702,7 @@ func (client *TelnyxClient) UpdateFQDN(fqdnID string, fqdn, dnsRecordType string
 	var result struct {
 		Data FQDN `json:"data"`
 	}
-	err := client.doRequest("PATCH", fmt.Sprintf("/fqdns/%d", fqdnID), body, &result)
+	err := client.doRequest("PATCH", fmt.Sprintf("/fqdns/%s", fqdnID), body, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -716,11 +710,13 @@ func (client *TelnyxClient) UpdateFQDN(fqdnID string, fqdn, dnsRecordType string
 }
 
 func (client *TelnyxClient) DeleteFQDN(fqdnID string) error {
-	return client.doRequest("DELETE", fmt.Sprintf("/fqdns/%d", fqdnID), nil, nil)
+	return client.doRequest("DELETE", fmt.Sprintf("/fqdns/%s", fqdnID), nil, nil)
 }
 
 func (client *TelnyxClient) UpdateFQDNConnection(fqdnConnectionID string, profile FQDNConnection) (*FQDNConnection, error) {
 	body := map[string]interface{}{
+		"user_name":                             profile.Username,
+		"password":                              profile.Password,
 		"active":                                profile.Active,
 		"anchorsite_override":                   profile.AnchorsiteOverride,
 		"connection_name":                       profile.ConnectionName,
@@ -733,10 +729,11 @@ func (client *TelnyxClient) UpdateFQDNConnection(fqdnConnectionID string, profil
 		"ios_push_credential_id":                profile.IosPushCredentialID,
 		"android_push_credential_id":            profile.AndroidPushCredentialID,
 		"microsoft_teams_sbc":                   profile.MicrosoftTeamsSbc,
-		"webhook_event_url":          profile.WebhookEventURL,
-		"webhook_event_failover_url": profile.WebhookEventFailoverURL,
-		"webhook_api_version":        profile.WebhookAPIVersion,
-		"webhook_timeout_secs":       profile.WebhookTimeoutSecs,
+		"webhook_event_url":                     profile.WebhookEventURL,
+		"webhook_event_failover_url":            profile.WebhookEventFailoverURL,
+		"webhook_api_version":                   profile.WebhookAPIVersion,
+		"webhook_timeout_secs":                  profile.WebhookTimeoutSecs,
+		"fqdn_outbound_authentication":          profile.FQDNOutboundAuthentication,
 		"rtcp_settings": map[string]interface{}{
 			"port":                  profile.RTCPSettings.Port,
 			"capture_enabled":       profile.RTCPSettings.CaptureEnabled,
@@ -907,70 +904,70 @@ func NewTestRunner(client *TelnyxClient) *TestRunner {
 }
 
 func (runner *TestRunner) PerformCreates() {
-	// // Create a Billing Group
-	// billingGroup, err := runner.client.CreateBillingGroup("Test Billing Group")
-	// if err != nil {
-	// 	fmt.Printf("Error creating billing group: %v\n", err)
-	// 	os.Exit(1)
-	// }
-	// runner.billingGroupID = billingGroup.ID
-	// fmt.Printf("Created Billing Group:\nID: %s\nName: %s\nCreated At: %s\n",
-	// 	billingGroup.ID, billingGroup.Name, billingGroup.CreatedAt)
+	// Create a Billing Group
+	billingGroup, err := runner.client.CreateBillingGroup("Test Billing Group")
+	if err != nil {
+		fmt.Printf("Error creating billing group: %v\n", err)
+		os.Exit(1)
+	}
+	runner.billingGroupID = billingGroup.ID
+	fmt.Printf("Created Billing Group:\nID: %s\nName: %s\nCreated At: %s\n",
+		billingGroup.ID, billingGroup.Name, billingGroup.CreatedAt)
 
-	// // Create an Outbound Voice Profile
-	// outboundVoiceProfile, err := runner.client.CreateOutboundVoiceProfile(OutboundVoiceProfile{
-	// 	Name:                    "Test Outbound Profile",
-	// 	TrafficType:             "conversational",
-	// 	ServicePlan:             "global",
-	// 	ConcurrentCallLimit:     10,
-	// 	Enabled:                 true,
-	// 	Tags:                    []string{"test-profile"},
-	// 	UsagePaymentMethod:      "rate-deck",
-	// 	WhitelistedDestinations: []string{"US"},
-	// 	MaxDestinationRate:      10.0,
-	// 	DailySpendLimit:         "100.00",
-	// 	DailySpendLimitEnabled:  true,
-	// 	BillingGroupID:          runner.billingGroupID,
-	// 	CallRecording: CallRecording{
-	// 		Type:               "all",
-	// 		CallerPhoneNumbers: []string{},
-	// 		Channels:           "single",
-	// 		Format:             "wav",
-	// 	},
-	// })
+	// Create an Outbound Voice Profile
+	outboundVoiceProfile, err := runner.client.CreateOutboundVoiceProfile(OutboundVoiceProfile{
+		Name:                    "Test Outbound Profile",
+		TrafficType:             "conversational",
+		ServicePlan:             "global",
+		ConcurrentCallLimit:     10,
+		Enabled:                 true,
+		Tags:                    []string{"test-profile"},
+		UsagePaymentMethod:      "rate-deck",
+		WhitelistedDestinations: []string{"US"},
+		MaxDestinationRate:      10.0,
+		DailySpendLimit:         "100.00",
+		DailySpendLimitEnabled:  true,
+		BillingGroupID:          runner.billingGroupID,
+		CallRecording: CallRecording{
+			Type:               "all",
+			CallerPhoneNumbers: []string{},
+			Channels:           "single",
+			Format:             "wav",
+		},
+	})
 
-	// if err != nil {
-	// 	fmt.Printf("Error creating outbound voice profile: %v\n", err)
-	// 	os.Exit(1)
-	// }
-	runner.outboundVoiceProfileID = "906df5d3-d34e-4858-8cb2-230c99488e95"
-	// fmt.Printf("Created Outbound Voice Profile:\nID: %s\nName: %s\nCreated At: %s\n",
-	// 	outboundVoiceProfile.ID, outboundVoiceProfile.Name, outboundVoiceProfile.CreatedAt)
+	if err != nil {
+		fmt.Printf("Error creating outbound voice profile: %v\n", err)
+		os.Exit(1)
+	}
+	runner.outboundVoiceProfileID = outboundVoiceProfile.ID
+	fmt.Printf("Created Outbound Voice Profile:\nID: %s\nName: %s\nCreated At: %s\n",
+		outboundVoiceProfile.ID, outboundVoiceProfile.Name, outboundVoiceProfile.CreatedAt)
 
-	// // Create a Messaging Profile
-	// messagingProfile, err := runner.client.CreateMessagingProfile("Test Profile", []string{"US"}, "https://www.example.com/hooks", "https://backup.example.com/hooks", true)
-	// if err != nil {
-	// 	fmt.Printf("Error creating messaging profile: %v\n", err)
-	// 	os.Exit(1)
-	// }
-	runner.messagingProfileID = "4001906e-f677-4a2e-a8e0-2a29581e4b68"
-	// fmt.Printf("Created Messaging Profile:\nID: %s\nName: %s\nEnabled: %t\nWebhook URL: %s\nWebhook Failover URL: %s\nWebhook API Version: %s\nWhitelisted Destinations: %v\nCreated At: %s\nUpdated At: %s\n",
-	// 	messagingProfile.ID, messagingProfile.Name, messagingProfile.Enabled, messagingProfile.WebhookURL, messagingProfile.WebhookFailoverURL, messagingProfile.WebhookAPIVersion, messagingProfile.WhitelistedDestinations, messagingProfile.CreatedAt, messagingProfile.UpdatedAt)
+	// Create a Messaging Profile
+	messagingProfile, err := runner.client.CreateMessagingProfile("Test Profile", []string{"US"}, "https://www.example.com/hooks", "https://backup.example.com/hooks", true)
+	if err != nil {
+		fmt.Printf("Error creating messaging profile: %v\n", err)
+		os.Exit(1)
+	}
+	runner.messagingProfileID = messagingProfile.ID
+	fmt.Printf("Created Messaging Profile:\nID: %s\nName: %s\nEnabled: %t\nWebhook URL: %s\nWebhook Failover URL: %s\nWebhook API Version: %s\nWhitelisted Destinations: %v\nCreated At: %s\nUpdated At: %s\n",
+		messagingProfile.ID, messagingProfile.Name, messagingProfile.Enabled, messagingProfile.WebhookURL, messagingProfile.WebhookFailoverURL, messagingProfile.WebhookAPIVersion, messagingProfile.WhitelistedDestinations, messagingProfile.CreatedAt, messagingProfile.UpdatedAt)
 
 	// Create an FQDN Connection
 	fqdnConnection, err := runner.client.CreateFQDNConnection(FQDNConnection{
+		Username:                         stringPtr("hellopatienttest12345"),
+		Password:                         stringPtr("54321testpatienthello"),
 		Active:                           true,
 		AnchorsiteOverride:               "Latency",
 		ConnectionName:                   "Test FQDN Connection",
 		TransportProtocol:                "UDP",
-		Username:						stringPtr("hp-test-12345"),
-		Password:						stringPtr("hp-test-54321"),
 		DefaultOnHoldComfortNoiseEnabled: true,
 		DTMFType:                         "RFC 2833",
 		EncodeContactHeaderEnabled:       false,
 		EncryptedMedia:                   nil,
 		OnnetT38PassthroughEnabled:       false,
-		MicrosoftTeamsSbc:				  false,
+		MicrosoftTeamsSbc:                false,
 		WebhookEventURL:                  "https://www.example.com/hooks",
 		WebhookEventFailoverURL:          "https://failover.example.com/hooks",
 		WebhookAPIVersion:                "1",
@@ -1005,9 +1002,9 @@ func (runner *TestRunner) PerformCreates() {
 			ChannelLimit:           10,
 			GenerateRingbackTone:   true,
 			InstantRingbackEnabled: false, // Ensure only one ringback setting is enabled
-			IPAuthenticationMethod: "credentials-connection",
-			// IPAuthenticationToken:    "aBcD1234aBcD1234", // Ensure token is at least 12 characters
-			Localization: "US",
+			IPAuthenticationMethod: "token",
+			IPAuthenticationToken:  "aBcD1234aBcD1234", // Ensure token is at least 12 characters
+			Localization:           "US",
 			// OutboundVoiceProfileID:   runner.outboundVoiceProfileID,
 			T38ReinviteSource: "customer",
 			EncryptedMedia:    "SRTP",
@@ -1030,7 +1027,7 @@ func (runner *TestRunner) PerformCreates() {
 		os.Exit(1)
 	}
 	runner.fqdnID = fqdn.ID
-	fmt.Printf("Created FQDN:\nID: %d\nFQDN: %s\nCreated At: %s\n",
+	fmt.Printf("Created FQDN:\nID: %s\nFQDN: %s\nCreated At: %s\n",
 		fqdn.ID, fqdn.FQDN, fqdn.CreatedAt)
 }
 
@@ -1075,16 +1072,18 @@ func (runner *TestRunner) PerformUpdates() {
 
 	// Update the FQDN Connection
 	updatedFQDNConnection, err := runner.client.UpdateFQDNConnection(runner.fqdnConnectionID, FQDNConnection{
+		Username:                         stringPtr("hellopatienttest12345"),
+		Password:                         stringPtr("54321testpatienthello"),
 		Active:                           true,
 		AnchorsiteOverride:               "Latency",
-		ConnectionName:                   "Updated Test FQDN Connection",
+		ConnectionName:                   "Test FQDN Connection",
 		TransportProtocol:                "UDP",
 		DefaultOnHoldComfortNoiseEnabled: true,
 		DTMFType:                         "RFC 2833",
 		EncodeContactHeaderEnabled:       false,
 		EncryptedMedia:                   nil,
 		OnnetT38PassthroughEnabled:       false,
-		MicrosoftTeamsSbc:				  false,
+		MicrosoftTeamsSbc:                false,
 		WebhookEventURL:                  "https://www.example.com/hooks",
 		WebhookEventFailoverURL:          "https://failover.example.com/hooks",
 		WebhookAPIVersion:                "1",
@@ -1119,8 +1118,8 @@ func (runner *TestRunner) PerformUpdates() {
 			ChannelLimit:           10,
 			GenerateRingbackTone:   true,
 			InstantRingbackEnabled: false, // Ensure only one ringback setting is enabled
-			IPAuthenticationMethod: "credentials-connection",
-			// IPAuthenticationToken:    "aBcD1234aBcD1234", // Ensure token is at least 12 characters
+			IPAuthenticationMethod: "token",
+			IPAuthenticationToken:  "aBcD1234aBcD1234", // Ensure token is at least 12 characters
 			Localization:           "US",
 			OutboundVoiceProfileID: runner.outboundVoiceProfileID,
 			T38ReinviteSource:      "customer",
@@ -1142,7 +1141,7 @@ func (runner *TestRunner) PerformUpdates() {
 		fmt.Printf("Error updating FQDN: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Printf("Updated FQDN:\nID: %d\nFQDN: %s\nUpdated At: %s\n",
+	fmt.Printf("Updated FQDN:\nID: %s\nFQDN: %s\nUpdated At: %s\n",
 		updatedFQDN.ID, updatedFQDN.FQDN, updatedFQDN.UpdatedAt)
 }
 
@@ -1191,7 +1190,7 @@ func (runner *TestRunner) PerformCascadingDeletes() {
 // Example Usage
 
 func main() {
-	client := NewClient("lol")
+	client := NewClient(os.Getenv("TELNYX_API_TOKEN"))
 	runner := NewTestRunner(client)
 
 	// Perform create operations
@@ -1212,4 +1211,16 @@ func stringPtr(s string) *string {
 
 func intPtr(i int) *int {
 	return &i
+}
+
+func prettyPrintRequestBody(body map[string]interface{}) error {
+	// Pretty print the body as JSON
+	prettyJSON, err := json.MarshalIndent(body, "", "  ")
+	if err != nil {
+		fmt.Println("Failed to generate JSON:", err)
+		return err
+	}
+	fmt.Println("Request Body JSON:")
+	fmt.Println(string(prettyJSON))
+	return nil
 }
