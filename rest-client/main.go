@@ -897,6 +897,7 @@ type TestRunner struct {
 	phoneNumberID          string
 	numberReservationID    string
 	numberOrderID          string
+	credentialConnectionID string // Added field for credential connection ID
 }
 
 func NewTestRunner(client *TelnyxClient) *TestRunner {
@@ -954,9 +955,75 @@ func (runner *TestRunner) PerformCreates() {
 	fmt.Printf("Created Messaging Profile:\nID: %s\nName: %s\nEnabled: %t\nWebhook URL: %s\nWebhook Failover URL: %s\nWebhook API Version: %s\nWhitelisted Destinations: %v\nCreated At: %s\nUpdated At: %s\n",
 		messagingProfile.ID, messagingProfile.Name, messagingProfile.Enabled, messagingProfile.WebhookURL, messagingProfile.WebhookFailoverURL, messagingProfile.WebhookAPIVersion, messagingProfile.WhitelistedDestinations, messagingProfile.CreatedAt, messagingProfile.UpdatedAt)
 
+	// Create a Credential Connection
+	credentialConnection, err := runner.client.CreateCredentialConnection(FQDNConnection{
+		Username:                         stringPtr("hellopatienttest12345"),
+		Password:                         stringPtr("54321testpatienthello"),
+		Active:                           true,
+		AnchorsiteOverride:               "Latency",
+		ConnectionName:                   "Test Credential Connection",
+		TransportProtocol:                "UDP",
+		DefaultOnHoldComfortNoiseEnabled: true,
+		DTMFType:                         "RFC 2833",
+		EncodeContactHeaderEnabled:       false,
+		EncryptedMedia:                   nil,
+		OnnetT38PassthroughEnabled:       false,
+		MicrosoftTeamsSbc:                false,
+		WebhookEventURL:                  "https://www.example.com/hooks",
+		WebhookEventFailoverURL:          "https://failover.example.com/hooks",
+		WebhookAPIVersion:                "1",
+		WebhookTimeoutSecs:               25,
+		RTCPSettings: RTCPSettings{
+			Port:                "rtp+1",
+			CaptureEnabled:      false,
+			ReportFrequencySecs: 5,
+		},
+		Inbound: InboundSettings{
+			ANINumberFormat:             "E.164-national",
+			DNISNumberFormat:            "e164",
+			Codecs:                      []string{"G722", "G711U", "G711A", "G729", "OPUS", "H.264"},
+			DefaultRoutingMethod:        "sequential",
+			ChannelLimit:                10,
+			GenerateRingbackTone:        true,
+			ISUPHeadersEnabled:          true,
+			PRACKEnabled:                true,
+			PrivacyZoneEnabled:          true,
+			SIPCompactHeadersEnabled:    true,
+			SIPRegion:                   "US",
+			SIPSubdomain:                "uniqueexample.sip.telnyx.com",
+			SIPSubdomainReceiveSettings: "only_my_connections",
+			Timeout1xxSecs:              3,
+			Timeout2xxSecs:              90,
+			ShakenSTIREnabled:           true,
+		},
+		Outbound: OutboundSettings{
+			ANIOverride:            "+12345678901",
+			ANIOverrideType:        "always",
+			CallParkingEnabled:     true,
+			ChannelLimit:           10,
+			GenerateRingbackTone:   true,
+			InstantRingbackEnabled: false, // Ensure only one ringback setting is enabled
+			IPAuthenticationMethod: "token",
+			IPAuthenticationToken:  "aBcD1234aBcD1234", // Ensure token is at least 12 characters
+			Localization:           "US",
+			OutboundVoiceProfileID: runner.outboundVoiceProfileID,
+			T38ReinviteSource:      "customer",
+			EncryptedMedia:         "SRTP",
+			Timeout1xxSecs:         3,
+			Timeout2xxSecs:         90,
+		},
+	})
+	if err != nil {
+		fmt.Printf("Error creating credential connection: %v\n", err)
+		os.Exit(1)
+	}
+	runner.credentialConnectionID = credentialConnection.ID
+	fmt.Printf("Created Credential Connection:\nID: %s\nName: %s\nCreated At: %s\n",
+		credentialConnection.ID, credentialConnection.ConnectionName, credentialConnection.CreatedAt)
+
 	// Create an FQDN Connection
 	fqdnConnection, err := runner.client.CreateFQDNConnection(FQDNConnection{
-		Username:                         stringPtr("hellopatienttest12345"),
+		Username:                         stringPtr("hellopatienttest123456"),
 		Password:                         stringPtr("54321testpatienthello"),
 		Active:                           true,
 		AnchorsiteOverride:               "Latency",
@@ -1070,9 +1137,74 @@ func (runner *TestRunner) PerformUpdates() {
 	fmt.Printf("Updated Outbound Voice Profile:\nID: %s\nName: %s\nUpdated At: %s\n",
 		updatedOutboundVoiceProfile.ID, updatedOutboundVoiceProfile.Name, updatedOutboundVoiceProfile.UpdatedAt)
 
+	// Update the Credential Connection
+	updatedCredentialConnection, err := runner.client.UpdateCredentialConnection(runner.credentialConnectionID, FQDNConnection{
+		Username:                         stringPtr("updatedtest12345"),
+		Password:                         stringPtr("updatedpassword54321"),
+		Active:                           true,
+		AnchorsiteOverride:               "Latency",
+		ConnectionName:                   "Updated Credential Connection",
+		TransportProtocol:                "UDP",
+		DefaultOnHoldComfortNoiseEnabled: true,
+		DTMFType:                         "RFC 2833",
+		EncodeContactHeaderEnabled:       false,
+		EncryptedMedia:                   nil,
+		OnnetT38PassthroughEnabled:       false,
+		MicrosoftTeamsSbc:                false,
+		WebhookEventURL:                  "https://www.example.com/hooks",
+		WebhookEventFailoverURL:          "https://failover.example.com/hooks",
+		WebhookAPIVersion:                "1",
+		WebhookTimeoutSecs:               25,
+		RTCPSettings: RTCPSettings{
+			Port:                "rtp+1",
+			CaptureEnabled:      false,
+			ReportFrequencySecs: 5,
+		},
+		Inbound: InboundSettings{
+			ANINumberFormat:             "E.164-national",
+			DNISNumberFormat:            "e164",
+			Codecs:                      []string{"G722", "G711U", "G711A", "G729", "OPUS", "H.264"},
+			DefaultRoutingMethod:        "sequential",
+			ChannelLimit:                10,
+			GenerateRingbackTone:        true,
+			ISUPHeadersEnabled:          true,
+			PRACKEnabled:                true,
+			PrivacyZoneEnabled:          true,
+			SIPCompactHeadersEnabled:    true,
+			SIPRegion:                   "US",
+			SIPSubdomain:                "updatedexample.sip.telnyx.com",
+			SIPSubdomainReceiveSettings: "only_my_connections",
+			Timeout1xxSecs:              3,
+			Timeout2xxSecs:              90,
+			ShakenSTIREnabled:           true,
+		},
+		Outbound: OutboundSettings{
+			ANIOverride:            "+12345678901",
+			ANIOverrideType:        "always",
+			CallParkingEnabled:     true,
+			ChannelLimit:           10,
+			GenerateRingbackTone:   true,
+			InstantRingbackEnabled: false, // Ensure only one ringback setting is enabled
+			IPAuthenticationMethod: "token",
+			IPAuthenticationToken:  "updatedtoken1234", // Ensure token is at least 12 characters
+			Localization:           "US",
+			OutboundVoiceProfileID: runner.outboundVoiceProfileID,
+			T38ReinviteSource:      "customer",
+			EncryptedMedia:         "SRTP",
+			Timeout1xxSecs:         3,
+			Timeout2xxSecs:         90,
+		},
+	})
+	if err != nil {
+		fmt.Printf("Error updating credential connection: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("Updated Credential Connection:\nID: %s\nName: %s\nUpdated At: %s\n",
+		updatedCredentialConnection.ID, updatedCredentialConnection.ConnectionName, updatedCredentialConnection.UpdatedAt)
+
 	// Update the FQDN Connection
 	updatedFQDNConnection, err := runner.client.UpdateFQDNConnection(runner.fqdnConnectionID, FQDNConnection{
-		Username:                         stringPtr("hellopatienttest12345"),
+		Username:                         stringPtr("hellopatienttest123456"),
 		Password:                         stringPtr("54321testpatienthello"),
 		Active:                           true,
 		AnchorsiteOverride:               "Latency",
@@ -1153,6 +1285,14 @@ func (runner *TestRunner) PerformCascadingDeletes() {
 		os.Exit(1)
 	}
 	fmt.Println("Deleted FQDN")
+
+	// Delete the Credential Connection
+	err = runner.client.DeleteCredentialConnection(runner.credentialConnectionID)
+	if err != nil {
+		fmt.Printf("Error deleting credential connection: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("Deleted Credential Connection")
 
 	// Delete the FQDN Connection
 	err = runner.client.DeleteFQDNConnection(runner.fqdnConnectionID)
