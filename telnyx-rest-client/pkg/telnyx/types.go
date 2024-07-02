@@ -90,33 +90,50 @@ type PhoneNumberReservation struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 }
 
-type PhoneNumberOrder struct {
-	ID           string `json:"id"`
-	RecordType   string `json:"record_type"`
-	PhoneNumbers []struct {
-		ID                     string `json:"id"`
-		RecordType             string `json:"record_type"`
-		PhoneNumber            string `json:"phone_number"`
-		BundleID               string `json:"bundle_id"`
-		PhoneNumberType        string `json:"phone_number_type"`
-		RegulatoryRequirements []struct {
-			RecordType    string `json:"record_type"`
-			RequirementID string `json:"requirement_id"`
-			FieldValue    string `json:"field_value"`
-			FieldType     string `json:"field_type"`
-		} `json:"regulatory_requirements"`
-		CountryCode     string `json:"country_code"`
-		RequirementsMet bool   `json:"requirements_met"`
-		Status          string `json:"status"`
-	} `json:"phone_numbers"`
-	PhoneNumbersCount  int       `json:"phone_numbers_count"`
-	ConnectionID       string    `json:"connection_id"`
-	MessagingProfileID string    `json:"messaging_profile_id"`
-	BillingGroupID     string    `json:"billing_group_id"`
-	Status             string    `json:"status"`
-	CustomerReference  string    `json:"customer_reference"`
-	CreatedAt          time.Time `json:"created_at"`
-	UpdatedAt          time.Time `json:"updated_at"`
+type PhoneNumberOrderRequest struct {
+	PhoneNumbers       []string `json:"phone_numbers"`
+	ConnectionID       string   `json:"connection_id"`
+	MessagingProfileID string   `json:"messaging_profile_id"`
+	BillingGroupID     string   `json:"billing_group_id"`
+	CustomerReference  string   `json:"customer_reference"`
+	SubNumberOrderIDs  []string `json:"sub_number_order_ids,omitempty"`
+}
+
+type NumberOrderRegulatoryRequirement struct {
+	RequirementID string `json:"requirement_id"`
+	FieldValue    string `json:"field_value"`
+}
+
+type UpdateNumberOrderRequest struct {
+	CustomerReference      string                             `json:"customer_reference"`
+	RegulatoryRequirements []NumberOrderRegulatoryRequirement `json:"regulatory_requirements"`
+}
+
+type PhoneNumberOrderResponse struct {
+	ID                 string                `json:"id"`
+	RecordType         string                `json:"record_type"`
+	PhoneNumbersCount  int                   `json:"phone_numbers_count"`
+	ConnectionID       string                `json:"connection_id"`
+	MessagingProfileID string                `json:"messaging_profile_id"`
+	BillingGroupID     string                `json:"billing_group_id"`
+	PhoneNumbers       []PhoneNumberResponse `json:"phone_numbers"`
+	SubNumberOrderIDs  []string              `json:"sub_number_order_ids"`
+	Status             string                `json:"status"`
+	CustomerReference  string                `json:"customer_reference"`
+	CreatedAt          time.Time             `json:"created_at"`
+	UpdatedAt          time.Time             `json:"updated_at"`
+	RequirementsMet    bool                  `json:"requirements_met"`
+}
+
+type PhoneNumberResponse struct {
+	ID              string `json:"id"`
+	RecordType      string `json:"record_type"`
+	PhoneNumber     string `json:"phone_number"`
+	BundleID        string `json:"bundle_id"`
+	PhoneNumberType string `json:"phone_number_type"`
+	CountryCode     string `json:"country_code"`
+	RequirementsMet bool   `json:"requirements_met"`
+	Status          string `json:"status"`
 }
 
 type RTCPSettings struct {
