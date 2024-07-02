@@ -232,3 +232,62 @@ type PhoneNumber struct {
 	UpdatedAt             time.Time `json:"updated_at"`
 	HDVoiceEnabled        bool      `json:"hd_voice_enabled"`
 }
+
+// AvailablePhoneNumbersResponse represents the response from the list available phone numbers API.
+type AvailablePhoneNumbersResponse struct {
+	Data []AvailablePhoneNumber `json:"data"`
+	Meta struct {
+		TotalResults      int `json:"total_results"`
+		BestEffortResults int `json:"best_effort_results"`
+	} `json:"meta"`
+}
+
+// AvailablePhoneNumber represents a single available phone number in the response.
+type AvailablePhoneNumber struct {
+	RecordType        string              `json:"record_type"`
+	PhoneNumber       string              `json:"phone_number"`
+	VanityFormat      string              `json:"vanity_format"`
+	BestEffort        bool                `json:"best_effort"`
+	Quickship         bool                `json:"quickship"`
+	Reservable        bool                `json:"reservable"`
+	RegionInformation []RegionInformation `json:"region_information"`
+	CostInformation   CostInformation     `json:"cost_information"`
+	Features          []Feature           `json:"features"`
+}
+
+// RegionInformation represents the region information for an available phone number.
+type RegionInformation struct {
+	RegionType string `json:"region_type"`
+	RegionName string `json:"region_name"`
+}
+
+// CostInformation represents the cost information for an available phone number.
+type CostInformation struct {
+	UpfrontCost string `json:"upfront_cost"`
+	MonthlyCost string `json:"monthly_cost"`
+	Currency    string `json:"currency"`
+}
+
+// Feature represents a feature available for a phone number.
+type Feature struct {
+	Name string `json:"name"`
+}
+
+// AvailablePhoneNumbersRequest encapsulates the filters for listing available phone numbers.
+type AvailablePhoneNumbersRequest struct {
+	StartsWith              string   `json:"filter[phone_number][starts_with],omitempty"`
+	EndsWith                string   `json:"filter[phone_number][ends_with],omitempty"`
+	Contains                string   `json:"filter[phone_number][contains],omitempty"`
+	Locality                string   `json:"filter[locality],omitempty"`
+	AdministrativeArea      string   `json:"filter[administrative_area],omitempty"`
+	CountryCode             string   `json:"filter[country_code],omitempty"`
+	NationalDestinationCode string   `json:"filter[national_destination_code],omitempty"`
+	RateCenter              string   `json:"filter[rate_center],omitempty"`
+	PhoneNumberType         string   `json:"filter[phone_number_type],omitempty"`
+	Features                []string `json:"filter[features],omitempty"`
+	Limit                   int      `json:"filter[limit],omitempty"`
+	BestEffort              bool     `json:"filter[best_effort],omitempty"`
+	Quickship               bool     `json:"filter[quickship],omitempty"`
+	Reservable              bool     `json:"filter[reservable],omitempty"`
+	ExcludeHeldNumbers      bool     `json:"filter[exclude_held_numbers],omitempty"`
+}

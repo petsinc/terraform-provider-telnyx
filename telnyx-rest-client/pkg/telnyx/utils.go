@@ -1,8 +1,8 @@
 package telnyx
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 )
 
 func StringPtr(s string) *string {

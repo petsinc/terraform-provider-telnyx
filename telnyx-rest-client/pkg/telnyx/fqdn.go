@@ -4,7 +4,6 @@ import (
 	"fmt"
 )
 
-
 func (client *TelnyxClient) CreateFQDN(connectionID, fqdn, dnsRecordType string, port int) (*FQDN, error) {
 	body := map[string]interface{}{
 		"connection_id":   connectionID,

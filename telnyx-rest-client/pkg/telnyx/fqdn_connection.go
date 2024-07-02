@@ -1,8 +1,8 @@
 package telnyx
 
 import (
-	"go.uber.org/zap"
 	"fmt"
+	"go.uber.org/zap"
 )
 
 func (client *TelnyxClient) CreateFQDNConnection(profile FQDNConnection) (*FQDNConnection, error) {

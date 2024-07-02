@@ -40,4 +40,3 @@ func (client *TelnyxClient) UpdateNumberOrder(numberOrderID, customerReference s
 	}
 	return &result.Data, nil
 }
-
