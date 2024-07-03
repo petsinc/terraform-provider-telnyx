@@ -3,65 +3,64 @@ package telnyx
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
-
-	"go.uber.org/zap"
 )
 
 type TelnyxClient struct {
-	ApiToken   string
-	ApiBaseURL string
-	logger     *zap.Logger
+	apiKey  string
+	baseURL string
+	logger  *zap.Logger
 }
 
-func NewClient(apiToken string, logger *zap.Logger) *TelnyxClient {
-	return &TelnyxClient{ApiToken: apiToken, ApiBaseURL: "https://api.telnyx.com/v2", logger: logger}
+func NewClient(apiKey string, logger *zap.Logger) *TelnyxClient {
+	return &TelnyxClient{apiKey: apiKey, baseURL: "https://api.telnyx.com/v2", logger: logger}
 }
 
-func (client *TelnyxClient) doRequest(method, endpoint string, body map[string]interface{}, result interface{}) error {
-	url := client.ApiBaseURL + endpoint
-	var jsonBody []byte
-	var err error
+func (client *TelnyxClient) doRequest(method, path string, body interface{}, v interface{}) error {
+	var buf bytes.Buffer
 	if body != nil {
-		jsonBody, err = json.Marshal(body)
-		if err != nil {
-			client.logger.Error("Error marshalling JSON", zap.Error(err), zap.Any("body", body))
+		if err := json.NewEncoder(&buf).Encode(body); err != nil {
+			client.logger.Error("Error encoding request body", zap.Error(err))
 			return err
 		}
+		client.logger.Info("Request Body", zap.String("body", buf.String()))
 	}
 
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(method, client.baseURL+path, &buf)
 	if err != nil {
-		client.logger.Error("Error creating HTTP request", zap.Error(err), zap.String("url", url))
+		client.logger.Error("Error creating request", zap.Error(err))
 		return err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+client.ApiToken)
+	req.Header.Set("Authorization", "Bearer "+client.apiKey)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		client.logger.Error("Error making HTTP request", zap.Error(err), zap.String("url", url))
+		client.logger.Error("Error making request", zap.Error(err))
 		return err
 	}
 	defer resp.Body.Close()
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		client.logger.Error("Error reading HTTP response body", zap.Error(err))
+		client.logger.Error("Error reading response body", zap.Error(err))
 		return err
 	}
+
+	// client.logger.Info("Response Body", zap.String("body", string(respBody)))
 
 	if resp.StatusCode >= 400 {
-		client.logger.Error("Received error response from API", zap.Int("status_code", resp.StatusCode), zap.String("response", string(bodyBytes)))
-		return err
+		client.logger.Error("Received error response from API", zap.Int("status_code", resp.StatusCode), zap.String("response", string(respBody)))
+		return fmt.Errorf("received error response from API: %s", string(respBody))
 	}
 
-	if len(bodyBytes) > 0 && result != nil {
-		if err := json.Unmarshal(bodyBytes, result); err != nil {
-			client.logger.Error("Error unmarshalling JSON response", zap.Error(err))
+	if v != nil {
+		if err := json.Unmarshal(respBody, v); err != nil {
+			client.logger.Error("Error unmarshaling response", zap.Error(err))
 			return err
 		}
 	}

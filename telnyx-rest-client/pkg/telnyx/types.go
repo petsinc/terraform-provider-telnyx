@@ -14,6 +14,29 @@ type BillingGroup struct {
 	DeletedAt      time.Time `json:"deleted_at,omitempty"`
 }
 
+type CreateNumberOrderRequest struct {
+	PhoneNumbers       []PhoneNumberRequest `json:"phone_numbers"`
+	ConnectionID       string               `json:"connection_id"`
+	MessagingProfileID string               `json:"messaging_profile_id"`
+	BillingGroupID     string               `json:"billing_group_id"`
+	CustomerReference  string               `json:"customer_reference"`
+	SubNumberOrderIDs  []string             `json:"sub_number_order_ids,omitempty"`
+}
+
+type PhoneNumberRequest struct {
+	PhoneNumber string `json:"phone_number"`
+}
+
+// CreateBillingGroupRequest represents the request payload for creating a billing group.
+type CreateBillingGroupRequest struct {
+	Name string `json:"name"`
+}
+
+// UpdateBillingGroupRequest represents the request payload for updating a billing group.
+type UpdateBillingGroupRequest struct {
+	Name string `json:"name"`
+}
+
 type MessagingProfile struct {
 	ID                      string                `json:"id"`
 	Name                    string                `json:"name"`
@@ -90,14 +113,14 @@ type PhoneNumberReservation struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 }
 
-type PhoneNumberOrderRequest struct {
-	PhoneNumbers       []string `json:"phone_numbers"`
-	ConnectionID       string   `json:"connection_id"`
-	MessagingProfileID string   `json:"messaging_profile_id"`
-	BillingGroupID     string   `json:"billing_group_id"`
-	CustomerReference  string   `json:"customer_reference"`
-	SubNumberOrderIDs  []string `json:"sub_number_order_ids,omitempty"`
-}
+// type PhoneNumberOrderRequest struct {
+// 	PhoneNumbers       []string `json:"phone_numbers"`
+// 	ConnectionID       string   `json:"connection_id"`
+// 	MessagingProfileID string   `json:"messaging_profile_id"`
+// 	BillingGroupID     string   `json:"billing_group_id"`
+// 	CustomerReference  string   `json:"customer_reference"`
+// 	SubNumberOrderIDs  []string `json:"sub_number_order_ids,omitempty"`
+// }
 
 type NumberOrderRegulatoryRequirement struct {
 	RequirementID string `json:"requirement_id"`
@@ -206,7 +229,7 @@ type FQDNConnection struct {
 	OnnetT38PassthroughEnabled       bool             `json:"onnet_t38_passthrough_enabled"`
 	IosPushCredentialID              *string          `json:"ios_push_credential_id,omitempty"`
 	AndroidPushCredentialID          *string          `json:"android_push_credential_id,omitempty"`
-	MicrosoftTeamsSbc                bool             `json:"microsoft_teams_sbc`
+	MicrosoftTeamsSbc                bool             `json:"microsoft_teams_sbc"`
 	WebhookEventURL                  string           `json:"webhook_event_url"`
 	WebhookEventFailoverURL          string           `json:"webhook_event_failover_url,omitempty"`
 	WebhookAPIVersion                string           `json:"webhook_api_version"`
@@ -218,7 +241,7 @@ type FQDNConnection struct {
 	UpdatedAt                        time.Time        `json:"updated_at"`
 	Username                         *string          `json:"user_name,omitempty"`
 	Password                         *string          `json:"password,omitempty"`
-	FQDNOutboundAuthentication       string           `json:"fqdn_outbound_authentication`
+	FQDNOutboundAuthentication       string           `json:"fqdn_outbound_authentication"`
 	SipUriCallingPreference          *string          `json:"sip_uri_calling_preference,omitempty"`
 }
 
@@ -307,4 +330,44 @@ type AvailablePhoneNumbersRequest struct {
 	Quickship               bool     `json:"filter[quickship],omitempty"`
 	Reservable              bool     `json:"filter[reservable],omitempty"`
 	ExcludeHeldNumbers      bool     `json:"filter[exclude_held_numbers],omitempty"`
+}
+
+// UpdatePhoneNumberRequest represents the request payload for updating a phone number.
+type UpdatePhoneNumberRequest struct {
+	CustomerReference  string   `json:"customer_reference"`
+	ConnectionID       int      `json:"connection_id"`
+	BillingGroupID     string   `json:"billing_group_id"`
+	Tags               []string `json:"tags"`
+	HDVoiceEnabled     bool     `json:"hd_voice_enabled"`
+	ExternalPin        string   `json:"external_pin,omitempty"`
+	NumberLevelRouting string   `json:"number_level_routing,omitempty"`
+}
+
+// UpdatePhoneNumberResponse represents the response from updating a phone number.
+type UpdatePhoneNumberResponse struct {
+	ID                    string    `json:"id"`
+	RecordType            string    `json:"record_type"`
+	PhoneNumber           string    `json:"phone_number"`
+	Status                string    `json:"status"`
+	Tags                  []string  `json:"tags"`
+	ExternalPin           string    `json:"external_pin"`
+	ConnectionID          string    `json:"connection_id"`
+	ConnectionName        string    `json:"connection_name"`
+	CustomerReference     string    `json:"customer_reference"`
+	MessagingProfileID    string    `json:"messaging_profile_id"`
+	MessagingProfileName  string    `json:"messaging_profile_name"`
+	BillingGroupID        string    `json:"billing_group_id"`
+	EmergencyEnabled      bool      `json:"emergency_enabled"`
+	EmergencyAddressID    string    `json:"emergency_address_id"`
+	CallForwardingEnabled bool      `json:"call_forwarding_enabled"`
+	CNAMListingEnabled    bool      `json:"cnam_listing_enabled"`
+	CallerIDNameEnabled   bool      `json:"caller_id_name_enabled"`
+	CallRecordingEnabled  bool      `json:"call_recording_enabled"`
+	T38FaxGatewayEnabled  bool      `json:"t38_fax_gateway_enabled"`
+	NumberLevelRouting    string    `json:"number_level_routing"`
+	PhoneNumberType       string    `json:"phone_number_type"`
+	PurchasedAt           time.Time `json:"purchased_at"`
+	CreatedAt             time.Time `json:"created_at"`
+	UpdatedAt             time.Time `json:"updated_at"`
+	HDVoiceEnabled        bool      `json:"hd_voice_enabled"`
 }

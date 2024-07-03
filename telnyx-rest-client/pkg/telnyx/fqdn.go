@@ -2,35 +2,25 @@ package telnyx
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 )
 
-func (client *TelnyxClient) CreateFQDN(connectionID, fqdn, dnsRecordType string, port int) (*FQDN, error) {
-	body := map[string]interface{}{
-		"connection_id":   connectionID,
-		"fqdn":            fqdn,
-		"dns_record_type": dnsRecordType,
-		"port":            port,
-	}
+func (client *TelnyxClient) CreateFQDN(fqdn FQDN) (*FQDN, error) {
 	var result struct {
 		Data FQDN `json:"data"`
 	}
-	err := client.doRequest("POST", "/fqdns", body, &result)
+	err := client.doRequest("POST", "/fqdns", fqdn, &result)
 	if err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
 }
 
-func (client *TelnyxClient) UpdateFQDN(fqdnID string, fqdn, dnsRecordType string, port int) (*FQDN, error) {
-	body := map[string]interface{}{
-		"fqdn":            fqdn,
-		"dns_record_type": dnsRecordType,
-		"port":            port,
-	}
+func (client *TelnyxClient) UpdateFQDN(fqdnID string, fqdn FQDN) (*FQDN, error) {
 	var result struct {
 		Data FQDN `json:"data"`
 	}
-	err := client.doRequest("PATCH", fmt.Sprintf("/fqdns/%s", fqdnID), body, &result)
+	err := client.doRequest("PATCH", fmt.Sprintf("/fqdns/%s", fqdnID), fqdn, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -38,5 +28,9 @@ func (client *TelnyxClient) UpdateFQDN(fqdnID string, fqdn, dnsRecordType string
 }
 
 func (client *TelnyxClient) DeleteFQDN(fqdnID string) error {
-	return client.doRequest("DELETE", fmt.Sprintf("/fqdns/%s", fqdnID), nil, nil)
+	err := client.doRequest("DELETE", fmt.Sprintf("/fqdns/%s", fqdnID), nil, nil)
+	if err != nil {
+		client.logger.Error("Error deleting FQDN", zap.Error(err), zap.String("fqdnID", fqdnID))
+	}
+	return err
 }

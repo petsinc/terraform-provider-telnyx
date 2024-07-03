@@ -8,18 +8,11 @@ import (
 	"strings"
 )
 
-func (client *TelnyxClient) UpdatePhoneNumber(phoneNumberID, customerReference, connectionID, billingGroupID string, tags []string, hdVoiceEnabled bool) (*PhoneNumber, error) {
-	body := map[string]interface{}{
-		"customer_reference": customerReference,
-		"connection_id":      connectionID,
-		"billing_group_id":   billingGroupID,
-		"tags":               tags,
-		"hd_voice_enabled":   hdVoiceEnabled,
-	}
+func (client *TelnyxClient) UpdatePhoneNumber(phoneNumberID string, request UpdatePhoneNumberRequest) (*UpdatePhoneNumberResponse, error) {
 	var result struct {
-		Data PhoneNumber `json:"data"`
+		Data UpdatePhoneNumberResponse `json:"data"`
 	}
-	err := client.doRequest("PATCH", fmt.Sprintf("/phone_numbers/%s", phoneNumberID), body, &result)
+	err := client.doRequest("PATCH", fmt.Sprintf("/phone_numbers/%s", phoneNumberID), request, &result)
 	if err != nil {
 		client.logger.Error("Error updating phone number", zap.Error(err), zap.String("phone_number_id", phoneNumberID))
 		return nil, err

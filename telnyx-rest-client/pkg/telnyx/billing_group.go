@@ -5,13 +5,11 @@ import (
 )
 
 func (client *TelnyxClient) CreateBillingGroup(name string) (*BillingGroup, error) {
-	body := map[string]interface{}{
-		"name": name,
-	}
+	request := CreateBillingGroupRequest{Name: name}
 	var result struct {
 		Data BillingGroup `json:"data"`
 	}
-	err := client.doRequest("POST", "/billing_groups", body, &result)
+	err := client.doRequest("POST", "/billing_groups", request, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -19,13 +17,11 @@ func (client *TelnyxClient) CreateBillingGroup(name string) (*BillingGroup, erro
 }
 
 func (client *TelnyxClient) UpdateBillingGroup(billingGroupID, name string) (*BillingGroup, error) {
-	body := map[string]interface{}{
-		"name": name,
-	}
+	request := UpdateBillingGroupRequest{Name: name}
 	var result struct {
 		Data BillingGroup `json:"data"`
 	}
-	err := client.doRequest("PATCH", fmt.Sprintf("/billing_groups/%s", billingGroupID), body, &result)
+	err := client.doRequest("PATCH", fmt.Sprintf("/billing_groups/%s", billingGroupID), request, &result)
 	if err != nil {
 		return nil, err
 	}

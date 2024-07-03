@@ -16,9 +16,9 @@ func main() {
 	// Perform create operations
 	runner.PerformCreates()
 
-	// Perform update operations
-	runner.PerformUpdates()
+	// // Perform update operations
+	// runner.PerformUpdates()
 
-	// Perform cascading delete operations
-	runner.PerformCascadingDeletes()
+	// // Perform cascading delete operations
+	// runner.PerformCascadingDeletes()
 }

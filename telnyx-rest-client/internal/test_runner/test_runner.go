@@ -1,9 +1,10 @@
 package test_runner
 
 import (
-	"os"
 	"github.com/petsinc/telnyx-rest-client/pkg/telnyx"
 	"go.uber.org/zap"
+	"os"
+	"strconv"
 )
 
 type TestRunner struct {
@@ -13,6 +14,7 @@ type TestRunner struct {
 	outboundVoiceProfileID string
 	messagingProfileID     string
 	fqdnConnectionID       string
+	fqdnConnectionIDInt    int
 	fqdnID                 string
 	phoneNumberID          string
 	numberReservationID    string
@@ -72,7 +74,14 @@ func (runner *TestRunner) PerformCreates() {
 		zap.Time("Created At", outboundVoiceProfile.CreatedAt))
 
 	// Create a Messaging Profile
-	messagingProfile, err := runner.client.CreateMessagingProfile("Test Profile", []string{"US"}, "https://www.example.com/hooks", "https://backup.example.com/hooks", true)
+	messagingProfile, err := runner.client.CreateMessagingProfile(telnyx.MessagingProfile{
+		Name:                    "Test Profile",
+		Enabled:                 true,
+		WebhookURL:              "https://www.example.com/hooks",
+		WebhookFailoverURL:      "https://backup.example.com/hooks",
+		WebhookAPIVersion:       "2",
+		WhitelistedDestinations: []string{"US"},
+	})
 	if err != nil {
 		runner.logger.Error("Error creating messaging profile", zap.Error(err))
 		os.Exit(1)
@@ -220,13 +229,20 @@ func (runner *TestRunner) PerformCreates() {
 		os.Exit(1)
 	}
 	runner.fqdnConnectionID = fqdnConnection.ID
+	asInt, err := strconv.Atoi(runner.fqdnConnectionID)
+	runner.fqdnConnectionIDInt = asInt
 	runner.logger.Info("Created FQDN Connection",
 		zap.String("ID", fqdnConnection.ID),
 		zap.String("Name", fqdnConnection.ConnectionName),
 		zap.Time("Created At", fqdnConnection.CreatedAt))
 
 	// Create an FQDN and bind it to the connection
-	fqdn, err := runner.client.CreateFQDN(runner.fqdnConnectionID, "test.sip.livekit.cloud", "a", 5060)
+	fqdn, err := runner.client.CreateFQDN(telnyx.FQDN{
+		ConnectionID:  runner.fqdnConnectionIDInt,
+		FQDN:          "test.sip.livekit.cloud",
+		DNSRecordType: "a",
+		Port:          5060,
+	})
 	if err != nil {
 		runner.logger.Error("Error creating FQDN", zap.Error(err))
 		os.Exit(1)
@@ -236,13 +252,69 @@ func (runner *TestRunner) PerformCreates() {
 		zap.String("ID", fqdn.ID),
 		zap.String("FQDN", fqdn.FQDN),
 		zap.Time("Created At", fqdn.CreatedAt))
+
+	// List all available phone numbers
+	filters := telnyx.AvailablePhoneNumbersRequest{
+		StartsWith:  "312",
+		CountryCode: "US",
+		Limit:       10,
+	}
+	response, err := runner.client.ListAvailablePhoneNumbers(filters)
+	if err != nil {
+		runner.logger.Error("Error retrieving available phone numbers", zap.Error(err))
+		os.Exit(1)
+	}
+
+	if len(response.Data) == 0 {
+		runner.logger.Info("No available phone numbers found")
+		return
+	}
+
+	firstPhoneNumber := response.Data[0].PhoneNumber
+	runner.logger.Info("First Available Phone Number",
+		zap.String("PhoneNumber", firstPhoneNumber),
+		zap.Bool("Reservable", response.Data[0].Reservable),
+		zap.String("UpfrontCost", response.Data[0].CostInformation.UpfrontCost),
+		zap.String("MonthlyCost", response.Data[0].CostInformation.MonthlyCost))
+
+	// Create a number order for the first available phone number
+	numberOrderRequest := telnyx.CreateNumberOrderRequest{
+		PhoneNumbers:       []telnyx.PhoneNumberRequest{{PhoneNumber: firstPhoneNumber}},
+		ConnectionID:       runner.fqdnConnectionID,
+		MessagingProfileID: runner.messagingProfileID,
+		BillingGroupID:     runner.billingGroupID,
+		CustomerReference:  "Test Order",
+	}
+
+	numberOrder, err := runner.client.CreateNumberOrder(numberOrderRequest)
+	if err != nil {
+		runner.logger.Error("Error creating number order", zap.Error(err))
+		os.Exit(1)
+	}
+
+	runner.numberOrderID = numberOrder.ID
+	runner.phoneNumberID = numberOrder.PhoneNumbers[0].ID
+	runner.logger.Info("Created Number Order",
+		zap.String("ID", numberOrder.ID),
+		zap.Int("PhoneNumbersCount", numberOrder.PhoneNumbersCount),
+		zap.String("Status", numberOrder.Status),
+		zap.String("CustomerReference", numberOrder.CustomerReference),
+		zap.Time("CreatedAt", numberOrder.CreatedAt),
+		zap.Time("UpdatedAt", numberOrder.UpdatedAt))
 }
 
 func (runner *TestRunner) PerformUpdates() {
 	runner.logger.Info("Performing update operations")
 
 	// Update the Messaging Profile
-	updatedMessagingProfile, err := runner.client.UpdateMessagingProfile(runner.messagingProfileID, "Updated Profile for Messages", []string{"US"}, "https://www.example.com/hooks", "https://backup.example.com/hooks", true)
+	updatedMessagingProfile, err := runner.client.UpdateMessagingProfile(runner.messagingProfileID, telnyx.MessagingProfile{
+		Name:                    "Updated Profile for Messages",
+		Enabled:                 true,
+		WebhookURL:              "https://www.example.com/hooks",
+		WebhookFailoverURL:      "https://backup.example.com/hooks",
+		WebhookAPIVersion:       "2",
+		WhitelistedDestinations: []string{"US"},
+	})
 	if err != nil {
 		runner.logger.Error("Error updating messaging profile", zap.Error(err))
 		os.Exit(1)
@@ -358,11 +430,11 @@ func (runner *TestRunner) PerformUpdates() {
 
 	// Update the FQDN Connection
 	updatedFQDNConnection, err := runner.client.UpdateFQDNConnection(runner.fqdnConnectionID, telnyx.FQDNConnection{
-		Username:                         telnyx.StringPtr("hellopatienttest123456"),
-		Password:                         telnyx.StringPtr("54321testpatienthello"),
+		Username:                         telnyx.StringPtr("updatedtest123456"),
+		Password:                         telnyx.StringPtr("updatedpasswordhello"),
 		Active:                           true,
 		AnchorsiteOverride:               "Latency",
-		ConnectionName:                   "Test FQDN Connection",
+		ConnectionName:                   "Updated FQDN Connection",
 		TransportProtocol:                "UDP",
 		DefaultOnHoldComfortNoiseEnabled: true,
 		DTMFType:                         "RFC 2833",
@@ -391,7 +463,7 @@ func (runner *TestRunner) PerformUpdates() {
 			PrivacyZoneEnabled:          true,
 			SIPCompactHeadersEnabled:    true,
 			SIPRegion:                   "US",
-			SIPSubdomain:                "uniqueexample.sip.telnyx.com",
+			SIPSubdomain:                "updatedexample.sip.telnyx.com",
 			SIPSubdomainReceiveSettings: "only_my_connections",
 			Timeout1xxSecs:              3,
 			Timeout2xxSecs:              90,
@@ -405,7 +477,7 @@ func (runner *TestRunner) PerformUpdates() {
 			GenerateRingbackTone:   true,
 			InstantRingbackEnabled: false, // Ensure only one ringback setting is enabled
 			IPAuthenticationMethod: "token",
-			IPAuthenticationToken:  "aBcD1234aBcD1234", // Ensure token is at least 12 characters
+			IPAuthenticationToken:  "updatedtoken1234", // Ensure token is at least 12 characters
 			Localization:           "US",
 			OutboundVoiceProfileID: runner.outboundVoiceProfileID,
 			T38ReinviteSource:      "customer",
@@ -424,7 +496,12 @@ func (runner *TestRunner) PerformUpdates() {
 		zap.Time("Updated At", updatedFQDNConnection.UpdatedAt))
 
 	// Update the FQDN
-	updatedFQDN, err := runner.client.UpdateFQDN(runner.fqdnID, "updated.test.sip.livekit.cloud", "a", 5060)
+	updatedFQDN, err := runner.client.UpdateFQDN(runner.fqdnID, telnyx.FQDN{
+		ConnectionID:  runner.fqdnConnectionIDInt,
+		FQDN:          "updated.test.sip.livekit.cloud",
+		DNSRecordType: "a",
+		Port:          5060,
+	})
 	if err != nil {
 		runner.logger.Error("Error updating FQDN", zap.Error(err))
 		os.Exit(1)
@@ -433,13 +510,69 @@ func (runner *TestRunner) PerformUpdates() {
 		zap.String("ID", updatedFQDN.ID),
 		zap.String("FQDN", updatedFQDN.FQDN),
 		zap.Time("Updated At", updatedFQDN.UpdatedAt))
+
+	// Update the Number Order
+	updateRequest := telnyx.UpdateNumberOrderRequest{
+		CustomerReference: "Updated Test Order",
+		RegulatoryRequirements: []telnyx.NumberOrderRegulatoryRequirement{
+			{
+				RequirementID: "requirement_id_example",
+				FieldValue:    "field_value_example",
+			},
+		},
+	}
+
+	updatedNumberOrder, err := runner.client.UpdateNumberOrder(runner.numberOrderID, updateRequest)
+	if err != nil {
+		runner.logger.Error("Error updating number order", zap.Error(err))
+		os.Exit(1)
+	}
+
+	runner.logger.Info("Updated Number Order",
+		zap.String("ID", updatedNumberOrder.ID),
+		zap.Int("PhoneNumbersCount", updatedNumberOrder.PhoneNumbersCount),
+		zap.String("Status", updatedNumberOrder.Status),
+		zap.String("CustomerReference", updatedNumberOrder.CustomerReference),
+		zap.Time("CreatedAt", updatedNumberOrder.CreatedAt),
+		zap.Time("UpdatedAt", updatedNumberOrder.UpdatedAt))
+
+	// Update the Phone Number
+	phoneNumberUpdateRequest := telnyx.UpdatePhoneNumberRequest{
+		CustomerReference:  "Updated Test Number",
+		ConnectionID:       runner.fqdnConnectionIDInt,
+		BillingGroupID:     runner.billingGroupID,
+		Tags:               []string{"test", "updated"},
+		HDVoiceEnabled:     true,
+		ExternalPin:        "1234",
+		NumberLevelRouting: "ENABLED",
+	}
+
+	updatedPhoneNumber, err := runner.client.UpdatePhoneNumber(runner.phoneNumberID, phoneNumberUpdateRequest)
+	if err != nil {
+		runner.logger.Error("Error updating phone number", zap.Error(err))
+		os.Exit(1)
+	}
+
+	runner.logger.Info("Updated Phone Number",
+		zap.String("ID", updatedPhoneNumber.ID),
+		zap.String("PhoneNumber", updatedPhoneNumber.PhoneNumber),
+		zap.String("CustomerReference", updatedPhoneNumber.CustomerReference),
+		zap.Time("UpdatedAt", updatedPhoneNumber.UpdatedAt))
 }
 
 func (runner *TestRunner) PerformCascadingDeletes() {
 	runner.logger.Info("Performing cascading delete operations")
 
+	// Delete the phone number
+	err := runner.client.DeletePhoneNumber(runner.phoneNumberID)
+	if err != nil {
+		runner.logger.Error("Error deleting phone number", zap.Error(err))
+		os.Exit(1)
+	}
+	runner.logger.Info("Deleted Phone Number")
+
 	// Delete the FQDN
-	err := runner.client.DeleteFQDN(runner.fqdnID)
+	err = runner.client.DeleteFQDN(runner.fqdnID)
 	if err != nil {
 		runner.logger.Error("Error deleting FQDN", zap.Error(err))
 		os.Exit(1)
