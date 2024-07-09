@@ -10,7 +10,7 @@ import (
 func main() {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
-	client := telnyx.NewClient(os.Getenv("TELNYX_API_TOKEN"), logger)
+	client := telnyx.NewClient()
 	runner := test_runner.NewTestRunner(client, logger)
 
 	// Perform create operations

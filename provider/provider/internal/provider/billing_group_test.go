@@ -13,7 +13,7 @@ const (
 	// test configuration so the Telnyx client is properly configured.
 	providerConfig = `
 provider "telnyx" {
-  endpoint = "http://httpbin.org/post"
+  endpoint = "https://api.telnyx.com/v2"
 }
 `
 )
@@ -28,19 +28,39 @@ var (
 	}
 )
 
-func TestAccTelnyxResource(t *testing.T) {
+func TestAccTelnyxBillingGroupResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: providerConfig + `
-resource "telnyx_request" "test" {
-  message = "Hello, World!"
+resource "telnyx_billing_group" "test" {
+  name = "Test Billing Group Terraform"
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("telnyx_request.test", "message", "Hello, World!"),
+					resource.TestCheckResourceAttr("telnyx_billing_group.test", "name", "Test Billing Group Terraform"),
 				),
+			},
+			{
+				ResourceName:      "telnyx_billing_group.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: providerConfig + `
+resource "telnyx_billing_group" "test" {
+  name = "Updated Billing Group Terraform"
+}
+`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("telnyx_billing_group.test", "name", "Updated Billing Group Terraform"),
+				),
+			},
+			{
+				ResourceName:      "telnyx_billing_group.test",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

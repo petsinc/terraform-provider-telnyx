@@ -31,3 +31,14 @@ func (client *TelnyxClient) UpdateBillingGroup(billingGroupID, name string) (*Bi
 func (client *TelnyxClient) DeleteBillingGroup(billingGroupID string) error {
 	return client.doRequest("DELETE", fmt.Sprintf("/billing_groups/%s", billingGroupID), nil, nil)
 }
+
+func (client *TelnyxClient) GetBillingGroup(billingGroupID string) (*BillingGroup, error) {
+	var result struct {
+		Data BillingGroup `json:"data"`
+	}
+	err := client.doRequest("GET", fmt.Sprintf("/billing_groups/%s", billingGroupID), nil, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result.Data, nil
+}

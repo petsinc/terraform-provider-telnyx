@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -10,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/petsinc/telnyx-rest-client/pkg/telnyx" // Ensure this path is correct
 )
 
 var (
@@ -57,7 +57,7 @@ func (p *TelnyxProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		return
 	}
 
-	client := &http.Client{}
+	client := telnyx.NewClient()
 
 	tflog.Info(ctx, "Configured Telnyx provider", map[string]interface{}{"endpoint": config.Endpoint})
 
@@ -67,7 +67,7 @@ func (p *TelnyxProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 func (p *TelnyxProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewHelloWorldResource,
+		NewBillingGroupResource,
 	}
 }
 

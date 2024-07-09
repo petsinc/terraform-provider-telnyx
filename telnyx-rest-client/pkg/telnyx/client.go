@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 type TelnyxClient struct {
@@ -15,7 +16,13 @@ type TelnyxClient struct {
 	logger  *zap.Logger
 }
 
-func NewClient(apiKey string, logger *zap.Logger) *TelnyxClient {
+func NewClient() *TelnyxClient {
+	apiKey := os.Getenv("TELNYX_API_TOKEN")
+	if apiKey == "" {
+		panic("TELNYX_API_TOKEN environment variable must be set")
+	}
+
+	logger, _ := zap.NewProduction()
 	return &TelnyxClient{apiKey: apiKey, baseURL: "https://api.telnyx.com/v2", logger: logger}
 }
 
@@ -50,8 +57,6 @@ func (client *TelnyxClient) doRequest(method, path string, body interface{}, v i
 		client.logger.Error("Error reading response body", zap.Error(err))
 		return err
 	}
-
-	// client.logger.Info("Response Body", zap.String("body", string(respBody)))
 
 	if resp.StatusCode >= 400 {
 		client.logger.Error("Received error response from API", zap.Int("status_code", resp.StatusCode), zap.String("response", string(respBody)))
