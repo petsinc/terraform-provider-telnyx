@@ -40,3 +40,16 @@ func (client *TelnyxClient) DeleteCredentialConnection(credentialConnectionID st
 	}
 	return err
 }
+
+// Get Credential Connection
+func (client *TelnyxClient) GetCredentialConnection(credentialConnectionID string) (*FQDNConnection, error) {
+	var result struct {
+		Data FQDNConnection `json:"data"`
+	}
+	err := client.doRequest("GET", fmt.Sprintf("/credential_connections/%s", credentialConnectionID), nil, &result)
+	if err != nil {
+		client.logger.Error("Error getting credential connection", zap.Error(err), zap.String("credentialConnectionID", credentialConnectionID))
+		return nil, err
+	}
+	return &result.Data, nil
+}

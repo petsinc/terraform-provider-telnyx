@@ -69,6 +69,7 @@ func (p *TelnyxProvider) Resources(_ context.Context) []func() resource.Resource
 		NewBillingGroupResource,
 		NewOutboundVoiceProfileResource,
 		NewMessagingProfileResource,
+		NewCredentialConnectionResource,
 	}
 }
 

@@ -3,7 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
-	
+
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -26,16 +26,16 @@ type MessagingProfileResource struct {
 }
 
 type MessagingProfileResourceModel struct {
-	ID                      types.String  `tfsdk:"id"`
-	Name                    types.String  `tfsdk:"name"`
-	Enabled                 types.Bool    `tfsdk:"enabled"`
-	WebhookURL              types.String  `tfsdk:"webhook_url"`
-	WebhookFailoverURL      types.String  `tfsdk:"webhook_failover_url"`
-	WebhookAPIVersion       types.String  `tfsdk:"webhook_api_version"`
-	WhitelistedDestinations types.List    `tfsdk:"whitelisted_destinations"`
-	CreatedAt               types.String  `tfsdk:"created_at"`
-	UpdatedAt               types.String  `tfsdk:"updated_at"`
-	V1Secret                types.String  `tfsdk:"v1_secret"`
+	ID                      types.String `tfsdk:"id"`
+	Name                    types.String `tfsdk:"name"`
+	Enabled                 types.Bool   `tfsdk:"enabled"`
+	WebhookURL              types.String `tfsdk:"webhook_url"`
+	WebhookFailoverURL      types.String `tfsdk:"webhook_failover_url"`
+	WebhookAPIVersion       types.String `tfsdk:"webhook_api_version"`
+	WhitelistedDestinations types.List   `tfsdk:"whitelisted_destinations"`
+	CreatedAt               types.String `tfsdk:"created_at"`
+	UpdatedAt               types.String `tfsdk:"updated_at"`
+	V1Secret                types.String `tfsdk:"v1_secret"`
 }
 
 func (r *MessagingProfileResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
