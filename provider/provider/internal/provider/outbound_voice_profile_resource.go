@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
+	
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -355,19 +354,4 @@ func (r *OutboundVoiceProfileResource) Delete(ctx context.Context, req resource.
 
 func (r *OutboundVoiceProfileResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-// Helper functions
-func convertListToStrings(ctx context.Context, list types.List) ([]string, diag.Diagnostics) {
-	var strings []string
-	diags := list.ElementsAs(ctx, &strings, false)
-	return strings, diags
-}
-
-func convertStringsToList(strings []string) types.List {
-	elements := make([]attr.Value, len(strings))
-	for i, str := range strings {
-		elements[i] = types.StringValue(str)
-	}
-	return types.ListValueMust(types.StringType, elements)
 }

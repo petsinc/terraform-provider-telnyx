@@ -51,10 +51,19 @@ resource "telnyx_outbound_voice_profile" "test" {
     format = "wav"
   }
 }
+resource "telnyx_messaging_profile" "test" {
+  name                      = "Test Messaging Profile Terraform"
+  enabled                   = true
+  webhook_url               = "https://example.com/webhook"
+  webhook_failover_url      = "https://example.com/failover"
+  webhook_api_version       = "2"
+  whitelisted_destinations  = ["US"]
+}
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("telnyx_billing_group.test", "name", "Test Billing Group Terraform"),
 					resource.TestCheckResourceAttr("telnyx_outbound_voice_profile.test", "name", "Test Outbound Profile Terraform"),
+					resource.TestCheckResourceAttr("telnyx_messaging_profile.test", "name", "Test Messaging Profile Terraform"),
 				),
 			},
 			{
@@ -87,10 +96,19 @@ resource "telnyx_outbound_voice_profile" "test" {
     format = "wav"
   }
 }
+resource "telnyx_messaging_profile" "test" {
+  name                      = "Updated Test Messaging Profile Terraform"
+  enabled                   = true
+  webhook_url               = "https://example.com/webhook"
+  webhook_failover_url      = "https://example.com/failover"
+  webhook_api_version       = "2"
+  whitelisted_destinations  = ["US"]
+}
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("telnyx_billing_group.test", "name", "Updated Billing Group Terraform"),
 					resource.TestCheckResourceAttr("telnyx_outbound_voice_profile.test", "name", "Updated Test Outbound Profile Terraform"),
+					resource.TestCheckResourceAttr("telnyx_messaging_profile.test", "name", "Updated Test Messaging Profile Terraform"),
 				),
 			},
 			{

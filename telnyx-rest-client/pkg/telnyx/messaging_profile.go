@@ -16,6 +16,17 @@ func (client *TelnyxClient) CreateMessagingProfile(profile MessagingProfile) (*M
 	return &result.Data, nil
 }
 
+func (client *TelnyxClient) GetMessagingProfile(profileID string) (*MessagingProfile, error) {
+	var result struct {
+		Data MessagingProfile `json:"data"`
+	}
+	err := client.doRequest("GET", fmt.Sprintf("/messaging_profiles/%s", profileID), nil, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result.Data, nil
+}
+
 func (client *TelnyxClient) UpdateMessagingProfile(profileID string, profile MessagingProfile) (*MessagingProfile, error) {
 	profile.WebhookAPIVersion = "2" // Ensure the API version is set to "2"
 	var result struct {

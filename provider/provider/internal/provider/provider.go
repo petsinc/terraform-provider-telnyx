@@ -2,14 +2,13 @@ package provider
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/petsinc/telnyx-rest-client/pkg/telnyx" // Ensure this path is correct
+	"github.com/petsinc/telnyx-rest-client/pkg/telnyx"
 )
 
 var (
@@ -69,6 +68,7 @@ func (p *TelnyxProvider) Resources(_ context.Context) []func() resource.Resource
 	return []func() resource.Resource{
 		NewBillingGroupResource,
 		NewOutboundVoiceProfileResource,
+		NewMessagingProfileResource,
 	}
 }
 
