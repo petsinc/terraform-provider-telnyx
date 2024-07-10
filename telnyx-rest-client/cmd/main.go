@@ -14,7 +14,7 @@ func main() {
 	runner := test_runner.NewTestRunner(client, logger)
 
 	// Perform create operations
-	runner.PerformCreates()
+	// runner.PerformCreates()
 
 	// // Perform update operations
 	// runner.PerformUpdates()
