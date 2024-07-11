@@ -31,7 +31,7 @@ build:
 # Run tests
 .PHONY: test
 test:
-	$(GOTEST) -v ./...
+	TF_LOG=DEBUG $(GOTEST) -v ./...
 
 # Generate docs
 .PHONY: docs

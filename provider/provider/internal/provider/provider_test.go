@@ -114,6 +114,63 @@ resource "telnyx_credential_connection" "test" {
     timeout_2xx_secs = 90
   }
 }
+
+resource "telnyx_fqdn_connection" "test" {
+  connection_name                    = "Test FQDN Connection Terraform"
+  username                           = "fqdnhellopatientest"
+  password                           = "fqdnhellopatientestlmao"
+  active                             = true
+  transport_protocol                 = "UDP"
+  encrypted_media                    = null
+  anchorsite_override                = "Latency"
+  default_on_hold_comfort_noise_enabled = true
+  dtmf_type                          = "RFC 2833"
+  encode_contact_header_enabled      = false
+  onnet_t38_passthrough_enabled      = false
+  microsoft_teams_sbc                = false
+  webhook_event_url                  = "https://www.example.com/hooks"
+  webhook_event_failover_url         = "https://failover.example.com/hooks"
+  webhook_api_version                = "1"
+  webhook_timeout_secs               = 25
+  rtcp_settings = {
+    port = "rtp+1"
+    capture_enabled = false
+    report_frequency_secs = 5
+  }
+  inbound = {
+    ani_number_format = "E.164-national"
+    dnis_number_format = "e164"
+    codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
+    default_routing_method = "sequential"
+    channel_limit = 10
+    generate_ringback_tone = true
+    isup_headers_enabled = true
+    prack_enabled = true
+    privacy_zone_enabled = true
+    sip_compact_headers_enabled = true
+    sip_region = "US"
+    sip_subdomain = "test.fqdn.connection.uniqueexample.sip.telnyx.com"
+    sip_subdomain_receive_settings = "only_my_connections"
+    timeout_1xx_secs = 3
+    timeout_2xx_secs = 90
+    shaken_stir_enabled = true
+  }
+  outbound = {
+    ani_override = "+12345678901"
+    ani_override_type = "always"
+    call_parking_enabled = true
+    channel_limit = 10
+    generate_ringback_tone = true
+    instant_ringback_enabled = false
+    ip_authentication_method = "token"
+    ip_authentication_token = "BBcD1234aBcD1234"
+    localization = "US"
+    outbound_voice_profile_id = telnyx_outbound_voice_profile.test.id
+    t38_reinvite_source = "customer"
+    timeout_1xx_secs = 3
+    timeout_2xx_secs = 90
+  }
+}
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("telnyx_billing_group.test", "name", "Test Billing Group Terraform"),
@@ -122,6 +179,7 @@ resource "telnyx_credential_connection" "test" {
 					resource.TestCheckResourceAttr("telnyx_credential_connection.test", "connection_name", "Test Credential Connection Terraform"),
 					resource.TestCheckResourceAttr("telnyx_credential_connection.test", "username", "hellopatienttest12345terraform"),
 					resource.TestCheckResourceAttr("telnyx_credential_connection.test", "webhook_event_url", "https://www.example.com/hooks"),
+					resource.TestCheckResourceAttr("telnyx_fqdn_connection.test", "connection_name", "Test FQDN Connection Terraform"),
 				),
 			},
 			{
@@ -217,6 +275,63 @@ resource "telnyx_credential_connection" "test" {
     timeout_2xx_secs = 90
   }
 }
+
+resource "telnyx_fqdn_connection" "test" {
+  connection_name                    = "Updated Test FQDN Connection Terraform"
+  username                           = "fqdnhellopatientest"
+  password                           = "fqdnhellopatientestlmao"
+  active                             = true
+  transport_protocol                 = "UDP"
+  encrypted_media                    = null
+  anchorsite_override                = "Latency"
+  default_on_hold_comfort_noise_enabled = true
+  dtmf_type                          = "RFC 2833"
+  encode_contact_header_enabled      = false
+  onnet_t38_passthrough_enabled      = false
+  microsoft_teams_sbc                = false
+  webhook_event_url                  = "https://www.example.com/hooks"
+  webhook_event_failover_url         = "https://failover.example.com/hooks"
+  webhook_api_version                = "1"
+  webhook_timeout_secs               = 25
+  rtcp_settings = {
+    port = "rtp+1"
+    capture_enabled = false
+    report_frequency_secs = 5
+  }
+  inbound = {
+    ani_number_format = "E.164-national"
+    dnis_number_format = "e164"
+    codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
+    default_routing_method = "sequential"
+    channel_limit = 10
+    generate_ringback_tone = true
+    isup_headers_enabled = true
+    prack_enabled = true
+    privacy_zone_enabled = true
+    sip_compact_headers_enabled = true
+    sip_region = "US"
+    sip_subdomain = "test.fqdn.connection.uniqueexample.sip.telnyx.com"
+    sip_subdomain_receive_settings = "only_my_connections"
+    timeout_1xx_secs = 3
+    timeout_2xx_secs = 90
+    shaken_stir_enabled = true
+  }
+  outbound = {
+    ani_override = "+12345678901"
+    ani_override_type = "always"
+    call_parking_enabled = true
+    channel_limit = 10
+    generate_ringback_tone = true
+    instant_ringback_enabled = false
+    ip_authentication_method = "token"
+    ip_authentication_token = "BBcD1234aBcD1234"
+    localization = "US"
+    outbound_voice_profile_id = telnyx_outbound_voice_profile.test.id
+    t38_reinvite_source = "customer"
+    timeout_1xx_secs = 3
+    timeout_2xx_secs = 90
+  }
+}
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("telnyx_billing_group.test", "name", "Updated Billing Group Terraform"),
@@ -225,6 +340,7 @@ resource "telnyx_credential_connection" "test" {
 					resource.TestCheckResourceAttr("telnyx_credential_connection.test", "connection_name", "Updated Test Credential Connection Terraform"),
 					resource.TestCheckResourceAttr("telnyx_credential_connection.test", "username", "updatedtest12345terraform"),
 					resource.TestCheckResourceAttr("telnyx_credential_connection.test", "webhook_event_url", "https://www.example.com/hooks"),
+					resource.TestCheckResourceAttr("telnyx_fqdn_connection.test", "connection_name", "Updated Test FQDN Connection Terraform"),
 				),
 			},
 			{

@@ -32,24 +32,24 @@ func NewCredentialConnectionResource() resource.Resource {
 }
 
 type CredentialConnectionResourceModel struct {
-	ID                               types.String                                `tfsdk:"id"`
-	ConnectionName                   types.String                                `tfsdk:"connection_name"`
-	Username                         types.String                                `tfsdk:"username"`
-	Password                         types.String                                `tfsdk:"password"`
-	Active                           types.Bool                                  `tfsdk:"active"`
-	AnchorsiteOverride               types.String                                `tfsdk:"anchorsite_override"`
-	DefaultOnHoldComfortNoiseEnabled types.Bool                                  `tfsdk:"default_on_hold_comfort_noise_enabled"`
-	DTMFType                         types.String                                `tfsdk:"dtmf_type"`
-	EncodeContactHeaderEnabled       types.Bool                                  `tfsdk:"encode_contact_header_enabled"`
-	OnnetT38PassthroughEnabled       types.Bool                                  `tfsdk:"onnet_t38_passthrough_enabled"`
-	MicrosoftTeamsSBC                types.Bool                                  `tfsdk:"microsoft_teams_sbc"`
-	WebhookEventURL                  types.String                                `tfsdk:"webhook_event_url"`
-	WebhookEventFailoverURL          types.String                                `tfsdk:"webhook_event_failover_url"`
-	WebhookAPIVersion                types.String                                `tfsdk:"webhook_api_version"`
-	WebhookTimeoutSecs               types.Int64                                 `tfsdk:"webhook_timeout_secs"`
-	RTCPSettings                     *RTCPSettingsModel                          `tfsdk:"rtcp_settings"`
-	Inbound                          *CredentialConnectionInboundSettingsModel   `tfsdk:"inbound"`
-	Outbound                         *CredentialConnectionOutboundSettingsModel  `tfsdk:"outbound"`
+	ID                               types.String                               `tfsdk:"id"`
+	ConnectionName                   types.String                               `tfsdk:"connection_name"`
+	Username                         types.String                               `tfsdk:"username"`
+	Password                         types.String                               `tfsdk:"password"`
+	Active                           types.Bool                                 `tfsdk:"active"`
+	AnchorsiteOverride               types.String                               `tfsdk:"anchorsite_override"`
+	DefaultOnHoldComfortNoiseEnabled types.Bool                                 `tfsdk:"default_on_hold_comfort_noise_enabled"`
+	DTMFType                         types.String                               `tfsdk:"dtmf_type"`
+	EncodeContactHeaderEnabled       types.Bool                                 `tfsdk:"encode_contact_header_enabled"`
+	OnnetT38PassthroughEnabled       types.Bool                                 `tfsdk:"onnet_t38_passthrough_enabled"`
+	MicrosoftTeamsSBC                types.Bool                                 `tfsdk:"microsoft_teams_sbc"`
+	WebhookEventURL                  types.String                               `tfsdk:"webhook_event_url"`
+	WebhookEventFailoverURL          types.String                               `tfsdk:"webhook_event_failover_url"`
+	WebhookAPIVersion                types.String                               `tfsdk:"webhook_api_version"`
+	WebhookTimeoutSecs               types.Int64                                `tfsdk:"webhook_timeout_secs"`
+	RTCPSettings                     *RTCPSettingsModel                         `tfsdk:"rtcp_settings"`
+	Inbound                          *CredentialConnectionInboundSettingsModel  `tfsdk:"inbound"`
+	Outbound                         *CredentialConnectionOutboundSettingsModel `tfsdk:"outbound"`
 }
 
 type RTCPSettingsModel struct {

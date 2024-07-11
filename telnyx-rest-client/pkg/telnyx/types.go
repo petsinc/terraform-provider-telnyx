@@ -196,10 +196,10 @@ type OutboundSettings struct {
 	Localization           string `json:"localization"`
 	OutboundVoiceProfileID string `json:"outbound_voice_profile_id"`
 	T38ReinviteSource      string `json:"t38_reinvite_source"`
-	TechPrefix             string `json:"tech_prefix"`
-	EncryptedMedia         string `json:"encrypted_media"`
-	Timeout1xxSecs         int    `json:"timeout_1xx_secs"`
-	Timeout2xxSecs         int    `json:"timeout_2xx_secs"`
+	// TechPrefix             string `json:"tech_prefix"`
+	// EncryptedMedia         string `json:"encrypted_media"`
+	// Timeout1xxSecs         int    `json:"timeout_1xx_secs"`
+	// Timeout2xxSecs         int    `json:"timeout_2xx_secs"`
 }
 
 // CredentialConnectionInboundSettings for CredentialConnection
@@ -247,7 +247,7 @@ type FQDN struct {
 // FQDNConnection Struct with Credential Fields
 type FQDNConnection struct {
 	ID                               string           `json:"id"`
-	RecordType                       string           `json:"record_type"`
+	// RecordType                       string           `json:"record_type"`
 	Active                           bool             `json:"active"`
 	AnchorsiteOverride               string           `json:"anchorsite_override"`
 	ConnectionName                   string           `json:"connection_name"`
@@ -271,7 +271,6 @@ type FQDNConnection struct {
 	UpdatedAt                        time.Time        `json:"updated_at"`
 	Username                         *string          `json:"user_name,omitempty"`
 	Password                         *string          `json:"password,omitempty"`
-	FQDNOutboundAuthentication       string           `json:"fqdn_outbound_authentication"`
 	SipUriCallingPreference          *string          `json:"sip_uri_calling_preference,omitempty"`
 }
 
