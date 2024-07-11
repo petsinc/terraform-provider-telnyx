@@ -65,7 +65,6 @@ resource "telnyx_credential_connection" "test" {
   password                           = "54321testpatienthelloterraform"
   active                             = true
   anchorsite_override                = "Latency"
-  transport_protocol                 = "UDP"
   default_on_hold_comfort_noise_enabled = true
   dtmf_type                          = "RFC 2833"
   encode_contact_header_enabled      = false
@@ -159,7 +158,7 @@ resource "telnyx_messaging_profile" "test" {
   name                      = "Updated Test Messaging Profile Terraform"
   enabled                   = true
   webhook_url               = "https://example.com/webhook"
-  webhook_failover_url      = "https://failover.example.com/failover"
+  webhook_failover_url      = "https://example.com/failover"
   webhook_api_version       = "2"
   whitelisted_destinations  = ["US"]
 }
@@ -169,7 +168,6 @@ resource "telnyx_credential_connection" "test" {
   password                           = "updatedpassword54321terraform"
   active                             = true
   anchorsite_override                = "Latency"
-  transport_protocol                 = "UDP"
   default_on_hold_comfort_noise_enabled = true
   dtmf_type                          = "RFC 2833"
   encode_contact_header_enabled      = false

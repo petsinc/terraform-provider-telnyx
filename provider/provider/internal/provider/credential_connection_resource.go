@@ -32,25 +32,24 @@ func NewCredentialConnectionResource() resource.Resource {
 }
 
 type CredentialConnectionResourceModel struct {
-	ID                               types.String           `tfsdk:"id"`
-	ConnectionName                   types.String           `tfsdk:"connection_name"`
-	Username                         types.String           `tfsdk:"username"`
-	Password                         types.String           `tfsdk:"password"`
-	Active                           types.Bool             `tfsdk:"active"`
-	AnchorsiteOverride               types.String           `tfsdk:"anchorsite_override"`
-	TransportProtocol                types.String           `tfsdk:"transport_protocol"`
-	DefaultOnHoldComfortNoiseEnabled types.Bool             `tfsdk:"default_on_hold_comfort_noise_enabled"`
-	DTMFType                         types.String           `tfsdk:"dtmf_type"`
-	EncodeContactHeaderEnabled       types.Bool             `tfsdk:"encode_contact_header_enabled"`
-	OnnetT38PassthroughEnabled       types.Bool             `tfsdk:"onnet_t38_passthrough_enabled"`
-	MicrosoftTeamsSBC                types.Bool             `tfsdk:"microsoft_teams_sbc"`
-	WebhookEventURL                  types.String           `tfsdk:"webhook_event_url"`
-	WebhookEventFailoverURL          types.String           `tfsdk:"webhook_event_failover_url"`
-	WebhookAPIVersion                types.String           `tfsdk:"webhook_api_version"`
-	WebhookTimeoutSecs               types.Int64            `tfsdk:"webhook_timeout_secs"`
-	RTCPSettings                     *RTCPSettingsModel     `tfsdk:"rtcp_settings"`
-	Inbound                          *InboundSettingsModel  `tfsdk:"inbound"`
-	Outbound                         *OutboundSettingsModel `tfsdk:"outbound"`
+	ID                               types.String                                `tfsdk:"id"`
+	ConnectionName                   types.String                                `tfsdk:"connection_name"`
+	Username                         types.String                                `tfsdk:"username"`
+	Password                         types.String                                `tfsdk:"password"`
+	Active                           types.Bool                                  `tfsdk:"active"`
+	AnchorsiteOverride               types.String                                `tfsdk:"anchorsite_override"`
+	DefaultOnHoldComfortNoiseEnabled types.Bool                                  `tfsdk:"default_on_hold_comfort_noise_enabled"`
+	DTMFType                         types.String                                `tfsdk:"dtmf_type"`
+	EncodeContactHeaderEnabled       types.Bool                                  `tfsdk:"encode_contact_header_enabled"`
+	OnnetT38PassthroughEnabled       types.Bool                                  `tfsdk:"onnet_t38_passthrough_enabled"`
+	MicrosoftTeamsSBC                types.Bool                                  `tfsdk:"microsoft_teams_sbc"`
+	WebhookEventURL                  types.String                                `tfsdk:"webhook_event_url"`
+	WebhookEventFailoverURL          types.String                                `tfsdk:"webhook_event_failover_url"`
+	WebhookAPIVersion                types.String                                `tfsdk:"webhook_api_version"`
+	WebhookTimeoutSecs               types.Int64                                 `tfsdk:"webhook_timeout_secs"`
+	RTCPSettings                     *RTCPSettingsModel                          `tfsdk:"rtcp_settings"`
+	Inbound                          *CredentialConnectionInboundSettingsModel   `tfsdk:"inbound"`
+	Outbound                         *CredentialConnectionOutboundSettingsModel  `tfsdk:"outbound"`
 }
 
 type RTCPSettingsModel struct {
@@ -59,40 +58,32 @@ type RTCPSettingsModel struct {
 	ReportFrequencySecs types.Int64  `tfsdk:"report_frequency_secs"`
 }
 
-type InboundSettingsModel struct {
-	ANINumberFormat             types.String `tfsdk:"ani_number_format"`
-	DNISNumberFormat            types.String `tfsdk:"dnis_number_format"`
-	Codecs                      types.List   `tfsdk:"codecs"`
-	DefaultRoutingMethod        types.String `tfsdk:"default_routing_method"`
-	ChannelLimit                types.Int64  `tfsdk:"channel_limit"`
-	GenerateRingbackTone        types.Bool   `tfsdk:"generate_ringback_tone"`
-	ISUPHeadersEnabled          types.Bool   `tfsdk:"isup_headers_enabled"`
-	PRACKEnabled                types.Bool   `tfsdk:"prack_enabled"`
-	PrivacyZoneEnabled          types.Bool   `tfsdk:"privacy_zone_enabled"`
-	SIPCompactHeadersEnabled    types.Bool   `tfsdk:"sip_compact_headers_enabled"`
-	SIPRegion                   types.String `tfsdk:"sip_region"`
-	SIPSubdomain                types.String `tfsdk:"sip_subdomain"`
-	SIPSubdomainReceiveSettings types.String `tfsdk:"sip_subdomain_receive_settings"`
-	Timeout1xxSecs              types.Int64  `tfsdk:"timeout_1xx_secs"`
-	Timeout2xxSecs              types.Int64  `tfsdk:"timeout_2xx_secs"`
-	ShakenSTIREnabled           types.Bool   `tfsdk:"shaken_stir_enabled"`
+type CredentialConnectionInboundSettingsModel struct {
+	ANINumberFormat          types.String `tfsdk:"ani_number_format"`
+	DNISNumberFormat         types.String `tfsdk:"dnis_number_format"`
+	Codecs                   types.List   `tfsdk:"codecs"`
+	DefaultRoutingMethod     types.String `tfsdk:"default_routing_method"`
+	ChannelLimit             types.Int64  `tfsdk:"channel_limit"`
+	GenerateRingbackTone     types.Bool   `tfsdk:"generate_ringback_tone"`
+	ISUPHeadersEnabled       types.Bool   `tfsdk:"isup_headers_enabled"`
+	PRACKEnabled             types.Bool   `tfsdk:"prack_enabled"`
+	PrivacyZoneEnabled       types.Bool   `tfsdk:"privacy_zone_enabled"`
+	SIPCompactHeadersEnabled types.Bool   `tfsdk:"sip_compact_headers_enabled"`
+	Timeout1xxSecs           types.Int64  `tfsdk:"timeout_1xx_secs"`
+	Timeout2xxSecs           types.Int64  `tfsdk:"timeout_2xx_secs"`
+	ShakenSTIREnabled        types.Bool   `tfsdk:"shaken_stir_enabled"`
 }
 
-type OutboundSettingsModel struct {
+type CredentialConnectionOutboundSettingsModel struct {
 	ANIOverride            types.String `tfsdk:"ani_override"`
 	ANIOverrideType        types.String `tfsdk:"ani_override_type"`
 	CallParkingEnabled     types.Bool   `tfsdk:"call_parking_enabled"`
 	ChannelLimit           types.Int64  `tfsdk:"channel_limit"`
 	GenerateRingbackTone   types.Bool   `tfsdk:"generate_ringback_tone"`
 	InstantRingbackEnabled types.Bool   `tfsdk:"instant_ringback_enabled"`
-	IPAuthenticationMethod types.String `tfsdk:"ip_authentication_method"`
-	IPAuthenticationToken  types.String `tfsdk:"ip_authentication_token"`
 	Localization           types.String `tfsdk:"localization"`
 	OutboundVoiceProfileID types.String `tfsdk:"outbound_voice_profile_id"`
 	T38ReinviteSource      types.String `tfsdk:"t38_reinvite_source"`
-	EncryptedMedia         types.String `tfsdk:"encrypted_media"`
-	Timeout1xxSecs         types.Int64  `tfsdk:"timeout_1xx_secs"`
-	Timeout2xxSecs         types.Int64  `tfsdk:"timeout_2xx_secs"`
 }
 
 func (r *CredentialConnectionResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -118,9 +109,6 @@ func (r *CredentialConnectionResource) Schema(_ context.Context, _ resource.Sche
 				Required: true,
 			},
 			"anchorsite_override": schema.StringAttribute{
-				Optional: true,
-			},
-			"transport_protocol": schema.StringAttribute{
 				Optional: true,
 			},
 			"default_on_hold_comfort_noise_enabled": schema.BoolAttribute{
@@ -198,15 +186,6 @@ func (r *CredentialConnectionResource) Schema(_ context.Context, _ resource.Sche
 					"sip_compact_headers_enabled": schema.BoolAttribute{
 						Optional: true,
 					},
-					"sip_region": schema.StringAttribute{
-						Optional: true,
-					},
-					"sip_subdomain": schema.StringAttribute{
-						Optional: true,
-					},
-					"sip_subdomain_receive_settings": schema.StringAttribute{
-						Optional: true,
-					},
 					"timeout_1xx_secs": schema.Int64Attribute{
 						Optional: true,
 					},
@@ -239,12 +218,6 @@ func (r *CredentialConnectionResource) Schema(_ context.Context, _ resource.Sche
 					"instant_ringback_enabled": schema.BoolAttribute{
 						Optional: true,
 					},
-					"ip_authentication_method": schema.StringAttribute{
-						Optional: true,
-					},
-					"ip_authentication_token": schema.StringAttribute{
-						Optional: true,
-					},
 					"localization": schema.StringAttribute{
 						Optional: true,
 					},
@@ -254,20 +227,12 @@ func (r *CredentialConnectionResource) Schema(_ context.Context, _ resource.Sche
 					"t38_reinvite_source": schema.StringAttribute{
 						Optional: true,
 					},
-					"encrypted_media": schema.StringAttribute{
-						Optional: true,
-					},
-					"timeout_1xx_secs": schema.Int64Attribute{
-						Optional: true,
-					},
-					"timeout_2xx_secs": schema.Int64Attribute{
-						Optional: true,
-					},
 				},
 			},
 		},
 	}
 }
+
 func (r *CredentialConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan CredentialConnectionResourceModel
 	diags := req.Plan.Get(ctx, &plan)
@@ -284,13 +249,12 @@ func (r *CredentialConnectionResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	connection := telnyx.FQDNConnection{
+	connection := telnyx.CredentialConnection{
 		ConnectionName:                   plan.ConnectionName.ValueString(),
-		Username:                         plan.Username.ValueStringPointer(),
-		Password:                         plan.Password.ValueStringPointer(),
+		Username:                         plan.Username.ValueString(),
+		Password:                         plan.Password.ValueString(),
 		Active:                           plan.Active.ValueBool(),
 		AnchorsiteOverride:               plan.AnchorsiteOverride.ValueString(),
-		TransportProtocol:                plan.TransportProtocol.ValueString(),
 		DefaultOnHoldComfortNoiseEnabled: plan.DefaultOnHoldComfortNoiseEnabled.ValueBool(),
 		DTMFType:                         plan.DTMFType.ValueString(),
 		EncodeContactHeaderEnabled:       plan.EncodeContactHeaderEnabled.ValueBool(),
@@ -305,39 +269,31 @@ func (r *CredentialConnectionResource) Create(ctx context.Context, req resource.
 			CaptureEnabled:      plan.RTCPSettings.CaptureEnabled.ValueBool(),
 			ReportFrequencySecs: int(plan.RTCPSettings.ReportFrequencySecs.ValueInt64()),
 		},
-		Inbound: telnyx.InboundSettings{
-			ANINumberFormat:             plan.Inbound.ANINumberFormat.ValueString(),
-			DNISNumberFormat:            plan.Inbound.DNISNumberFormat.ValueString(),
-			Codecs:                      codecs,
-			DefaultRoutingMethod:        plan.Inbound.DefaultRoutingMethod.ValueString(),
-			ChannelLimit:                int(plan.Inbound.ChannelLimit.ValueInt64()),
-			GenerateRingbackTone:        plan.Inbound.GenerateRingbackTone.ValueBool(),
-			ISUPHeadersEnabled:          plan.Inbound.ISUPHeadersEnabled.ValueBool(),
-			PRACKEnabled:                plan.Inbound.PRACKEnabled.ValueBool(),
-			PrivacyZoneEnabled:          plan.Inbound.PrivacyZoneEnabled.ValueBool(),
-			SIPCompactHeadersEnabled:    plan.Inbound.SIPCompactHeadersEnabled.ValueBool(),
-			SIPRegion:                   plan.Inbound.SIPRegion.ValueString(),
-			SIPSubdomain:                plan.Inbound.SIPSubdomain.ValueString(),
-			SIPSubdomainReceiveSettings: plan.Inbound.SIPSubdomainReceiveSettings.ValueString(),
-			Timeout1xxSecs:              int(plan.Inbound.Timeout1xxSecs.ValueInt64()),
-			Timeout2xxSecs:              int(plan.Inbound.Timeout2xxSecs.ValueInt64()),
-			ShakenSTIREnabled:           plan.Inbound.ShakenSTIREnabled.ValueBool(),
+		Inbound: telnyx.CredentialConnectionInboundSettings{
+			ANINumberFormat:          plan.Inbound.ANINumberFormat.ValueString(),
+			DNISNumberFormat:         plan.Inbound.DNISNumberFormat.ValueString(),
+			Codecs:                   codecs,
+			DefaultRoutingMethod:     plan.Inbound.DefaultRoutingMethod.ValueString(),
+			ChannelLimit:             int(plan.Inbound.ChannelLimit.ValueInt64()),
+			GenerateRingbackTone:     plan.Inbound.GenerateRingbackTone.ValueBool(),
+			ISUPHeadersEnabled:       plan.Inbound.ISUPHeadersEnabled.ValueBool(),
+			PRACKEnabled:             plan.Inbound.PRACKEnabled.ValueBool(),
+			PrivacyZoneEnabled:       plan.Inbound.PrivacyZoneEnabled.ValueBool(),
+			SIPCompactHeadersEnabled: plan.Inbound.SIPCompactHeadersEnabled.ValueBool(),
+			Timeout1xxSecs:           int(plan.Inbound.Timeout1xxSecs.ValueInt64()),
+			Timeout2xxSecs:           int(plan.Inbound.Timeout2xxSecs.ValueInt64()),
+			ShakenSTIREnabled:        plan.Inbound.ShakenSTIREnabled.ValueBool(),
 		},
-		Outbound: telnyx.OutboundSettings{
+		Outbound: telnyx.CredentialConnectionOutboundSettings{
 			ANIOverride:            plan.Outbound.ANIOverride.ValueString(),
 			ANIOverrideType:        plan.Outbound.ANIOverrideType.ValueString(),
 			CallParkingEnabled:     plan.Outbound.CallParkingEnabled.ValueBool(),
 			ChannelLimit:           int(plan.Outbound.ChannelLimit.ValueInt64()),
 			GenerateRingbackTone:   plan.Outbound.GenerateRingbackTone.ValueBool(),
 			InstantRingbackEnabled: plan.Outbound.InstantRingbackEnabled.ValueBool(),
-			IPAuthenticationMethod: plan.Outbound.IPAuthenticationMethod.ValueString(),
-			IPAuthenticationToken:  plan.Outbound.IPAuthenticationToken.ValueString(),
 			Localization:           plan.Outbound.Localization.ValueString(),
 			OutboundVoiceProfileID: plan.Outbound.OutboundVoiceProfileID.ValueString(),
 			T38ReinviteSource:      plan.Outbound.T38ReinviteSource.ValueString(),
-			EncryptedMedia:         plan.Outbound.EncryptedMedia.ValueString(),
-			Timeout1xxSecs:         int(plan.Outbound.Timeout1xxSecs.ValueInt64()),
-			Timeout2xxSecs:         int(plan.Outbound.Timeout2xxSecs.ValueInt64()),
 		},
 	}
 
@@ -350,16 +306,16 @@ func (r *CredentialConnectionResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	fmt.Printf("\n\n--- Created Connection ---\n%+v\n\n", createdConnection)
+	// fmt.Printf("\n\n--- Created Connection ---\n%+v\n\n", createdConnection)
 
 	setCredentialConnectionState(ctx, &plan, createdConnection)
 
-	fmt.Printf("\n\n--- State After Create ---\n%+v\n\n", plan)
+	// fmt.Printf("\n\n--- State After Create ---\n%+v\n\n", plan)
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		fmt.Printf("\n\n--- Error setting state after create ---\n%+v\n\n", resp.Diagnostics)
+		// fmt.Printf("\n\n--- Error setting state after create ---\n%+v\n\n", resp.Diagnostics)
 		return
 	}
 }
@@ -369,11 +325,11 @@ func (r *CredentialConnectionResource) Read(ctx context.Context, req resource.Re
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		fmt.Printf("\n\n--- Error getting state ---\n%+v\n\n", resp.Diagnostics)
+		// fmt.Printf("\n\n--- Error getting state ---\n%+v\n\n", resp.Diagnostics)
 		return
 	}
 
-	fmt.Printf("\n\n--- State Before Read ---\n%+v\n\n", state)
+	// fmt.Printf("\n\n--- State Before Read ---\n%+v\n\n", state)
 
 	client := r.client
 
@@ -383,24 +339,24 @@ func (r *CredentialConnectionResource) Read(ctx context.Context, req resource.Re
 			"Error reading credential connection",
 			"Could not read credential connection, unexpected error: "+err.Error(),
 		)
-		fmt.Printf("\n\n--- Error reading credential connection ---\n%s\n\n", err.Error())
+		// fmt.Printf("\n\n--- Error reading credential connection ---\n%s\n\n", err.Error())
 		return
 	}
 
-	fmt.Printf("\n\n--- Response from API ---\n%+v\n\n", connection)
+	// fmt.Printf("\n\n--- Response from API ---\n%+v\n\n", connection)
 
 	setCredentialConnectionState(ctx, &state, connection)
 
-	fmt.Printf("\n\n--- State After Setting Connection ---\n%+v\n\n", state)
+	// fmt.Printf("\n\n--- State After Setting Connection ---\n%+v\n\n", state)
 
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		fmt.Printf("\n\n--- Error setting state after read ---\n%+v\n\n", resp.Diagnostics)
+		// fmt.Printf("\n\n--- Error setting state after read ---\n%+v\n\n", resp.Diagnostics)
 		return
 	}
 
-	fmt.Printf("\n\n--- Final State After Read ---\n%+v\n\n", state)
+	// fmt.Printf("\n\n--- Final State After Read ---\n%+v\n\n", state)
 }
 
 func (r *CredentialConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -428,13 +384,12 @@ func (r *CredentialConnectionResource) Update(ctx context.Context, req resource.
 	}
 
 	// Prepare connection data
-	connection := telnyx.FQDNConnection{
+	connection := telnyx.CredentialConnection{
 		ConnectionName:                   plan.ConnectionName.ValueString(),
-		Username:                         plan.Username.ValueStringPointer(),
-		Password:                         plan.Password.ValueStringPointer(),
+		Username:                         plan.Username.ValueString(),
+		Password:                         plan.Password.ValueString(),
 		Active:                           plan.Active.ValueBool(),
 		AnchorsiteOverride:               plan.AnchorsiteOverride.ValueString(),
-		TransportProtocol:                plan.TransportProtocol.ValueString(),
 		DefaultOnHoldComfortNoiseEnabled: plan.DefaultOnHoldComfortNoiseEnabled.ValueBool(),
 		DTMFType:                         plan.DTMFType.ValueString(),
 		EncodeContactHeaderEnabled:       plan.EncodeContactHeaderEnabled.ValueBool(),
@@ -449,39 +404,31 @@ func (r *CredentialConnectionResource) Update(ctx context.Context, req resource.
 			CaptureEnabled:      plan.RTCPSettings.CaptureEnabled.ValueBool(),
 			ReportFrequencySecs: int(plan.RTCPSettings.ReportFrequencySecs.ValueInt64()),
 		},
-		Inbound: telnyx.InboundSettings{
-			ANINumberFormat:             plan.Inbound.ANINumberFormat.ValueString(),
-			DNISNumberFormat:            plan.Inbound.DNISNumberFormat.ValueString(),
-			Codecs:                      codecs,
-			DefaultRoutingMethod:        plan.Inbound.DefaultRoutingMethod.ValueString(),
-			ChannelLimit:                int(plan.Inbound.ChannelLimit.ValueInt64()),
-			GenerateRingbackTone:        plan.Inbound.GenerateRingbackTone.ValueBool(),
-			ISUPHeadersEnabled:          plan.Inbound.ISUPHeadersEnabled.ValueBool(),
-			PRACKEnabled:                plan.Inbound.PRACKEnabled.ValueBool(),
-			PrivacyZoneEnabled:          plan.Inbound.PrivacyZoneEnabled.ValueBool(),
-			SIPCompactHeadersEnabled:    plan.Inbound.SIPCompactHeadersEnabled.ValueBool(),
-			SIPRegion:                   plan.Inbound.SIPRegion.ValueString(),
-			SIPSubdomain:                plan.Inbound.SIPSubdomain.ValueString(),
-			SIPSubdomainReceiveSettings: plan.Inbound.SIPSubdomainReceiveSettings.ValueString(),
-			Timeout1xxSecs:              int(plan.Inbound.Timeout1xxSecs.ValueInt64()),
-			Timeout2xxSecs:              int(plan.Inbound.Timeout2xxSecs.ValueInt64()),
-			ShakenSTIREnabled:           plan.Inbound.ShakenSTIREnabled.ValueBool(),
+		Inbound: telnyx.CredentialConnectionInboundSettings{
+			ANINumberFormat:          plan.Inbound.ANINumberFormat.ValueString(),
+			DNISNumberFormat:         plan.Inbound.DNISNumberFormat.ValueString(),
+			Codecs:                   codecs,
+			DefaultRoutingMethod:     plan.Inbound.DefaultRoutingMethod.ValueString(),
+			ChannelLimit:             int(plan.Inbound.ChannelLimit.ValueInt64()),
+			GenerateRingbackTone:     plan.Inbound.GenerateRingbackTone.ValueBool(),
+			ISUPHeadersEnabled:       plan.Inbound.ISUPHeadersEnabled.ValueBool(),
+			PRACKEnabled:             plan.Inbound.PRACKEnabled.ValueBool(),
+			PrivacyZoneEnabled:       plan.Inbound.PrivacyZoneEnabled.ValueBool(),
+			SIPCompactHeadersEnabled: plan.Inbound.SIPCompactHeadersEnabled.ValueBool(),
+			Timeout1xxSecs:           int(plan.Inbound.Timeout1xxSecs.ValueInt64()),
+			Timeout2xxSecs:           int(plan.Inbound.Timeout2xxSecs.ValueInt64()),
+			ShakenSTIREnabled:        plan.Inbound.ShakenSTIREnabled.ValueBool(),
 		},
-		Outbound: telnyx.OutboundSettings{
+		Outbound: telnyx.CredentialConnectionOutboundSettings{
 			ANIOverride:            plan.Outbound.ANIOverride.ValueString(),
 			ANIOverrideType:        plan.Outbound.ANIOverrideType.ValueString(),
 			CallParkingEnabled:     plan.Outbound.CallParkingEnabled.ValueBool(),
 			ChannelLimit:           int(plan.Outbound.ChannelLimit.ValueInt64()),
 			GenerateRingbackTone:   plan.Outbound.GenerateRingbackTone.ValueBool(),
 			InstantRingbackEnabled: plan.Outbound.InstantRingbackEnabled.ValueBool(),
-			IPAuthenticationMethod: plan.Outbound.IPAuthenticationMethod.ValueString(),
-			IPAuthenticationToken:  plan.Outbound.IPAuthenticationToken.ValueString(),
 			Localization:           plan.Outbound.Localization.ValueString(),
 			OutboundVoiceProfileID: plan.Outbound.OutboundVoiceProfileID.ValueString(),
 			T38ReinviteSource:      plan.Outbound.T38ReinviteSource.ValueString(),
-			EncryptedMedia:         plan.Outbound.EncryptedMedia.ValueString(),
-			Timeout1xxSecs:         int(plan.Outbound.Timeout1xxSecs.ValueInt64()),
-			Timeout2xxSecs:         int(plan.Outbound.Timeout2xxSecs.ValueInt64()),
 		},
 	}
 
@@ -495,16 +442,16 @@ func (r *CredentialConnectionResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	fmt.Printf("\n\n--- Updated Connection ---\n%+v\n\n", updatedConnection)
+	// fmt.Printf("\n\n--- Updated Connection ---\n%+v\n\n", updatedConnection)
 
 	setCredentialConnectionState(ctx, &plan, updatedConnection)
 
-	fmt.Printf("\n\n--- State After Update ---\n%+v\n\n", plan)
+	// fmt.Printf("\n\n--- State After Update ---\n%+v\n\n", plan)
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		fmt.Printf("\n\n--- Error setting state after update ---\n%+v\n\n", resp.Diagnostics)
+		// fmt.Printf("\n\n--- Error setting state after update ---\n%+v\n\n", resp.Diagnostics)
 		return
 	}
 }
@@ -529,20 +476,13 @@ func (r *CredentialConnectionResource) Delete(ctx context.Context, req resource.
 	}
 }
 
-func setCredentialConnectionState(ctx context.Context, state *CredentialConnectionResourceModel, connection *telnyx.FQDNConnection) {
+func setCredentialConnectionState(ctx context.Context, state *CredentialConnectionResourceModel, connection *telnyx.CredentialConnection) {
 	state.ID = types.StringValue(connection.ID)
 	state.ConnectionName = types.StringValue(connection.ConnectionName)
-	state.Username = types.StringPointerValue(connection.Username)
-	state.Password = types.StringPointerValue(connection.Password)
+	state.Username = types.StringValue(connection.Username)
+	state.Password = types.StringValue(connection.Password)
 	state.Active = types.BoolValue(connection.Active)
 	state.AnchorsiteOverride = types.StringValue(connection.AnchorsiteOverride)
-
-	// Set default value for TransportProtocol if it's empty
-	if connection.TransportProtocol == "" {
-		state.TransportProtocol = types.StringValue("UDP")
-	} else {
-		state.TransportProtocol = types.StringValue(connection.TransportProtocol)
-	}
 
 	state.DefaultOnHoldComfortNoiseEnabled = types.BoolValue(connection.DefaultOnHoldComfortNoiseEnabled)
 	state.DTMFType = types.StringValue(connection.DTMFType)
@@ -565,7 +505,7 @@ func setCredentialConnectionState(ctx context.Context, state *CredentialConnecti
 	}
 
 	// Set inbound settings with defaults
-	state.Inbound = &InboundSettingsModel{
+	state.Inbound = &CredentialConnectionInboundSettingsModel{
 		ANINumberFormat:          types.StringValue(connection.Inbound.ANINumberFormat),
 		DNISNumberFormat:         types.StringValue(connection.Inbound.DNISNumberFormat),
 		Codecs:                   convertStringsToList(connection.Inbound.Codecs),
@@ -581,27 +521,8 @@ func setCredentialConnectionState(ctx context.Context, state *CredentialConnecti
 		ShakenSTIREnabled:        types.BoolValue(connection.Inbound.ShakenSTIREnabled),
 	}
 
-	// Set default values for optional inbound fields
-	if connection.Inbound.SIPRegion == "" {
-		state.Inbound.SIPRegion = types.StringValue("US")
-	} else {
-		state.Inbound.SIPRegion = types.StringValue(connection.Inbound.SIPRegion)
-	}
-
-	if connection.Inbound.SIPSubdomain == "" {
-		state.Inbound.SIPSubdomain = types.StringValue("uniqueexample.sip.telnyx.com")
-	} else {
-		state.Inbound.SIPSubdomain = types.StringValue(connection.Inbound.SIPSubdomain)
-	}
-
-	if connection.Inbound.SIPSubdomainReceiveSettings == "" {
-		state.Inbound.SIPSubdomainReceiveSettings = types.StringValue("only_my_connections")
-	} else {
-		state.Inbound.SIPSubdomainReceiveSettings = types.StringValue(connection.Inbound.SIPSubdomainReceiveSettings)
-	}
-
 	// Set outbound settings with defaults
-	state.Outbound = &OutboundSettingsModel{
+	state.Outbound = &CredentialConnectionOutboundSettingsModel{
 		ANIOverride:            types.StringValue(connection.Outbound.ANIOverride),
 		ANIOverrideType:        types.StringValue(connection.Outbound.ANIOverrideType),
 		CallParkingEnabled:     types.BoolValue(connection.Outbound.CallParkingEnabled),
@@ -613,37 +534,6 @@ func setCredentialConnectionState(ctx context.Context, state *CredentialConnecti
 		T38ReinviteSource:      types.StringValue(connection.Outbound.T38ReinviteSource),
 	}
 
-	// Set default values for optional outbound fields
-	if connection.Outbound.IPAuthenticationMethod == "" {
-		state.Outbound.IPAuthenticationMethod = types.StringValue("token")
-	} else {
-		state.Outbound.IPAuthenticationMethod = types.StringValue(connection.Outbound.IPAuthenticationMethod)
-	}
-
-	if connection.Outbound.IPAuthenticationToken == "" {
-		state.Outbound.IPAuthenticationToken = types.StringValue("aBcD1234aBcD1234")
-	} else {
-		state.Outbound.IPAuthenticationToken = types.StringValue(connection.Outbound.IPAuthenticationToken)
-	}
-
-	if connection.Outbound.Timeout1xxSecs == 0 {
-		state.Outbound.Timeout1xxSecs = types.Int64Value(3)
-	} else {
-		state.Outbound.Timeout1xxSecs = types.Int64Value(int64(connection.Outbound.Timeout1xxSecs))
-	}
-
-	if connection.Outbound.Timeout2xxSecs == 0 {
-		state.Outbound.Timeout2xxSecs = types.Int64Value(90)
-	} else {
-		state.Outbound.Timeout2xxSecs = types.Int64Value(int64(connection.Outbound.Timeout2xxSecs))
-	}
-
-	if connection.Outbound.EncryptedMedia == "" {
-		state.Outbound.EncryptedMedia = types.StringValue("SRTP")
-	} else {
-		state.Outbound.EncryptedMedia = types.StringValue(connection.Outbound.EncryptedMedia)
-	}
-
 	// Log the state for debugging
-	fmt.Printf("\n\n--- State Set in setCredentialConnectionState ---\n%+v\n\n", state)
+	// fmt.Printf("\n\n--- State Set in setCredentialConnectionState ---\n%+v\n\n", state)
 }

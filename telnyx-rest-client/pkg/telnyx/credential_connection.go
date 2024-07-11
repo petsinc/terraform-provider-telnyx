@@ -7,9 +7,9 @@ import (
 )
 
 // Create Credential Connection
-func (client *TelnyxClient) CreateCredentialConnection(profile FQDNConnection) (*FQDNConnection, error) {
+func (client *TelnyxClient) CreateCredentialConnection(profile CredentialConnection) (*CredentialConnection, error) {
 	var result struct {
-		Data FQDNConnection `json:"data"`
+		Data CredentialConnection `json:"data"`
 	}
 	err := client.doRequest("POST", "/credential_connections", profile, &result)
 	if err != nil {
@@ -20,9 +20,9 @@ func (client *TelnyxClient) CreateCredentialConnection(profile FQDNConnection) (
 }
 
 // Update Credential Connection
-func (client *TelnyxClient) UpdateCredentialConnection(credentialConnectionID string, profile FQDNConnection) (*FQDNConnection, error) {
+func (client *TelnyxClient) UpdateCredentialConnection(credentialConnectionID string, profile CredentialConnection) (*CredentialConnection, error) {
 	var result struct {
-		Data FQDNConnection `json:"data"`
+		Data CredentialConnection `json:"data"`
 	}
 	err := client.doRequest("PATCH", fmt.Sprintf("/credential_connections/%s", credentialConnectionID), profile, &result)
 	if err != nil {
@@ -42,9 +42,9 @@ func (client *TelnyxClient) DeleteCredentialConnection(credentialConnectionID st
 }
 
 // Get Credential Connection
-func (client *TelnyxClient) GetCredentialConnection(credentialConnectionID string) (*FQDNConnection, error) {
+func (client *TelnyxClient) GetCredentialConnection(credentialConnectionID string) (*CredentialConnection, error) {
 	var result struct {
-		Data FQDNConnection `json:"data"`
+		Data CredentialConnection `json:"data"`
 	}
 	err := client.doRequest("GET", fmt.Sprintf("/credential_connections/%s", credentialConnectionID), nil, &result)
 	if err != nil {

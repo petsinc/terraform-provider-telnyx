@@ -202,6 +202,36 @@ type OutboundSettings struct {
 	Timeout2xxSecs         int    `json:"timeout_2xx_secs"`
 }
 
+// CredentialConnectionInboundSettings for CredentialConnection
+type CredentialConnectionInboundSettings struct {
+	ANINumberFormat          string   `json:"ani_number_format"`
+	DNISNumberFormat         string   `json:"dnis_number_format"`
+	Codecs                   []string `json:"codecs"`
+	DefaultRoutingMethod     string   `json:"default_routing_method"`
+	ChannelLimit             int      `json:"channel_limit"`
+	GenerateRingbackTone     bool     `json:"generate_ringback_tone"`
+	ISUPHeadersEnabled       bool     `json:"isup_headers_enabled"`
+	PRACKEnabled             bool     `json:"prack_enabled"`
+	PrivacyZoneEnabled       bool     `json:"privacy_zone_enabled"`
+	SIPCompactHeadersEnabled bool     `json:"sip_compact_headers_enabled"`
+	Timeout1xxSecs           int      `json:"timeout_1xx_secs"`
+	Timeout2xxSecs           int      `json:"timeout_2xx_secs"`
+	ShakenSTIREnabled        bool     `json:"shaken_stir_enabled"`
+}
+
+// CredentialConnectionOutboundSettings for CredentialConnection
+type CredentialConnectionOutboundSettings struct {
+	ANIOverride            string `json:"ani_override"`
+	ANIOverrideType        string `json:"ani_override_type"`
+	CallParkingEnabled     bool   `json:"call_parking_enabled"`
+	ChannelLimit           int    `json:"channel_limit"`
+	GenerateRingbackTone   bool   `json:"generate_ringback_tone"`
+	InstantRingbackEnabled bool   `json:"instant_ringback_enabled"`
+	Localization           string `json:"localization"`
+	OutboundVoiceProfileID string `json:"outbound_voice_profile_id"`
+	T38ReinviteSource      string `json:"t38_reinvite_source"`
+}
+
 // New FQDN Struct
 type FQDN struct {
 	ID            string    `json:"id"`
@@ -243,6 +273,31 @@ type FQDNConnection struct {
 	Password                         *string          `json:"password,omitempty"`
 	FQDNOutboundAuthentication       string           `json:"fqdn_outbound_authentication"`
 	SipUriCallingPreference          *string          `json:"sip_uri_calling_preference,omitempty"`
+}
+
+// CredentialConnection Struct
+type CredentialConnection struct {
+	ID                               string                               `json:"id"`
+	RecordType                       string                               `json:"record_type"`
+	Active                           bool                                 `json:"active"`
+	AnchorsiteOverride               string                               `json:"anchorsite_override"`
+	ConnectionName                   string                               `json:"connection_name"`
+	DefaultOnHoldComfortNoiseEnabled bool                                 `json:"default_on_hold_comfort_noise_enabled"`
+	DTMFType                         string                               `json:"dtmf_type"`
+	EncodeContactHeaderEnabled       bool                                 `json:"encode_contact_header_enabled"`
+	OnnetT38PassthroughEnabled       bool                                 `json:"onnet_t38_passthrough_enabled"`
+	MicrosoftTeamsSbc                bool                                 `json:"microsoft_teams_sbc"`
+	WebhookEventURL                  string                               `json:"webhook_event_url"`
+	WebhookEventFailoverURL          string                               `json:"webhook_event_failover_url"`
+	WebhookAPIVersion                string                               `json:"webhook_api_version"`
+	WebhookTimeoutSecs               int                                  `json:"webhook_timeout_secs"`
+	RTCPSettings                     RTCPSettings                         `json:"rtcp_settings"`
+	Inbound                          CredentialConnectionInboundSettings  `json:"inbound"`
+	Outbound                         CredentialConnectionOutboundSettings `json:"outbound"`
+	CreatedAt                        time.Time                            `json:"created_at"`
+	UpdatedAt                        time.Time                            `json:"updated_at"`
+	Username                         string                               `json:"user_name"`
+	Password                         string                               `json:"password"`
 }
 
 type PhoneNumber struct {
