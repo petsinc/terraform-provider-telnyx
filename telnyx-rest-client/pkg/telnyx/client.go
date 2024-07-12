@@ -33,7 +33,7 @@ func (client *TelnyxClient) doRequest(method, path string, body interface{}, v i
 			client.logger.Error("Error encoding request body", zap.Error(err))
 			return err
 		}
-		client.logger.Info("Request Body", zap.String("body", buf.String()))
+		client.logger.Debug("Request Body", zap.String("body", buf.String()))
 	}
 
 	req, err := http.NewRequest(method, client.baseURL+path, &buf)
@@ -57,6 +57,8 @@ func (client *TelnyxClient) doRequest(method, path string, body interface{}, v i
 		client.logger.Error("Error reading response body", zap.Error(err))
 		return err
 	}
+
+	client.logger.Debug("Response Body", zap.String("response", string(respBody)))
 
 	if resp.StatusCode >= 400 {
 		client.logger.Error("Received error response from API", zap.Int("status_code", resp.StatusCode), zap.String("response", string(respBody)))
