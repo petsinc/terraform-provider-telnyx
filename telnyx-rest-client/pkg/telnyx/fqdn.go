@@ -34,3 +34,15 @@ func (client *TelnyxClient) DeleteFQDN(fqdnID string) error {
 	}
 	return err
 }
+
+func (client *TelnyxClient) GetFQDN(fqdnID string) (*FQDN, error) {
+	var result struct {
+		Data FQDN `json:"data"`
+	}
+	err := client.doRequest("GET", fmt.Sprintf("/fqdns/%s", fqdnID), nil, &result)
+	if err != nil {
+		client.logger.Error("Error getting FQDN", zap.Error(err), zap.String("fqdnID", fqdnID))
+		return nil, err
+	}
+	return &result.Data, nil
+}

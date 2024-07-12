@@ -171,6 +171,13 @@ resource "telnyx_fqdn_connection" "test" {
     timeout_2xx_secs = 90
   }
 }
+
+resource "telnyx_fqdn" "test" {
+  connection_id  = telnyx_fqdn_connection.test.id
+  fqdn           = "terraform.test.sip.livekit.cloud"
+  dns_record_type = "a"
+  port           = 5060
+}
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("telnyx_billing_group.test", "name", "Test Billing Group Terraform"),
@@ -180,6 +187,9 @@ resource "telnyx_fqdn_connection" "test" {
 					resource.TestCheckResourceAttr("telnyx_credential_connection.test", "username", "hellopatienttest12345terraform"),
 					resource.TestCheckResourceAttr("telnyx_credential_connection.test", "webhook_event_url", "https://www.example.com/hooks"),
 					resource.TestCheckResourceAttr("telnyx_fqdn_connection.test", "connection_name", "Test FQDN Connection Terraform"),
+					resource.TestCheckResourceAttr("telnyx_fqdn.test", "fqdn", "terraform.test.sip.livekit.cloud"),
+					resource.TestCheckResourceAttr("telnyx_fqdn.test", "dns_record_type", "a"),
+					resource.TestCheckResourceAttr("telnyx_fqdn.test", "port", "5060"),
 				),
 			},
 			{
@@ -332,6 +342,13 @@ resource "telnyx_fqdn_connection" "test" {
     timeout_2xx_secs = 90
   }
 }
+
+resource "telnyx_fqdn" "test" {
+  connection_id  = telnyx_fqdn_connection.test.id
+  fqdn           = "updated.terraform.test.sip.livekit.cloud"
+  dns_record_type = "a"
+  port           = 5060
+}
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("telnyx_billing_group.test", "name", "Updated Billing Group Terraform"),
@@ -341,6 +358,9 @@ resource "telnyx_fqdn_connection" "test" {
 					resource.TestCheckResourceAttr("telnyx_credential_connection.test", "username", "updatedtest12345terraform"),
 					resource.TestCheckResourceAttr("telnyx_credential_connection.test", "webhook_event_url", "https://www.example.com/hooks"),
 					resource.TestCheckResourceAttr("telnyx_fqdn_connection.test", "connection_name", "Updated Test FQDN Connection Terraform"),
+					resource.TestCheckResourceAttr("telnyx_fqdn.test", "fqdn", "updated.terraform.test.sip.livekit.cloud"),
+					resource.TestCheckResourceAttr("telnyx_fqdn.test", "dns_record_type", "a"),
+					resource.TestCheckResourceAttr("telnyx_fqdn.test", "port", "5060"),
 				),
 			},
 			{

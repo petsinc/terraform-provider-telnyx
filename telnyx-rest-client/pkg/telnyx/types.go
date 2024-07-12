@@ -235,7 +235,6 @@ type CredentialConnectionOutboundSettings struct {
 // New FQDN Struct
 type FQDN struct {
 	ID            string    `json:"id"`
-	RecordType    string    `json:"record_type"`
 	ConnectionID  int       `json:"connection_id"`
 	FQDN          string    `json:"fqdn"`
 	Port          int       `json:"port"`
