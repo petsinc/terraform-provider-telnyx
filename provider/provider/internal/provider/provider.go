@@ -72,6 +72,7 @@ func (p *TelnyxProvider) Resources(_ context.Context) []func() resource.Resource
 		NewCredentialConnectionResource,
 		NewFQDNConnectionResource,
 		NewFQDNResource,
+		NewNumberOrderResource,
 	}
 }
 

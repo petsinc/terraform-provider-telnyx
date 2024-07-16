@@ -125,6 +125,7 @@ type PhoneNumberReservation struct {
 type NumberOrderRegulatoryRequirement struct {
 	RequirementID string `json:"requirement_id"`
 	FieldValue    string `json:"field_value"`
+	FieldType     string `json:"field_type"`
 }
 
 type UpdateNumberOrderRequest struct {
@@ -139,7 +140,7 @@ type PhoneNumberOrderResponse struct {
 	ConnectionID       string                `json:"connection_id"`
 	MessagingProfileID string                `json:"messaging_profile_id"`
 	BillingGroupID     string                `json:"billing_group_id"`
-	PhoneNumbers       []PhoneNumberResponse `json:"phone_numbers"`
+	PhoneNumbers       []OrderResponsePhoneNumbers `json:"phone_numbers"`
 	SubNumberOrderIDs  []string              `json:"sub_number_order_ids"`
 	Status             string                `json:"status"`
 	CustomerReference  string                `json:"customer_reference"`
@@ -148,15 +149,46 @@ type PhoneNumberOrderResponse struct {
 	RequirementsMet    bool                  `json:"requirements_met"`
 }
 
+type OrderResponsePhoneNumbers struct {
+	ID                    string                            `json:"id"`
+	RecordType            string                            `json:"record_type"`
+	PhoneNumber           string                            `json:"phone_number"`
+	BundleID              string                            `json:"bundle_id"`
+	PhoneNumberType       string                            `json:"phone_number_type"`
+	CountryCode           string                            `json:"country_code"`
+	RequirementsMet       bool                              `json:"requirements_met"`
+	Status                string                            `json:"status"`
+	RegulatoryRequirements []NumberOrderRegulatoryRequirement `json:"regulatory_requirements"`
+}
+
+
+// PhoneNumberResponse represents the response for retrieving a phone number.
 type PhoneNumberResponse struct {
-	ID              string `json:"id"`
-	RecordType      string `json:"record_type"`
-	PhoneNumber     string `json:"phone_number"`
-	BundleID        string `json:"bundle_id"`
-	PhoneNumberType string `json:"phone_number_type"`
-	CountryCode     string `json:"country_code"`
-	RequirementsMet bool   `json:"requirements_met"`
-	Status          string `json:"status"`
+	ID                    string    `json:"id"`
+	RecordType            string    `json:"record_type"`
+	PhoneNumber           string    `json:"phone_number"`
+	Status                string    `json:"status"`
+	Tags                  []string  `json:"tags"`
+	ExternalPin           string    `json:"external_pin"`
+	ConnectionID          string    `json:"connection_id"`
+	ConnectionName        string    `json:"connection_name"`
+	CustomerReference     string    `json:"customer_reference"`
+	MessagingProfileID    string    `json:"messaging_profile_id"`
+	MessagingProfileName  string    `json:"messaging_profile_name"`
+	BillingGroupID        string    `json:"billing_group_id"`
+	EmergencyEnabled      bool      `json:"emergency_enabled"`
+	EmergencyAddressID    string    `json:"emergency_address_id"`
+	CallForwardingEnabled bool      `json:"call_forwarding_enabled"`
+	CNAMListingEnabled    bool      `json:"cnam_listing_enabled"`
+	CallerIDNameEnabled   bool      `json:"caller_id_name_enabled"`
+	CallRecordingEnabled  bool      `json:"call_recording_enabled"`
+	T38FaxGatewayEnabled  bool      `json:"t38_fax_gateway_enabled"`
+	NumberLevelRouting    string    `json:"number_level_routing"`
+	PhoneNumberType       string    `json:"phone_number_type"`
+	PurchasedAt           time.Time `json:"purchased_at"`
+	CreatedAt             time.Time `json:"created_at"`
+	UpdatedAt             time.Time `json:"updated_at"`
+	HDVoiceEnabled        bool      `json:"hd_voice_enabled"`
 }
 
 type RTCPSettings struct {

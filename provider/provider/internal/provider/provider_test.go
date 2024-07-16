@@ -178,6 +178,18 @@ resource "telnyx_fqdn" "test" {
   dns_record_type = "a"
   port           = 5060
 }
+
+resource "telnyx_number_order" "test" {
+  connection_id       = telnyx_credential_connection.test.id
+  messaging_profile_id = telnyx_messaging_profile.test.id
+  billing_group_id     = telnyx_billing_group.test.id
+  customer_reference   = "Test Order"
+  phone_numbers = [
+    {
+      phone_number = "+16814151019"
+    }
+  ]
+}
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("telnyx_billing_group.test", "name", "Test Billing Group Terraform"),
@@ -190,6 +202,7 @@ resource "telnyx_fqdn" "test" {
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "fqdn", "terraform.test.sip.livekit.cloud"),
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "dns_record_type", "a"),
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "port", "5060"),
+          resource.TestCheckResourceAttr("telnyx_number_order.test", "customer_reference", "Test Order"),
 				),
 			},
 			{
@@ -349,6 +362,24 @@ resource "telnyx_fqdn" "test" {
   dns_record_type = "a"
   port           = 5060
 }
+
+resource "telnyx_number_order" "test" {
+  connection_id       = telnyx_credential_connection.test.id
+  messaging_profile_id = telnyx_messaging_profile.test.id
+  billing_group_id     = telnyx_billing_group.test.id
+  customer_reference   = "Updated Test Order"
+  phone_numbers = [
+    {
+      phone_number = "+16814151019"
+      regulatory_requirements = [
+        {
+          requirement_id = "requirement_id_example"
+          field_value    = "field_value_example"
+        }
+      ]
+    }
+  ]
+}
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("telnyx_billing_group.test", "name", "Updated Billing Group Terraform"),
@@ -361,6 +392,7 @@ resource "telnyx_fqdn" "test" {
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "fqdn", "updated.terraform.test.sip.livekit.cloud"),
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "dns_record_type", "a"),
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "port", "5060"),
+          resource.TestCheckResourceAttr("telnyx_number_order.test", "customer_reference", "Updated Test Order"),
 				),
 			},
 			{
