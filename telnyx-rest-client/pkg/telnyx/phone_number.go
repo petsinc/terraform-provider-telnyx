@@ -8,6 +8,18 @@ import (
 	"strings"
 )
 
+func (client *TelnyxClient) GetPhoneNumber(phoneNumberID string) (*PhoneNumberResponse, error) {
+	var result struct {
+		Data PhoneNumberResponse `json:"data"`
+	}
+	err := client.doRequest("GET", fmt.Sprintf("/phone_numbers/%s", phoneNumberID), nil, &result)
+	if err != nil {
+		client.logger.Error("Error retrieving phone number", zap.Error(err), zap.String("phone_number_id", phoneNumberID))
+		return nil, err
+	}
+	return &result.Data, nil
+}
+
 func (client *TelnyxClient) UpdatePhoneNumber(phoneNumberID string, request UpdatePhoneNumberRequest) (*UpdatePhoneNumberResponse, error) {
 	var result struct {
 		Data UpdatePhoneNumberResponse `json:"data"`
