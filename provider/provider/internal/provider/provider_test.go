@@ -186,7 +186,7 @@ resource "telnyx_number_order" "test" {
   customer_reference   = "Test Order"
   phone_numbers = [
     {
-      phone_number = "+16814151019"
+      phone_number = "+16035855219"
     }
   ]
 }
@@ -370,13 +370,7 @@ resource "telnyx_number_order" "test" {
   customer_reference   = "Updated Test Order"
   phone_numbers = [
     {
-      phone_number = "+16814151019"
-      regulatory_requirements = [
-        {
-          requirement_id = "requirement_id_example"
-          field_value    = "field_value_example"
-        }
-      ]
+      phone_number = "+16035855219"
     }
   ]
 }

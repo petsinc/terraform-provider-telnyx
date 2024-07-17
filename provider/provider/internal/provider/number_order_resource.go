@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/petsinc/telnyx-rest-client/pkg/telnyx"
 )
@@ -36,13 +36,14 @@ type NumberOrderResourceModel struct {
 	CreatedAt          types.String `tfsdk:"created_at"`
 	UpdatedAt          types.String `tfsdk:"updated_at"`
 	PhoneNumbers       types.List   `tfsdk:"phone_numbers"`
+	SubNumberOrderIDs  types.List   `tfsdk:"sub_number_orders_ids"` // Add this field
 }
 
 type PhoneNumberResourceModel struct {
-	ID                    types.String `tfsdk:"id"`
-	PhoneNumber           types.String `tfsdk:"phone_number"`
-	Status                types.String `tfsdk:"status"`
-	RegulatoryRequirements types.List  `tfsdk:"regulatory_requirements"`
+	ID                     types.String `tfsdk:"id"`
+	PhoneNumber            types.String `tfsdk:"phone_number"`
+	Status                 types.String `tfsdk:"status"`
+	RegulatoryRequirements types.List   `tfsdk:"regulatory_requirements"`
 }
 
 type RegulatoryRequirementResourceModel struct {
@@ -50,7 +51,6 @@ type RegulatoryRequirementResourceModel struct {
 	FieldValue    types.String `tfsdk:"field_value"`
 	FieldType     types.String `tfsdk:"field_type"`
 }
-
 
 func (p PhoneNumberResourceModel) AttrTypes() map[string]attr.Type {
 	return map[string]attr.Type{
@@ -60,7 +60,6 @@ func (p PhoneNumberResourceModel) AttrTypes() map[string]attr.Type {
 		"regulatory_requirements": types.ListType{ElemType: types.ObjectType{AttrTypes: RegulatoryRequirementResourceModel{}.AttrTypes()}},
 	}
 }
-
 
 func (r RegulatoryRequirementResourceModel) AttrTypes() map[string]attr.Type {
 	return map[string]attr.Type{
@@ -132,7 +131,6 @@ func (r *NumberOrderResource) Schema(ctx context.Context, req resource.SchemaReq
 						},
 						"regulatory_requirements": schema.ListNestedAttribute{
 							Description: "List of regulatory requirements for the phone number",
-							Optional:    true,
 							Computed:    true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
@@ -153,6 +151,11 @@ func (r *NumberOrderResource) Schema(ctx context.Context, req resource.SchemaReq
 						},
 					},
 				},
+			},
+			"sub_number_orders_ids": schema.ListAttribute{
+				Description: "List of sub number order IDs associated with the number order",
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 		},
 	}
@@ -206,46 +209,8 @@ func (r *NumberOrderResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	plan.ID = types.StringValue(order.ID)
-	plan.Status = types.StringValue(order.Status)
-	plan.CreatedAt = types.StringValue(order.CreatedAt.String())
-	plan.UpdatedAt = types.StringValue(order.UpdatedAt.String())
-
-	var phoneNumbersModel []PhoneNumberResourceModel
-	for _, pn := range order.PhoneNumbers {
-		phoneNumberModel := PhoneNumberResourceModel{
-			ID:          types.StringValue(pn.ID),
-			PhoneNumber: types.StringValue(pn.PhoneNumber),
-			Status:      types.StringValue(pn.Status),
-		}
-
-		if pn.RegulatoryRequirements != nil {
-			reqs := make([]RegulatoryRequirementResourceModel, len(pn.RegulatoryRequirements))
-			for j, req := range pn.RegulatoryRequirements {
-				reqs[j] = RegulatoryRequirementResourceModel{
-					RequirementID: types.StringValue(req.RequirementID),
-					FieldValue:    types.StringValue(req.FieldValue),
-					FieldType:     types.StringValue(req.FieldType),
-				}
-			}
-			phoneNumberModel.RegulatoryRequirements, diags = ConvertRegulatoryRequirementsToList(ctx, reqs)
-			resp.Diagnostics.Append(diags...)
-			if resp.Diagnostics.HasError() {
-				return
-			}
-		} else {
-			phoneNumberModel.RegulatoryRequirements = types.ListNull(types.ObjectType{})
-		}
-
-		phoneNumbersModel = append(phoneNumbersModel, phoneNumberModel)
-	}
-	plan.PhoneNumbers, diags = ConvertPhoneNumbersToList(ctx, phoneNumbersModel)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	tflog.Info(ctx, "Created Number Order", map[string]interface{}{"id": order.ID, "status": order.Status})
+	// Set state based on response from the API
+	setStateFromOrderResponse(&plan, order)
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
@@ -264,7 +229,71 @@ func (r *NumberOrderResource) Read(ctx context.Context, req resource.ReadRequest
 		resp.Diagnostics.AddError("Error reading number order", err.Error())
 		return
 	}
+	// Update state based on response from the API
+	setStateFromOrderResponse(&state, order)
 
+	diags = resp.State.Set(ctx, state)
+	resp.Diagnostics.Append(diags...)
+}
+
+func (r *NumberOrderResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan NumberOrderResourceModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// TODO Prepare the request with an empty array for regulatory requirements until we support this prop
+	request := telnyx.UpdateNumberOrderRequest{
+		CustomerReference:      plan.CustomerReference.ValueString(),
+		RegulatoryRequirements: []telnyx.NumberOrderRegulatoryRequirement{}, // Ensure this is always an empty array
+	}
+
+	order, err := r.client.UpdateNumberOrder(plan.ID.ValueString(), request)
+	if err != nil {
+		resp.Diagnostics.AddError("Error updating number order", err.Error())
+		return
+	}
+
+	// Update state based on response from the API
+	setStateFromOrderResponse(&plan, order)
+
+	diags = resp.State.Set(ctx, plan)
+	resp.Diagnostics.Append(diags...)
+}
+
+func (r *NumberOrderResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state NumberOrderResourceModel
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Convert the SubNumberOrderIDs list to a slice of strings using the utility function
+	subNumberOrderIDs, diags := convertListToStrings(ctx, state.SubNumberOrderIDs)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Cancel sub number orders if they exist
+	for _, subOrderID := range subNumberOrderIDs {
+		fmt.Printf("Cancelling sub number order with ID: %s\n", subOrderID)
+		_, err := r.client.CancelSubNumberOrder(subOrderID)
+		if err != nil {
+			fmt.Printf("Error cancelling sub number order ID: %s, Error: %s\n", subOrderID, err.Error())
+			resp.Diagnostics.AddError("Error cancelling sub number order", fmt.Sprintf("ID: %s, Error: %s", subOrderID, err.Error()))
+			return
+		}
+	}
+
+	resp.State.RemoveResource(ctx)
+}
+
+func setStateFromOrderResponse(state *NumberOrderResourceModel, order *telnyx.PhoneNumberOrderResponse) {
+	state.ID = types.StringValue(order.ID)
 	state.Status = types.StringValue(order.Status)
 	state.CreatedAt = types.StringValue(order.CreatedAt.String())
 	state.UpdatedAt = types.StringValue(order.UpdatedAt.String())
@@ -286,65 +315,15 @@ func (r *NumberOrderResource) Read(ctx context.Context, req resource.ReadRequest
 					FieldType:     types.StringValue(req.FieldType),
 				}
 			}
-			phoneNumberModel.RegulatoryRequirements, diags = ConvertRegulatoryRequirementsToList(ctx, reqs)
-			resp.Diagnostics.Append(diags...)
-			if resp.Diagnostics.HasError() {
-				return
-			}
+			phoneNumberModel.RegulatoryRequirements, _ = ConvertRegulatoryRequirementsToList(context.Background(), reqs)
 		} else {
-			phoneNumberModel.RegulatoryRequirements = types.ListNull(types.ObjectType{})
+			phoneNumberModel.RegulatoryRequirements = types.ListValueMust(
+				types.ObjectType{AttrTypes: RegulatoryRequirementResourceModel{}.AttrTypes()}, []attr.Value{})
 		}
 
 		phoneNumbersModel = append(phoneNumbersModel, phoneNumberModel)
 	}
-	state.PhoneNumbers, diags = ConvertPhoneNumbersToList(ctx, phoneNumbersModel)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 
-	diags = resp.State.Set(ctx, state)
-	resp.Diagnostics.Append(diags...)
-}
-
-func (r *NumberOrderResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan NumberOrderResourceModel
-	diags := req.Plan.Get(ctx, &plan)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	request := telnyx.UpdateNumberOrderRequest{
-		CustomerReference: plan.CustomerReference.ValueString(),
-	}
-
-	order, err := r.client.UpdateNumberOrder(plan.ID.ValueString(), request)
-	if err != nil {
-		resp.Diagnostics.AddError("Error updating number order", err.Error())
-		return
-	}
-
-	plan.Status = types.StringValue(order.Status)
-	plan.UpdatedAt = types.StringValue(order.UpdatedAt.String())
-
-	diags = resp.State.Set(ctx, plan)
-	resp.Diagnostics.Append(diags...)
-}
-
-func (r *NumberOrderResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state NumberOrderResourceModel
-	diags := req.State.Get(ctx, &state)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	err := r.client.DeletePhoneNumber(state.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Error deleting number order", err.Error())
-		return
-	}
-
-	resp.State.RemoveResource(ctx)
+	state.PhoneNumbers, _ = ConvertPhoneNumbersToList(context.Background(), phoneNumbersModel)
+	state.SubNumberOrderIDs = convertStringsToList(order.SubNumberOrderIDs)
 }
