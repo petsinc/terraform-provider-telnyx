@@ -73,6 +73,7 @@ func (p *TelnyxProvider) Resources(_ context.Context) []func() resource.Resource
 		NewFQDNConnectionResource,
 		NewFQDNResource,
 		NewNumberOrderResource,
+		NewTeXMLApplicationResource,
 	}
 }
 

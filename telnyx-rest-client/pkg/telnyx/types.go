@@ -480,3 +480,55 @@ type UpdatePhoneNumberResponse struct {
 	UpdatedAt             time.Time `json:"updated_at"`
 	HDVoiceEnabled        bool      `json:"hd_voice_enabled"`
 }
+
+// TeXMLApplication represents a TeXML application in Telnyx.
+type TeXMLApplication struct {
+	ID                      string                `json:"id"`
+	RecordType              string                `json:"record_type"`
+	FriendlyName            string                `json:"friendly_name"`
+	Active                  bool                  `json:"active"`
+	AnchorsiteOverride      string                `json:"anchorsite_override"`
+	DTMFType                string                `json:"dtmf_type"`
+	FirstCommandTimeout     bool                  `json:"first_command_timeout"`
+	FirstCommandTimeoutSecs int                   `json:"first_command_timeout_secs"`
+	VoiceURL                string                `json:"voice_url"`
+	VoiceFallbackURL        string                `json:"voice_fallback_url"`
+	VoiceMethod             string                `json:"voice_method"`
+	StatusCallback          string                `json:"status_callback"`
+	StatusCallbackMethod    string                `json:"status_callback_method"`
+	Inbound                 InboundTeXMLSettings  `json:"inbound"`
+	Outbound                OutboundTeXMLSettings `json:"outbound"`
+	CreatedAt               time.Time             `json:"created_at"`
+	UpdatedAt               time.Time             `json:"updated_at"`
+}
+
+// InboundTeXMLSettings represents the inbound settings for a TeXML application.
+type InboundTeXMLSettings struct {
+	ChannelLimit                int    `json:"channel_limit"`
+	ShakenStirEnabled           bool   `json:"shaken_stir_enabled"`
+	SIPSubdomain                string `json:"sip_subdomain"`
+	SIPSubdomainReceiveSettings string `json:"sip_subdomain_receive_settings"`
+}
+
+// OutboundTeXMLSettings represents the outbound settings for a TeXML application.
+type OutboundTeXMLSettings struct {
+	ChannelLimit           int    `json:"channel_limit"`
+	OutboundVoiceProfileID string `json:"outbound_voice_profile_id"`
+}
+
+// TeXMLApplicationRequest represents the request payload for creating or updating a TeXML application.
+type TeXMLApplicationRequest struct {
+	FriendlyName            string                `json:"friendly_name"`
+	Active                  bool                  `json:"active"`
+	AnchorsiteOverride      string                `json:"anchorsite_override"`
+	DTMFType                string                `json:"dtmf_type"`
+	FirstCommandTimeout     bool                  `json:"first_command_timeout"`
+	FirstCommandTimeoutSecs int                   `json:"first_command_timeout_secs"`
+	VoiceURL                string                `json:"voice_url"`
+	VoiceFallbackURL        string                `json:"voice_fallback_url"`
+	VoiceMethod             string                `json:"voice_method"`
+	StatusCallback          string                `json:"status_callback"`
+	StatusCallbackMethod    string                `json:"status_callback_method"`
+	Inbound                 InboundTeXMLSettings  `json:"inbound"`
+	Outbound                OutboundTeXMLSettings `json:"outbound"`
+}

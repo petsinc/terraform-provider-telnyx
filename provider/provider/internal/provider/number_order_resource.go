@@ -36,7 +36,7 @@ type NumberOrderResourceModel struct {
 	CreatedAt          types.String `tfsdk:"created_at"`
 	UpdatedAt          types.String `tfsdk:"updated_at"`
 	PhoneNumbers       types.List   `tfsdk:"phone_numbers"`
-	SubNumberOrderIDs  types.List   `tfsdk:"sub_number_orders_ids"` // Add this field
+	SubNumberOrderIDs  types.List   `tfsdk:"sub_number_orders_ids"`
 }
 
 type PhoneNumberResourceModel struct {

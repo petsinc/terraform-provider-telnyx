@@ -179,6 +179,30 @@ resource "telnyx_fqdn" "test" {
   port           = 5060
 }
 
+resource "telnyx_texml_application" "test" {
+  friendly_name            = "Test TeXML Application Terraform"
+  active                   = true
+  anchorsite_override      = "Amsterdam, Netherlands"
+  dtmf_type                = "Inband"
+  first_command_timeout    = true
+  first_command_timeout_secs = 10
+  voice_url                = "https://example.com/voice"
+  voice_fallback_url       = "https://fallback.example.com/voice"
+  voice_method             = "get"
+  status_callback          = "https://example.com/status"
+  status_callback_method   = "post"
+  inbound = {
+    channel_limit                 = 10
+    shaken_stir_enabled           = true
+    sip_subdomain                 = "hpterraformexample"
+    sip_subdomain_receive_settings = "only_my_connections"
+  }
+  outbound = {
+    channel_limit           = 10
+    outbound_voice_profile_id = telnyx_outbound_voice_profile.test.id
+  }
+}
+
 resource "telnyx_number_order" "test" {
   connection_id       = telnyx_credential_connection.test.id
   messaging_profile_id = telnyx_messaging_profile.test.id
@@ -202,7 +226,14 @@ resource "telnyx_number_order" "test" {
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "fqdn", "terraform.test.sip.livekit.cloud"),
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "dns_record_type", "a"),
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "port", "5060"),
-          resource.TestCheckResourceAttr("telnyx_number_order.test", "customer_reference", "Test Order"),
+					resource.TestCheckResourceAttr("telnyx_number_order.test", "customer_reference", "Test Order"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "friendly_name", "Test TeXML Application Terraform"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "anchorsite_override", "Amsterdam, Netherlands"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_url", "https://example.com/voice"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_fallback_url", "https://fallback.example.com/voice"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_method", "get"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "status_callback", "https://example.com/status"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "status_callback_method", "post"),
 				),
 			},
 			{
@@ -363,6 +394,30 @@ resource "telnyx_fqdn" "test" {
   port           = 5060
 }
 
+resource "telnyx_texml_application" "test" {
+  friendly_name            = "Updated Test TeXML Application Terraform"
+  active                   = true
+  anchorsite_override      = "Amsterdam, Netherlands"
+  dtmf_type                = "Inband"
+  first_command_timeout    = true
+  first_command_timeout_secs = 10
+  voice_url                = "https://example.com/voice"
+  voice_fallback_url       = "https://fallback.example.com/voice"
+  voice_method             = "get"
+  status_callback          = "https://example.com/status"
+  status_callback_method   = "post"
+  inbound = {
+    channel_limit                 = 10
+    shaken_stir_enabled           = true
+    sip_subdomain                 = "hpterraformexample"
+    sip_subdomain_receive_settings = "only_my_connections"
+  }
+  outbound = {
+    channel_limit           = 10
+    outbound_voice_profile_id = telnyx_outbound_voice_profile.test.id
+  }
+}
+
 resource "telnyx_number_order" "test" {
   connection_id       = telnyx_credential_connection.test.id
   messaging_profile_id = telnyx_messaging_profile.test.id
@@ -386,7 +441,14 @@ resource "telnyx_number_order" "test" {
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "fqdn", "updated.terraform.test.sip.livekit.cloud"),
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "dns_record_type", "a"),
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "port", "5060"),
-          resource.TestCheckResourceAttr("telnyx_number_order.test", "customer_reference", "Updated Test Order"),
+					resource.TestCheckResourceAttr("telnyx_number_order.test", "customer_reference", "Updated Test Order"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "friendly_name", "Updated Test TeXML Application Terraform"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "anchorsite_override", "Amsterdam, Netherlands"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_url", "https://example.com/voice"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_fallback_url", "https://fallback.example.com/voice"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_method", "get"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "status_callback", "https://example.com/status"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "status_callback_method", "post"),
 				),
 			},
 			{
