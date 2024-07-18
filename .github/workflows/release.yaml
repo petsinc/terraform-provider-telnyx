@@ -19,45 +19,25 @@ jobs:
         with:
           go-version: '1.22'
 
-      - name: Set up environment
+      - name: Install GoReleaser
         run: |
-          mkdir -p provider/bin
-          echo "BIN_DIR=./provider/bin" >> $GITHUB_ENV
-          VERSION=${GITHUB_REF#refs/tags/}
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          curl -sL https://git.io/goreleaser | bash
 
-      - name: Build binaries for Linux, macOS, and Windows
+      - name: Set up GPG
         run: |
-          cd provider
-          make clean
-          make deps
-          make format
-          GOOS=linux GOARCH=amd64 make build VERSION=${VERSION}
-          mv ./provider/bin/terraform-provider-telnyx ./provider/bin/terraform-provider-telnyx_v${VERSION}_linux_amd64
-          GOOS=darwin GOARCH=arm64 make build VERSION=${VERSION}
-          mv ./provider/bin/terraform-provider-telnyx ./provider/bin/terraform-provider-telnyx_v${VERSION}_darwin_arm64
-
-      - name: Generate SHA256 checksums
-        run: |
-          cd ./provider/provider/bin
-          shasum -a 256 * > terraform-provider-telnyx_${VERSION}_SHA256SUMS
-
-      - name: Sign the checksum file
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          PASSPHRASE: ${{ secrets.PASSPHRASE }}
-        run: |
-          cd provider/provider/bin
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
-          echo "$PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --armor --detach-sign terraform-provider-telnyx_${VERSION}_SHA256SUMS
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            ./provider/provider/bin/*
-          body: |
-            ## Changes
-            - Release version ${{ github.ref_name }}
+      # - name: Set GPG_TTY
+      #   run: |
+      #     echo "export GPG_TTY=$(tty)" >> $GITHUB_ENV
+
+      - name: Change to provider directory and run GoReleaser
+        run: |
+          cd provider
+          goreleaser release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
+          GPG_PASS: ${{ secrets.GPG_PASS }}
