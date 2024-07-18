@@ -1,4 +1,4 @@
-module github.com/petsinc/telnyx-terraform-provider
+module github.com/petsinc/terraform-provider-telnyx
 
 go 1.22
 

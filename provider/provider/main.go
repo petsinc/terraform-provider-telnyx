@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/petsinc/telnyx-terraform-provider/internal/provider"
+	"github.com/petsinc/terraform-provider-telnyx/internal/provider"
 )
 
 var version string
