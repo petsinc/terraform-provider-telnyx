@@ -12,7 +12,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
-      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      GPG_PASS: ${{ secrets.GPG_PASS }}
       GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
 
     steps:

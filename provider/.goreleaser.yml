@@ -37,7 +37,7 @@ signs:
       - "--pinentry-mode"
       - "loopback"
       - "--passphrase"
-      - "{{ .Env.GPG_PASSPHRASE }}"
+      - "{{ .Env.GPG_PASS }}"
       - "--output"
       - "${signature}"
       - "--detach-sign"
