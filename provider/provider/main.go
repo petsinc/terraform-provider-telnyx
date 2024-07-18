@@ -31,7 +31,7 @@ func main() {
 	}
 
 	tflog.Info(context.Background(), "Starting telnyx provider", map[string]interface{}{
-		"version":     version,
+		"version": version,
 	})
 
 	err := providerserver.Serve(context.Background(), provider.New(version), opts)

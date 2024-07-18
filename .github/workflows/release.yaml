@@ -30,6 +30,7 @@ jobs:
         run: |
           cd provider
           make clean
+          make deps
           make format
           GOOS=linux GOARCH=amd64 make build VERSION=${VERSION}
           mv ./bin/terraform-provider-telnyx ./bin/terraform-provider-telnyx_v${VERSION}_linux_amd64

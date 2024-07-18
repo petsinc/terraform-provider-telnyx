@@ -20,6 +20,10 @@ GOFMT := $(GOCMD) fmt
 # All command
 all: format build test
 
+# Install dependencies
+deps:
+	cd $(PROVIDER_DIR) && $(GOCMD) mod tidy && $(GOCMD) mod download
+	
 # Build binary with version
 build:
 	cd $(PROVIDER_DIR) && $(GOBUILD) -ldflags "-X main.version=$(VERSION)" -o $(BIN_DIR)/$(BINARY) ./main.go
