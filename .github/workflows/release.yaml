@@ -24,10 +24,6 @@ jobs:
         with:
           go-version: '1.22'
 
-      - name: Install GoReleaser
-        run: |
-          curl -sL https://git.io/goreleaser | bash
-
       - name: Set up GPG
         run: |
           echo "$GPG_PRIVATE_KEY" | gpg --batch --import
@@ -35,6 +31,11 @@ jobs:
       # - name: Set GPG_TTY
       #   run: |
       #     echo "export GPG_TTY=$(tty)" >> $GITHUB_ENV
+
+      - name: Change to provider directory and install GoReleaser
+        working-directory: provider/provider
+        run: |
+          curl -sL https://git.io/goreleaser | bash
 
       - name: Change to provider directory and run GoReleaser
         working-directory: provider/provider
