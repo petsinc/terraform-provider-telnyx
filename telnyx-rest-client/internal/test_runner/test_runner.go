@@ -145,9 +145,9 @@ func (runner *TestRunner) PerformCreates() {
 			CallParkingEnabled:     true,
 			ChannelLimit:           10,
 			GenerateRingbackTone:   true,
-			InstantRingbackEnabled: false, // Ensure only one ringback setting is enabled
+			InstantRingbackEnabled: false,
 			IPAuthenticationMethod: "token",
-			IPAuthenticationToken:  "aBcD1234aBcD1234", // Ensure token is at least 12 characters
+			IPAuthenticationToken:  "aBcD1234aBcD1234",
 			Localization:           "US",
 			OutboundVoiceProfileID: runner.outboundVoiceProfileID,
 			T38ReinviteSource:      "customer",
@@ -213,9 +213,9 @@ func (runner *TestRunner) PerformCreates() {
 			CallParkingEnabled:     true,
 			ChannelLimit:           10,
 			GenerateRingbackTone:   true,
-			InstantRingbackEnabled: false, // Ensure only one ringback setting is enabled
+			InstantRingbackEnabled: false,
 			IPAuthenticationMethod: "token",
-			IPAuthenticationToken:  "aBcD1234aBcD1234", // Ensure token is at least 12 characters
+			IPAuthenticationToken:  "aBcD1234aBcD1234",
 			Localization:           "US",
 			OutboundVoiceProfileID: runner.outboundVoiceProfileID,
 			T38ReinviteSource:      "customer",
@@ -408,9 +408,9 @@ func (runner *TestRunner) PerformUpdates() {
 			CallParkingEnabled:     true,
 			ChannelLimit:           10,
 			GenerateRingbackTone:   true,
-			InstantRingbackEnabled: false, // Ensure only one ringback setting is enabled
+			InstantRingbackEnabled: false,
 			IPAuthenticationMethod: "token",
-			IPAuthenticationToken:  "updatedtoken1234", // Ensure token is at least 12 characters
+			IPAuthenticationToken:  "updatedtoken1234",
 			Localization:           "US",
 			OutboundVoiceProfileID: runner.outboundVoiceProfileID,
 			T38ReinviteSource:      "customer",
@@ -475,9 +475,9 @@ func (runner *TestRunner) PerformUpdates() {
 			CallParkingEnabled:     true,
 			ChannelLimit:           10,
 			GenerateRingbackTone:   true,
-			InstantRingbackEnabled: false, // Ensure only one ringback setting is enabled
+			InstantRingbackEnabled: false,
 			IPAuthenticationMethod: "token",
-			IPAuthenticationToken:  "updatedtoken1234", // Ensure token is at least 12 characters
+			IPAuthenticationToken:  "updatedtoken1234",
 			Localization:           "US",
 			OutboundVoiceProfileID: runner.outboundVoiceProfileID,
 			T38ReinviteSource:      "customer",

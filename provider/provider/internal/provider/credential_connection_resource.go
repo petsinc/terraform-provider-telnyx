@@ -306,16 +306,11 @@ func (r *CredentialConnectionResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	// fmt.Printf("\n\n--- Created Connection ---\n%+v\n\n", createdConnection)
-
 	setCredentialConnectionState(ctx, &plan, createdConnection)
-
-	// fmt.Printf("\n\n--- State After Create ---\n%+v\n\n", plan)
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		// fmt.Printf("\n\n--- Error setting state after create ---\n%+v\n\n", resp.Diagnostics)
 		return
 	}
 }
@@ -325,11 +320,8 @@ func (r *CredentialConnectionResource) Read(ctx context.Context, req resource.Re
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		// fmt.Printf("\n\n--- Error getting state ---\n%+v\n\n", resp.Diagnostics)
 		return
 	}
-
-	// fmt.Printf("\n\n--- State Before Read ---\n%+v\n\n", state)
 
 	client := r.client
 
@@ -339,24 +331,17 @@ func (r *CredentialConnectionResource) Read(ctx context.Context, req resource.Re
 			"Error reading credential connection",
 			"Could not read credential connection, unexpected error: "+err.Error(),
 		)
-		// fmt.Printf("\n\n--- Error reading credential connection ---\n%s\n\n", err.Error())
 		return
 	}
 
-	// fmt.Printf("\n\n--- Response from API ---\n%+v\n\n", connection)
-
 	setCredentialConnectionState(ctx, &state, connection)
-
-	// fmt.Printf("\n\n--- State After Setting Connection ---\n%+v\n\n", state)
 
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		// fmt.Printf("\n\n--- Error setting state after read ---\n%+v\n\n", resp.Diagnostics)
 		return
 	}
 
-	// fmt.Printf("\n\n--- Final State After Read ---\n%+v\n\n", state)
 }
 
 func (r *CredentialConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -442,16 +427,11 @@ func (r *CredentialConnectionResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	// fmt.Printf("\n\n--- Updated Connection ---\n%+v\n\n", updatedConnection)
-
 	setCredentialConnectionState(ctx, &plan, updatedConnection)
-
-	// fmt.Printf("\n\n--- State After Update ---\n%+v\n\n", plan)
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		// fmt.Printf("\n\n--- Error setting state after update ---\n%+v\n\n", resp.Diagnostics)
 		return
 	}
 }
@@ -504,7 +484,7 @@ func setCredentialConnectionState(ctx context.Context, state *CredentialConnecti
 		state.RTCPSettings = nil
 	}
 
-	// Set inbound settings with defaults
+	// Set inbound settings
 	state.Inbound = &CredentialConnectionInboundSettingsModel{
 		ANINumberFormat:          types.StringValue(connection.Inbound.ANINumberFormat),
 		DNISNumberFormat:         types.StringValue(connection.Inbound.DNISNumberFormat),
@@ -521,7 +501,7 @@ func setCredentialConnectionState(ctx context.Context, state *CredentialConnecti
 		ShakenSTIREnabled:        types.BoolValue(connection.Inbound.ShakenSTIREnabled),
 	}
 
-	// Set outbound settings with defaults
+	// Set outbound settings
 	state.Outbound = &CredentialConnectionOutboundSettingsModel{
 		ANIOverride:            types.StringValue(connection.Outbound.ANIOverride),
 		ANIOverrideType:        types.StringValue(connection.Outbound.ANIOverrideType),
@@ -534,6 +514,4 @@ func setCredentialConnectionState(ctx context.Context, state *CredentialConnecti
 		T38ReinviteSource:      types.StringValue(connection.Outbound.T38ReinviteSource),
 	}
 
-	// Log the state for debugging
-	// fmt.Printf("\n\n--- State Set in setCredentialConnectionState ---\n%+v\n\n", state)
 }
