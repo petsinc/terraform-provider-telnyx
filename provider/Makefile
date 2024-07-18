@@ -1,56 +1,56 @@
-# Define variables
-BINARY_NAME := terraform-provider-telnyx
-BINARY_VERSION := dev
-
 # Directories
-SRC_DIR := .
-BUILD_DIR := ./bin
-DOCS_DIR := ./docs
+MAIN_DIR := .
+BIN_DIR := ./bin
+DOCS_DIR := ../docs
+PROVIDER_DIR := ./provider
+
+# Binary name
+BINARY := terraform-provider-telnyx
 
 # Go commands
-GO := go
-GOBUILD := $(GO) build
-GOCLEAN := $(GO) clean
-GOTEST := $(GO) test
-GOFMT := $(GO) fmt
+GOCMD := go
+GOBUILD := $(GOCMD) build
+GORUN := $(GOCMD) run
+GOTEST := $(GOCMD) test
+GOFMT := $(GOCMD) fmt
+
+# Targets
+.PHONY: all build run test format clean docs help
 
 # All command
-.PHONY: all
 all: format build test
 
-# Format code
-.PHONY: format
-format:
-	$(GOFMT) $(SRC_DIR)/...
-
-# Build binary
-.PHONY: build
+# Build binary with version
 build:
-	$(GOBUILD) -o $(BUILD_DIR)/$(BINARY_NAME)_$(BINARY_VERSION)
+	cd $(PROVIDER_DIR) && $(GOBUILD) -ldflags "-X main.version=$(VERSION)" -o $(BIN_DIR)/$(BINARY) ./main.go
+
+# Run the program
+run:
+	cd $(PROVIDER_DIR) && $(GORUN) main.go
 
 # Run tests
-.PHONY: test
 test:
-	TF_LOG=DEBUG $(GOTEST) -v ./...
+	cd $(PROVIDER_DIR) && . .env && TELNYX_API_TOKEN=$$TELNYX_API_TOKEN TF_ACC=1 $(GOTEST) ./internal/provider -v --count=1
+
+# Format code
+format:
+	cd $(PROVIDER_DIR) && $(GOFMT) ./...
 
 # Generate docs
-.PHONY: docs
 docs:
-	$(GO) run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name telnyx --provider-dir $(SRC_DIR) --rendered-website-dir $(DOCS_DIR)
+	cd $(PROVIDER_DIR) && $(GOCMD) run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name telnyx --provider-dir . --rendered-website-dir $(DOCS_DIR)
 
 # Clean build artifacts
-.PHONY: clean
 clean:
-	$(GOCLEAN)
-	rm -rf $(BUILD_DIR)
+	rm -rf $(PROVIDER_DIR)/$(BIN_DIR)
 
-# Help
-.PHONY: help
+# Help command
 help:
 	@echo "Makefile commands:"
+	@echo "  all       - Format, build, and test."
 	@echo "  format    - Format the Go code."
 	@echo "  build     - Build the binary."
+	@echo "  run       - Run the program."
 	@echo "  test      - Run tests."
 	@echo "  docs      - Generate documentation."
 	@echo "  clean     - Clean build artifacts."
-	@echo "  all       - Format, build, and test."
