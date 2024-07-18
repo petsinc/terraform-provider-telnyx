@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.16'
+
+      - name: Set up environment
+        run: |
+          mkdir -p provider/bin
+          echo "BIN_DIR=./provider/bin" >> $GITHUB_ENV
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Build binaries for Linux, macOS, and Windows
+        run: |
+          cd provider
+          make clean
+          make format
+          GOOS=linux GOARCH=amd64 make build VERSION=${VERSION}
+          mv ./bin/terraform-provider-telnyx ./bin/terraform-provider-telnyx_v${VERSION}_linux_amd64
+          GOOS=darwin GOARCH=arm64 make build VERSION=${VERSION}
+          mv ./bin/terraform-provider-telnyx ./bin/terraform-provider-telnyx_v${VERSION}_darwin_arm64
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd ./provider/bin
+          shasum -a 256 * > terraform-provider-telnyx_${VERSION}_SHA256SUMS
+
+      - name: Sign the checksum file
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          PASSPHRASE: ${{ secrets.PASSPHRASE }}
+        run: |
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          echo "$PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --armor --detach-sign terraform-provider-telnyx_${VERSION}_SHA256SUMS
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./provider/bin/*
+          body: |
+            ## Changes
+            - Release version ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate documentation
+        run: cd provider && make docs
