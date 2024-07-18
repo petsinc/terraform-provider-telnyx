@@ -36,7 +36,3 @@ jobs:
         working-directory: provider/provider
         run: |
           curl -sL https://git.io/goreleaser | bash
-
-      - name: Change to provider directory and run GoReleaser
-        working-directory: provider/provider
-        run: goreleaser release --clean
