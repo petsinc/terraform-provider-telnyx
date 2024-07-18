@@ -2,7 +2,8 @@ version: 2
 
 before:
   hooks:
-    - (cd provider && go mod tidy)
+    - dir: provider
+      cmd: go mod tidy
 
 builds:
   - dir: provider
