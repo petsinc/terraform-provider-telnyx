@@ -9,6 +9,11 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
 
     steps:
       - name: Checkout code
@@ -26,18 +31,11 @@ jobs:
       - name: Set up GPG
         run: |
           echo "$GPG_PRIVATE_KEY" | gpg --batch --import
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
 
       # - name: Set GPG_TTY
       #   run: |
       #     echo "export GPG_TTY=$(tty)" >> $GITHUB_ENV
 
       - name: Change to provider directory and run GoReleaser
-        run: |
-          cd provider
-          goreleaser release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
-          GPG_PASS: ${{ secrets.GPG_PASS }}
+        working-directory: provider
+        run: goreleaser release --clean
