@@ -37,5 +37,5 @@ jobs:
       #     echo "export GPG_TTY=$(tty)" >> $GITHUB_ENV
 
       - name: Change to provider directory and run GoReleaser
-        working-directory: provider
+        working-directory: provider/provider
         run: goreleaser release --clean
