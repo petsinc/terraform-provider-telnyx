@@ -32,8 +32,8 @@ jobs:
       #   run: |
       #     echo "export GPG_TTY=$(tty)" >> $GITHUB_ENV
 
-      - name: Run go mod tidy
-        working-directory: provider
+      - name: Fetch Dependencies
+        working-directory: ./provider/provider
         run: go mod tidy
 
       - name: Run GoReleaser
