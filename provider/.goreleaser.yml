@@ -1,11 +1,12 @@
-version: 2
+version: '2'
 
 before:
   hooks:
-    - go mod tidy
+    - (cd provider && go mod tidy)
 
 builds:
-  - env:
+  - dir: provider
+    env:
       - CGO_ENABLED=0
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
@@ -18,18 +19,18 @@ builds:
     goarch:
       - amd64
       - arm64
-    binary: '{{ .ProjectName }}_v{{ .Version }}'
+    binary: 'terraform-provider-telnyx_v{{ .Version }}'
 
 archives:
   - format: zip
-    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    name_template: 'terraform-provider-telnyx_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 
 checksum:
-  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
+  name_template: 'terraform-provider-telnyx_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
   extra_files:
     - glob: 'terraform-registry-manifest.json'
-      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
+      name_template: 'terraform-provider-telnyx_{{ .Version }}_manifest.json'
 
 signs:
   - artifacts: checksum
@@ -40,7 +41,7 @@ signs:
       - "--pinentry-mode"
       - "loopback"
       - "--passphrase"
-      - "{{ .Env.GPG_PASS }}"
+      - "{{ .Env.GPG_PASSPHRASE }}"
       - "--output"
       - "${signature}"
       - "--detach-sign"
@@ -49,4 +50,7 @@ signs:
 release:
   extra_files:
     - glob: 'terraform-registry-manifest.json'
-      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
+      name_template: 'terraform-provider-telnyx_{{ .Version }}_manifest.json'
+
+changelog:
+  skip: true

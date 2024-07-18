@@ -12,7 +12,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
-      GPG_PASS: ${{ secrets.GPG_PASS }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
 
     steps:
@@ -32,7 +32,7 @@ jobs:
       #   run: |
       #     echo "export GPG_TTY=$(tty)" >> $GITHUB_ENV
 
-      - name: Change to provider directory and install GoReleaser
-        working-directory: provider/provider
+      - name: Change to provider directory and run GoReleaser
+        working-directory: provider
         run: |
           curl -sL https://git.io/goreleaser | bash
