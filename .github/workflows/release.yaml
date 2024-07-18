@@ -32,7 +32,11 @@ jobs:
       #   run: |
       #     echo "export GPG_TTY=$(tty)" >> $GITHUB_ENV
 
-      - name: Change to provider directory and run GoReleaser
+      - name: Run go mod tidy
+        working-directory: provider
+        run: go mod tidy
+
+      - name: Run GoReleaser
         working-directory: provider
         run: |
           curl -sL https://git.io/goreleaser | bash
