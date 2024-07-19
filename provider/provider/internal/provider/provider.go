@@ -78,5 +78,7 @@ func (p *TelnyxProvider) Resources(_ context.Context) []func() resource.Resource
 }
 
 func (p *TelnyxProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		NewPhoneNumberLookupDataSource,
+	}
 }

@@ -213,6 +213,15 @@ resource "telnyx_number_order" "test" {
       phone_number = "+16035855219"
     }
   ]
+
+data "telnyx_phone_number_lookup" "test" {
+  starts_with = "312"
+  country_code = "US"
+  limit = 1
+}
+
+output "phone_numbers" {
+  value = data.telnyx_phone_number_lookup.test.phone_numbers
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -428,6 +437,16 @@ resource "telnyx_number_order" "test" {
       phone_number = "+16035855219"
     }
   ]
+}
+
+data "telnyx_phone_number_lookup" "test" {
+  starts_with = "312"
+  country_code = "US"
+  limit = 1
+}
+
+output "phone_numbers" {
+  value = data.telnyx_phone_number_lookup.test.phone_numbers
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(

@@ -5,7 +5,6 @@ import (
 )
 
 func (client *TelnyxClient) CreateMessagingProfile(profile MessagingProfile) (*MessagingProfile, error) {
-	profile.WebhookAPIVersion = "2" // Ensure the API version is set to "2"
 	var result struct {
 		Data MessagingProfile `json:"data"`
 	}
@@ -28,7 +27,6 @@ func (client *TelnyxClient) GetMessagingProfile(profileID string) (*MessagingPro
 }
 
 func (client *TelnyxClient) UpdateMessagingProfile(profileID string, profile MessagingProfile) (*MessagingProfile, error) {
-	profile.WebhookAPIVersion = "2" // Ensure the API version is set to "2"
 	var result struct {
 		Data MessagingProfile `json:"data"`
 	}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"net/url"
-	"strconv"
 	"strings"
 )
 
@@ -42,39 +41,36 @@ func (client *TelnyxClient) DeletePhoneNumber(phoneNumberID string) error {
 
 // ListAvailablePhoneNumbers retrieves available phone numbers based on the provided filters.
 func (client *TelnyxClient) ListAvailablePhoneNumbers(filters AvailablePhoneNumbersRequest) (*AvailablePhoneNumbersResponse, error) {
+	queryParams := filters.toQueryParams()
+	var result AvailablePhoneNumbersResponse
+	err := client.doRequest("GET", fmt.Sprintf("/available_phone_numbers?%s", queryParams), nil, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (filters AvailablePhoneNumbersRequest) toQueryParams() string {
 	params := url.Values{}
-	if filters.StartsWith != "" {
-		params.Set("filter[phone_number][starts_with]", filters.StartsWith)
+	addParam := func(key, value string) {
+		if value != "" {
+			params.Set(key, value)
+		}
 	}
-	if filters.EndsWith != "" {
-		params.Set("filter[phone_number][ends_with]", filters.EndsWith)
-	}
-	if filters.Contains != "" {
-		params.Set("filter[phone_number][contains]", filters.Contains)
-	}
-	if filters.Locality != "" {
-		params.Set("filter[locality]", filters.Locality)
-	}
-	if filters.AdministrativeArea != "" {
-		params.Set("filter[administrative_area]", filters.AdministrativeArea)
-	}
-	if filters.CountryCode != "" {
-		params.Set("filter[country_code]", filters.CountryCode)
-	}
-	if filters.NationalDestinationCode != "" {
-		params.Set("filter[national_destination_code]", filters.NationalDestinationCode)
-	}
-	if filters.RateCenter != "" {
-		params.Set("filter[rate_center]", filters.RateCenter)
-	}
-	if filters.PhoneNumberType != "" {
-		params.Set("filter[phone_number_type]", filters.PhoneNumberType)
-	}
+	addParam("filter[phone_number][starts_with]", filters.StartsWith)
+	addParam("filter[phone_number][ends_with]", filters.EndsWith)
+	addParam("filter[phone_number][contains]", filters.Contains)
+	addParam("filter[locality]", filters.Locality)
+	addParam("filter[administrative_area]", filters.AdministrativeArea)
+	addParam("filter[country_code]", filters.CountryCode)
+	addParam("filter[national_destination_code]", filters.NationalDestinationCode)
+	addParam("filter[rate_center]", filters.RateCenter)
+	addParam("filter[phone_number_type]", filters.PhoneNumberType)
 	if len(filters.Features) > 0 {
 		params.Set("filter[features]", strings.Join(filters.Features, ","))
 	}
 	if filters.Limit > 0 {
-		params.Set("filter[limit]", strconv.Itoa(filters.Limit))
+		params.Set("filter[limit]", fmt.Sprintf("%d", filters.Limit))
 	}
 	if filters.BestEffort {
 		params.Set("filter[best_effort]", "true")
@@ -88,11 +84,5 @@ func (client *TelnyxClient) ListAvailablePhoneNumbers(filters AvailablePhoneNumb
 	if filters.ExcludeHeldNumbers {
 		params.Set("filter[exclude_held_numbers]", "true")
 	}
-
-	var result AvailablePhoneNumbersResponse
-	err := client.doRequest("GET", fmt.Sprintf("/available_phone_numbers?%s", params.Encode()), nil, &result)
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
+	return params.Encode()
 }
