@@ -3,38 +3,40 @@ package provider
 import (
 	"context"
 	"fmt"
-
+	
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/petsinc/telnyx-rest-client/pkg/telnyx"
 )
 
-type FQDNConnectionResource struct {
-	client *telnyx.TelnyxClient
-}
-
-func (r *FQDNConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	if req.ProviderData != nil {
-		client, ok := req.ProviderData.(*telnyx.TelnyxClient)
-		if !ok {
-			resp.Diagnostics.AddError(
-				"Unexpected Resource Configure Type",
-				fmt.Sprintf("Expected *telnyx.TelnyxClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-			)
-			return
-		}
-		r.client = client
-	}
-}
+var (
+	_ resource.Resource                = &FQDNConnectionResource{}
+	_ resource.ResourceWithConfigure   = &FQDNConnectionResource{}
+	_ resource.ResourceWithImportState = &FQDNConnectionResource{}
+)
 
 func NewFQDNConnectionResource() resource.Resource {
 	return &FQDNConnectionResource{}
 }
 
+type FQDNConnectionResource struct {
+	client *telnyx.TelnyxClient
+}
+
 type FQDNConnectionResourceModel struct {
 	ID                               types.String `tfsdk:"id"`
 	ConnectionName                   types.String `tfsdk:"connection_name"`
+	Username                         types.String `tfsdk:"user_name"`
+	Password                         types.String `tfsdk:"password"`
 	Active                           types.Bool   `tfsdk:"active"`
 	AnchorsiteOverride               types.String `tfsdk:"anchorsite_override"`
 	TransportProtocol                types.String `tfsdk:"transport_protocol"`
@@ -43,247 +45,420 @@ type FQDNConnectionResourceModel struct {
 	EncodeContactHeaderEnabled       types.Bool   `tfsdk:"encode_contact_header_enabled"`
 	EncryptedMedia                   types.String `tfsdk:"encrypted_media"`
 	OnnetT38PassthroughEnabled       types.Bool   `tfsdk:"onnet_t38_passthrough_enabled"`
-	// IosPushCredentialID              types.String                   `tfsdk:"ios_push_credential_id"`
-	// AndroidPushCredentialID          types.String                   `tfsdk:"android_push_credential_id"`
-	MicrosoftTeamsSBC       types.Bool                           `tfsdk:"microsoft_teams_sbc"`
-	WebhookEventURL         types.String                         `tfsdk:"webhook_event_url"`
-	WebhookEventFailoverURL types.String                         `tfsdk:"webhook_event_failover_url"`
-	WebhookAPIVersion       types.String                         `tfsdk:"webhook_api_version"`
-	WebhookTimeoutSecs      types.Int64                          `tfsdk:"webhook_timeout_secs"`
-	RTCPSettings            *FQDNRTCPSettingsModel               `tfsdk:"rtcp_settings"`
-	Inbound                 *FQDNConnectionInboundSettingsModel  `tfsdk:"inbound"`
-	Outbound                *FQDNConnectionOutboundSettingsModel `tfsdk:"outbound"`
-	SipUriCallingPreference types.String                         `tfsdk:"sip_uri_calling_preference"`
-	Username                types.String                         `tfsdk:"username"`
-	Password                types.String                         `tfsdk:"password"`
+	MicrosoftTeamsSBC                types.Bool   `tfsdk:"microsoft_teams_sbc"`
+	WebhookEventURL                  types.String `tfsdk:"webhook_event_url"`
+	WebhookEventFailoverURL          types.String `tfsdk:"webhook_event_failover_url"`
+	WebhookAPIVersion                types.String `tfsdk:"webhook_api_version"`
+	WebhookTimeoutSecs               types.Int64  `tfsdk:"webhook_timeout_secs"`
+	RTCPSettings                     types.Object `tfsdk:"rtcp_settings"`
+	Inbound                          types.Object `tfsdk:"inbound"`
+	Outbound                         types.Object `tfsdk:"outbound"`
+	SipUriCallingPreference          types.String `tfsdk:"sip_uri_calling_preference"`
 }
 
-type FQDNRTCPSettingsModel struct {
-	Port                types.String `tfsdk:"port"`
-	CaptureEnabled      types.Bool   `tfsdk:"capture_enabled"`
-	ReportFrequencySecs types.Int64  `tfsdk:"report_frequency_secs"`
-}
-
-type FQDNConnectionInboundSettingsModel struct {
-	ANINumberFormat             types.String `tfsdk:"ani_number_format"`
-	DNISNumberFormat            types.String `tfsdk:"dnis_number_format"`
-	Codecs                      types.List   `tfsdk:"codecs"`
-	DefaultRoutingMethod        types.String `tfsdk:"default_routing_method"`
-	ChannelLimit                types.Int64  `tfsdk:"channel_limit"`
-	GenerateRingbackTone        types.Bool   `tfsdk:"generate_ringback_tone"`
-	ISUPHeadersEnabled          types.Bool   `tfsdk:"isup_headers_enabled"`
-	PRACKEnabled                types.Bool   `tfsdk:"prack_enabled"`
-	PrivacyZoneEnabled          types.Bool   `tfsdk:"privacy_zone_enabled"`
-	SIPCompactHeadersEnabled    types.Bool   `tfsdk:"sip_compact_headers_enabled"`
-	SIPRegion                   types.String `tfsdk:"sip_region"`
-	SIPSubdomain                types.String `tfsdk:"sip_subdomain"`
-	SIPSubdomainReceiveSettings types.String `tfsdk:"sip_subdomain_receive_settings"`
-	Timeout1xxSecs              types.Int64  `tfsdk:"timeout_1xx_secs"`
-	Timeout2xxSecs              types.Int64  `tfsdk:"timeout_2xx_secs"`
-	ShakenSTIREnabled           types.Bool   `tfsdk:"shaken_stir_enabled"`
-}
-
-type FQDNConnectionOutboundSettingsModel struct {
-	ANIOverride            types.String `tfsdk:"ani_override"`
-	ANIOverrideType        types.String `tfsdk:"ani_override_type"`
-	CallParkingEnabled     types.Bool   `tfsdk:"call_parking_enabled"`
-	ChannelLimit           types.Int64  `tfsdk:"channel_limit"`
-	GenerateRingbackTone   types.Bool   `tfsdk:"generate_ringback_tone"`
-	InstantRingbackEnabled types.Bool   `tfsdk:"instant_ringback_enabled"`
-	IPAuthenticationMethod types.String `tfsdk:"ip_authentication_method"`
-	IPAuthenticationToken  types.String `tfsdk:"ip_authentication_token"`
-	Localization           types.String `tfsdk:"localization"`
-	OutboundVoiceProfileID types.String `tfsdk:"outbound_voice_profile_id"`
-	T38ReinviteSource      types.String `tfsdk:"t38_reinvite_source"`
-	// TechPrefix             types.String `tfsdk:"tech_prefix"`
-	// Timeout1xxSecs         types.Int64  `tfsdk:"timeout_1xx_secs"`
-	// Timeout2xxSecs         types.Int64  `tfsdk:"timeout_2xx_secs"`
-}
-
-func (r *FQDNConnectionResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *FQDNConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_fqdn_connection"
 }
 
-func (r *FQDNConnectionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *FQDNConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Resource for managing Telnyx FQDN Connections",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed: true,
+				Description: "Unique identifier of the FQDN connection",
+				Computed:    true,
 			},
 			"connection_name": schema.StringAttribute{
-				Required: true,
+				Description: "Name of the FQDN connection",
+				Required:    true,
+			},
+			"user_name": schema.StringAttribute{
+				Description: "Username for the FQDN connection",
+				Required:    true,
+			},
+			"password": schema.StringAttribute{
+				Description: "Password for the FQDN connection",
+				Required:    true,
+				Sensitive:   true,
 			},
 			"active": schema.BoolAttribute{
-				Required: true,
+				Description: "Specifies whether the FQDN connection is active or not",
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(true),
 			},
 			"anchorsite_override": schema.StringAttribute{
-				Optional: true,
+				Description: "Anchorsite override setting",
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString("Latency"),
 			},
 			"transport_protocol": schema.StringAttribute{
-				Optional: true,
+				Description: "Transport protocol",
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString("UDP"),
 			},
 			"default_on_hold_comfort_noise_enabled": schema.BoolAttribute{
-				Optional: true,
+				Description: "Default on-hold comfort noise enabled setting",
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(true),
 			},
 			"dtmf_type": schema.StringAttribute{
-				Optional: true,
+				Description: "DTMF type",
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString("RFC 2833"),
 			},
 			"encode_contact_header_enabled": schema.BoolAttribute{
-				Optional: true,
+				Description: "Encode contact header enabled setting",
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
 			},
 			"encrypted_media": schema.StringAttribute{
-				Optional: true,
+				Description: "Encrypted media",
+				Optional:    true,
+				Computed:	 true,
+				Default:	stringdefault.StaticString("SRTP"),
 			},
 			"onnet_t38_passthrough_enabled": schema.BoolAttribute{
-				Optional: true,
+				Description: "On-net T38 passthrough enabled setting",
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
 			},
-			// "ios_push_credential_id": schema.StringAttribute{
-			// 	Optional: true,
-			// },
-			// "android_push_credential_id": schema.StringAttribute{
-			// 	Optional: true,
-			// },
 			"microsoft_teams_sbc": schema.BoolAttribute{
-				Optional: true,
+				Description: "Microsoft Teams SBC setting",
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
 			},
 			"webhook_event_url": schema.StringAttribute{
-				Optional: true,
+				Description: "Webhook event URL",
+				Optional:    true,
+				Computed:    true,
+				Default:	stringdefault.StaticString("https://www.example.com/hooks"),
 			},
 			"webhook_event_failover_url": schema.StringAttribute{
-				Optional: true,
+				Description: "Webhook event failover URL",
+				Optional:    true,
+				Computed:    true,
+				Default:	stringdefault.StaticString("https://failover.example.com/hooks"),
 			},
 			"webhook_api_version": schema.StringAttribute{
-				Optional: true,
+				Description: "Webhook API version",
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString("2"),
 			},
 			"webhook_timeout_secs": schema.Int64Attribute{
-				Optional: true,
+				Description: "Webhook timeout in seconds",
+				Optional:    true,
+				Computed:    true,
+				Default:     int64default.StaticInt64(25),
 			},
 			"rtcp_settings": schema.SingleNestedAttribute{
-				Optional: true,
+				Description: "RTCP settings",
+				Optional:    true,
+				Computed:    true,
+				Default: objectdefault.StaticValue(types.ObjectValueMust(
+					map[string]attr.Type{
+						"port":                types.StringType,
+						"capture_enabled":     types.BoolType,
+						"report_frequency_secs": types.Int64Type,
+					},
+					map[string]attr.Value{
+						"port":                types.StringValue("rtp+1"),
+						"capture_enabled":     types.BoolValue(false),
+						"report_frequency_secs": types.Int64Value(5),
+					},
+				)),
 				Attributes: map[string]schema.Attribute{
 					"port": schema.StringAttribute{
-						Optional: true,
+						Description: "Port for RTCP",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("rtp+1"),
 					},
 					"capture_enabled": schema.BoolAttribute{
-						Optional: true,
+						Description: "Capture enabled for RTCP",
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(false),
 					},
 					"report_frequency_secs": schema.Int64Attribute{
-						Optional: true,
+						Description: "Report frequency for RTCP in seconds",
+						Optional:    true,
+						Computed:    true,
+						Default:     int64default.StaticInt64(5),
 					},
 				},
 			},
 			"inbound": schema.SingleNestedAttribute{
-				Optional: true,
+				Description: "Inbound settings",
+				Optional:    true,
+				Computed:    true,
+				Default: objectdefault.StaticValue(types.ObjectValueMust(
+					map[string]attr.Type{
+						"ani_number_format":            types.StringType,
+						"dnis_number_format":           types.StringType,
+						"codecs":                       types.ListType{ElemType: types.StringType},
+						"default_routing_method":       types.StringType,
+						"channel_limit":                types.Int64Type,
+						"generate_ringback_tone":       types.BoolType,
+						"isup_headers_enabled":         types.BoolType,
+						"prack_enabled":                types.BoolType,
+						"privacy_zone_enabled":         types.BoolType,
+						"sip_compact_headers_enabled":  types.BoolType,
+						"sip_region":                   types.StringType,
+						"sip_subdomain":                types.StringType,
+						"sip_subdomain_receive_settings": types.StringType,
+						"timeout_1xx_secs":             types.Int64Type,
+						"timeout_2xx_secs":             types.Int64Type,
+						"shaken_stir_enabled":          types.BoolType,
+					},
+					map[string]attr.Value{
+						"ani_number_format":            types.StringValue("E.164-national"),
+						"dnis_number_format":           types.StringValue("e164"),
+						"codecs":                       types.ListValueMust(types.StringType, []attr.Value{types.StringValue("G722"), types.StringValue("G711U"), types.StringValue("G711A"), types.StringValue("G729"), types.StringValue("OPUS"), types.StringValue("H.264")}),
+						"default_routing_method":       types.StringValue("sequential"),
+						"channel_limit":                types.Int64Value(10),
+						"generate_ringback_tone":       types.BoolValue(true),
+						"isup_headers_enabled":         types.BoolValue(true),
+						"prack_enabled":                types.BoolValue(true),
+						"privacy_zone_enabled":         types.BoolValue(true),
+						"sip_compact_headers_enabled":  types.BoolValue(true),
+						"sip_region":                   types.StringValue("US"),
+						"sip_subdomain_receive_settings": types.StringValue(""),
+						"sip_subdomain":                types.StringValue("test.fqdn.connection.uniqueexample.sip.telnyx.com"),
+						"timeout_1xx_secs":             types.Int64Value(3),
+						"timeout_2xx_secs":             types.Int64Value(90),
+						"shaken_stir_enabled":          types.BoolValue(true),
+					},
+				)),
 				Attributes: map[string]schema.Attribute{
 					"ani_number_format": schema.StringAttribute{
-						Optional: true,
+						Description: "ANI number format",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("E.164-national"),
 					},
 					"dnis_number_format": schema.StringAttribute{
-						Optional: true,
+						Description: "DNIS number format",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("e164"),
 					},
 					"codecs": schema.ListAttribute{
+						Description: "List of codecs",
 						Optional:    true,
+						Computed:    true,
 						ElementType: types.StringType,
+						Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{types.StringValue("G722"), types.StringValue("G711U"), types.StringValue("G711A"), types.StringValue("G729"), types.StringValue("OPUS"), types.StringValue("H.264")})),
 					},
 					"default_routing_method": schema.StringAttribute{
-						Optional: true,
+						Description: "Default routing method",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("sequential"),
 					},
 					"channel_limit": schema.Int64Attribute{
-						Optional: true,
+						Description: "Channel limit",
+						Optional:    true,
+						Computed:    true,
+						Default:     int64default.StaticInt64(10),
 					},
 					"generate_ringback_tone": schema.BoolAttribute{
-						Optional: true,
+						Description: "Generate ringback tone",
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(true),
 					},
 					"isup_headers_enabled": schema.BoolAttribute{
-						Optional: true,
+						Description: "ISUP headers enabled",
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(true),
 					},
 					"prack_enabled": schema.BoolAttribute{
-						Optional: true,
+						Description: "PRACK enabled",
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(true),
 					},
 					"privacy_zone_enabled": schema.BoolAttribute{
-						Optional: true,
+						Description: "Privacy zone enabled",
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(true),
 					},
 					"sip_compact_headers_enabled": schema.BoolAttribute{
-						Optional: true,
+						Description: "SIP compact headers enabled",
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(true),
 					},
 					"sip_region": schema.StringAttribute{
-						Optional: true,
+						Description: "SIP region",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("US"),
 					},
 					"sip_subdomain": schema.StringAttribute{
-						Optional: true,
+						Description: "SIP subdomain",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("test.fqdn.connection.uniqueexample.sip.telnyx.com"),
 					},
 					"sip_subdomain_receive_settings": schema.StringAttribute{
-						Optional: true,
+						Description: "SIP subdomain receive settings",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("only_my_connections"),
 					},
 					"timeout_1xx_secs": schema.Int64Attribute{
-						Optional: true,
+						Description: "Timeout for 1xx responses in seconds",
+						Optional:    true,
+						Computed:    true,
+						Default:     int64default.StaticInt64(3),
 					},
 					"timeout_2xx_secs": schema.Int64Attribute{
-						Optional: true,
+						Description: "Timeout for 2xx responses in seconds",
+						Optional:    true,
+						Computed:    true,
+						Default:     int64default.StaticInt64(90),
 					},
 					"shaken_stir_enabled": schema.BoolAttribute{
-						Optional: true,
+						Description: "SHAKEN/STIR enabled",
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(true),
 					},
 				},
 			},
 			"outbound": schema.SingleNestedAttribute{
-				Optional: true,
+				Description: "Outbound settings",
+				Optional:    true,
+				Computed:    true,
+				Default: objectdefault.StaticValue(types.ObjectValueMust(
+					map[string]attr.Type{
+						"ani_override":                types.StringType,
+						"ani_override_type":           types.StringType,
+						"call_parking_enabled":        types.BoolType,
+						"channel_limit":               types.Int64Type,
+						"generate_ringback_tone":      types.BoolType,
+						"instant_ringback_enabled":    types.BoolType,
+						"ip_authentication_method":    types.StringType,
+						"ip_authentication_token":     types.StringType,
+						"localization":                types.StringType,
+						"outbound_voice_profile_id":   types.StringType,
+						"t38_reinvite_source":         types.StringType,
+					},
+					map[string]attr.Value{
+						"ani_override":                types.StringValue("+12345678901"),
+						"ani_override_type":           types.StringValue("always"),
+						"call_parking_enabled":        types.BoolValue(true),
+						"channel_limit":               types.Int64Value(10),
+						"generate_ringback_tone":      types.BoolValue(true),
+						"instant_ringback_enabled":    types.BoolValue(false),
+						"ip_authentication_method":    types.StringValue("token"),
+						"ip_authentication_token":     types.StringValue("BBcD1234aBcD1234"),
+						"localization":                types.StringValue("US"),
+						"outbound_voice_profile_id":   types.StringValue(""),
+						"t38_reinvite_source":         types.StringValue("customer"),
+					},
+				)),
 				Attributes: map[string]schema.Attribute{
 					"ani_override": schema.StringAttribute{
-						Optional: true,
+						Description: "ANI override",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("+12345678901"),
 					},
 					"ani_override_type": schema.StringAttribute{
-						Optional: true,
+						Description: "ANI override type",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("always"),
 					},
 					"call_parking_enabled": schema.BoolAttribute{
-						Optional: true,
+						Description: "Call parking enabled",
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(true),
 					},
 					"channel_limit": schema.Int64Attribute{
-						Optional: true,
+						Description: "Channel limit",
+						Optional:    true,
+						Computed:    true,
+						Default:     int64default.StaticInt64(10),
 					},
 					"generate_ringback_tone": schema.BoolAttribute{
-						Optional: true,
+						Description: "Generate ringback tone",
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(true),
 					},
 					"instant_ringback_enabled": schema.BoolAttribute{
-						Optional: true,
+						Description: "Instant ringback enabled",
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(false),
 					},
 					"ip_authentication_method": schema.StringAttribute{
-						Optional: true,
+						Description: "IP authentication method",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("token"),
 					},
 					"ip_authentication_token": schema.StringAttribute{
-						Optional: true,
+						Description: "IP authentication token",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("BBcD1234aBcD1234"),
 					},
 					"localization": schema.StringAttribute{
-						Optional: true,
+						Description: "Localization",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("US"),
 					},
 					"outbound_voice_profile_id": schema.StringAttribute{
-						Optional: true,
+						Description: "Outbound voice profile ID",
+						Optional:    true,
 					},
 					"t38_reinvite_source": schema.StringAttribute{
-						Optional: true,
+						Description: "T38 reinvite source",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("customer"),
 					},
-					// "tech_prefix": schema.StringAttribute{
-					// 	Optional: true,
-					// },
-					// "timeout_1xx_secs": schema.Int64Attribute{
-					// 	Optional: true,
-					// },
-					// "timeout_2xx_secs": schema.Int64Attribute{
-					// 	Optional: true,
-					// },
 				},
 			},
 			"sip_uri_calling_preference": schema.StringAttribute{
-				Optional: true,
-			},
-			"username": schema.StringAttribute{
-				Optional: true,
-			},
-			"password": schema.StringAttribute{
-				Optional:  true,
-				Sensitive: true,
+				Description: "SIP URI calling preference",
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(""),
 			},
 		},
+	}
+}
+
+func (r *FQDNConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if req.ProviderData != nil {
+		client, ok := req.ProviderData.(*telnyx.TelnyxClient)
+		if (!ok) {
+			resp.Diagnostics.AddError(
+				"Unexpected Resource Configure Type",
+				fmt.Sprintf("Expected *telnyx.TelnyxClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			)
+			return
+		}
+		r.client = client
+		tflog.Info(ctx, "Configured Telnyx client for FQDNConnectionResource")
 	}
 }
 
@@ -295,22 +470,35 @@ func (r *FQDNConnectionResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	client := r.client
+	tflog.Info(ctx, "Creating FQDN Connection", map[string]interface{}{
+		"connection_name": plan.ConnectionName.ValueString(),
+	})
 
-	codecs, diags := convertListToStrings(ctx, plan.Inbound.Codecs)
-	resp.Diagnostics.Append(diags...)
+	rtcpSettingsAttributes := plan.RTCPSettings.Attributes()
+	inboundAttributes := plan.Inbound.Attributes()
+	outboundAttributes := plan.Outbound.Attributes()
+
+	codecs, diagCodecs := convertListToStrings(ctx, inboundAttributes["codecs"].(types.List))
+	resp.Diagnostics.Append(diagCodecs...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	tflog.Info(ctx, "Converted inbound codecs", map[string]interface{}{
+		"codecs": codecs,
+	})
+
 	connection := telnyx.FQDNConnection{
 		ConnectionName:                   plan.ConnectionName.ValueString(),
+		Username:                         telnyx.StringPtr(plan.Username.ValueString()),
+		Password:                         telnyx.StringPtr(plan.Password.ValueString()),
 		Active:                           plan.Active.ValueBool(),
 		AnchorsiteOverride:               plan.AnchorsiteOverride.ValueString(),
 		TransportProtocol:                plan.TransportProtocol.ValueString(),
 		DefaultOnHoldComfortNoiseEnabled: plan.DefaultOnHoldComfortNoiseEnabled.ValueBool(),
 		DTMFType:                         plan.DTMFType.ValueString(),
 		EncodeContactHeaderEnabled:       plan.EncodeContactHeaderEnabled.ValueBool(),
+		EncryptedMedia:                   nil, // As specified in the Terraform config
 		OnnetT38PassthroughEnabled:       plan.OnnetT38PassthroughEnabled.ValueBool(),
 		MicrosoftTeamsSbc:                plan.MicrosoftTeamsSBC.ValueBool(),
 		WebhookEventURL:                  plan.WebhookEventURL.ValueString(),
@@ -318,66 +506,59 @@ func (r *FQDNConnectionResource) Create(ctx context.Context, req resource.Create
 		WebhookAPIVersion:                plan.WebhookAPIVersion.ValueString(),
 		WebhookTimeoutSecs:               int(plan.WebhookTimeoutSecs.ValueInt64()),
 		RTCPSettings: telnyx.RTCPSettings{
-			Port:                plan.RTCPSettings.Port.ValueString(),
-			CaptureEnabled:      plan.RTCPSettings.CaptureEnabled.ValueBool(),
-			ReportFrequencySecs: int(plan.RTCPSettings.ReportFrequencySecs.ValueInt64()),
+			Port:                rtcpSettingsAttributes["port"].(types.String).ValueString(),
+			CaptureEnabled:      rtcpSettingsAttributes["capture_enabled"].(types.Bool).ValueBool(),
+			ReportFrequencySecs: int(rtcpSettingsAttributes["report_frequency_secs"].(types.Int64).ValueInt64()),
 		},
 		Inbound: telnyx.InboundSettings{
-			ANINumberFormat:             plan.Inbound.ANINumberFormat.ValueString(),
-			DNISNumberFormat:            plan.Inbound.DNISNumberFormat.ValueString(),
-			Codecs:                      codecs,
-			DefaultRoutingMethod:        plan.Inbound.DefaultRoutingMethod.ValueString(),
-			ChannelLimit:                int(plan.Inbound.ChannelLimit.ValueInt64()),
-			GenerateRingbackTone:        plan.Inbound.GenerateRingbackTone.ValueBool(),
-			ISUPHeadersEnabled:          plan.Inbound.ISUPHeadersEnabled.ValueBool(),
-			PRACKEnabled:                plan.Inbound.PRACKEnabled.ValueBool(),
-			PrivacyZoneEnabled:          plan.Inbound.PrivacyZoneEnabled.ValueBool(),
-			SIPCompactHeadersEnabled:    plan.Inbound.SIPCompactHeadersEnabled.ValueBool(),
-			SIPRegion:                   plan.Inbound.SIPRegion.ValueString(),
-			SIPSubdomain:                plan.Inbound.SIPSubdomain.ValueString(),
-			SIPSubdomainReceiveSettings: plan.Inbound.SIPSubdomainReceiveSettings.ValueString(),
-			Timeout1xxSecs:              int(plan.Inbound.Timeout1xxSecs.ValueInt64()),
-			Timeout2xxSecs:              int(plan.Inbound.Timeout2xxSecs.ValueInt64()),
-			ShakenSTIREnabled:           plan.Inbound.ShakenSTIREnabled.ValueBool(),
+			ANINumberFormat:          inboundAttributes["ani_number_format"].(types.String).ValueString(),
+			DNISNumberFormat:         inboundAttributes["dnis_number_format"].(types.String).ValueString(),
+			Codecs:                   codecs,
+			DefaultRoutingMethod:     inboundAttributes["default_routing_method"].(types.String).ValueString(),
+			ChannelLimit:             int(inboundAttributes["channel_limit"].(types.Int64).ValueInt64()),
+			GenerateRingbackTone:     inboundAttributes["generate_ringback_tone"].(types.Bool).ValueBool(),
+			ISUPHeadersEnabled:       inboundAttributes["isup_headers_enabled"].(types.Bool).ValueBool(),
+			PRACKEnabled:             inboundAttributes["prack_enabled"].(types.Bool).ValueBool(),
+			PrivacyZoneEnabled:       inboundAttributes["privacy_zone_enabled"].(types.Bool).ValueBool(),
+			SIPCompactHeadersEnabled: inboundAttributes["sip_compact_headers_enabled"].(types.Bool).ValueBool(),
+			SIPRegion:                inboundAttributes["sip_region"].(types.String).ValueString(),
+			SIPSubdomain:             inboundAttributes["sip_subdomain"].(types.String).ValueString(),
+			SIPSubdomainReceiveSettings: inboundAttributes["sip_subdomain_receive_settings"].(types.String).ValueString(),
+			Timeout1xxSecs:           int(inboundAttributes["timeout_1xx_secs"].(types.Int64).ValueInt64()),
+			Timeout2xxSecs:           int(inboundAttributes["timeout_2xx_secs"].(types.Int64).ValueInt64()),
+			ShakenSTIREnabled:        inboundAttributes["shaken_stir_enabled"].(types.Bool).ValueBool(),
 		},
 		Outbound: telnyx.OutboundSettings{
-			ANIOverride:            plan.Outbound.ANIOverride.ValueString(),
-			ANIOverrideType:        plan.Outbound.ANIOverrideType.ValueString(),
-			CallParkingEnabled:     plan.Outbound.CallParkingEnabled.ValueBool(),
-			ChannelLimit:           int(plan.Outbound.ChannelLimit.ValueInt64()),
-			GenerateRingbackTone:   plan.Outbound.GenerateRingbackTone.ValueBool(),
-			InstantRingbackEnabled: plan.Outbound.InstantRingbackEnabled.ValueBool(),
-			IPAuthenticationMethod: plan.Outbound.IPAuthenticationMethod.ValueString(),
-			IPAuthenticationToken:  plan.Outbound.IPAuthenticationToken.ValueString(),
-			Localization:           plan.Outbound.Localization.ValueString(),
-			OutboundVoiceProfileID: plan.Outbound.OutboundVoiceProfileID.ValueString(),
-			T38ReinviteSource:      plan.Outbound.T38ReinviteSource.ValueString(),
+			ANIOverride:            outboundAttributes["ani_override"].(types.String).ValueString(),
+			ANIOverrideType:        outboundAttributes["ani_override_type"].(types.String).ValueString(),
+			CallParkingEnabled:     outboundAttributes["call_parking_enabled"].(types.Bool).ValueBool(),
+			ChannelLimit:           int(outboundAttributes["channel_limit"].(types.Int64).ValueInt64()),
+			GenerateRingbackTone:   outboundAttributes["generate_ringback_tone"].(types.Bool).ValueBool(),
+			InstantRingbackEnabled: outboundAttributes["instant_ringback_enabled"].(types.Bool).ValueBool(),
+			IPAuthenticationMethod: outboundAttributes["ip_authentication_method"].(types.String).ValueString(),
+			IPAuthenticationToken:  outboundAttributes["ip_authentication_token"].(types.String).ValueString(),
+			Localization:           outboundAttributes["localization"].(types.String).ValueString(),
+			OutboundVoiceProfileID: outboundAttributes["outbound_voice_profile_id"].(types.String).ValueString(),
+			T38ReinviteSource:      outboundAttributes["t38_reinvite_source"].(types.String).ValueString(),
 		},
-		SipUriCallingPreference: telnyx.StringPtr(plan.SipUriCallingPreference.ValueString()),
-		Username:                telnyx.StringPtr(plan.Username.ValueString()),
-		Password:                telnyx.StringPtr(plan.Password.ValueString()),
 	}
 
-	if !plan.EncryptedMedia.IsNull() {
-		connection.EncryptedMedia = telnyx.StringPtr(plan.EncryptedMedia.ValueString())
-	}
-
-	createdConnection, err := client.CreateFQDNConnection(connection)
+	createdConnection, err := r.client.CreateFQDNConnection(connection)
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error creating FQDN connection",
-			"Could not create FQDN connection, unexpected error: "+err.Error(),
-		)
+		resp.Diagnostics.AddError("Error creating FQDN connection", err.Error())
 		return
 	}
+
+	plan.ID = types.StringValue(createdConnection.ID)
+
+	tflog.Info(ctx, "Created FQDN Connection", map[string]interface{}{
+		"id": createdConnection.ID,
+	})
 
 	setFQDNConnectionState(ctx, &plan, createdConnection)
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *FQDNConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -388,14 +569,9 @@ func (r *FQDNConnectionResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	client := r.client
-
-	connection, err := client.GetFQDNConnection(state.ID.ValueString())
+	connection, err := r.client.GetFQDNConnection(state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error reading FQDN connection",
-			"Could not read FQDN connection, unexpected error: "+err.Error(),
-		)
+		resp.Diagnostics.AddError("Error reading FQDN connection", err.Error())
 		return
 	}
 
@@ -403,9 +579,6 @@ func (r *FQDNConnectionResource) Read(ctx context.Context, req resource.ReadRequ
 
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *FQDNConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -423,22 +596,23 @@ func (r *FQDNConnectionResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	client := r.client
-
-	codecs, diags := convertListToStrings(ctx, plan.Inbound.Codecs)
-	resp.Diagnostics.Append(diags...)
+	codecs, diagCodecs := convertListToStrings(ctx, plan.Inbound.Attributes()["codecs"].(types.List))
+	resp.Diagnostics.Append(diagCodecs...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	connection := telnyx.FQDNConnection{
 		ConnectionName:                   plan.ConnectionName.ValueString(),
+		Username:                         telnyx.StringPtr(plan.Username.ValueString()),
+		Password:                         telnyx.StringPtr(plan.Password.ValueString()),
 		Active:                           plan.Active.ValueBool(),
 		AnchorsiteOverride:               plan.AnchorsiteOverride.ValueString(),
 		TransportProtocol:                plan.TransportProtocol.ValueString(),
 		DefaultOnHoldComfortNoiseEnabled: plan.DefaultOnHoldComfortNoiseEnabled.ValueBool(),
 		DTMFType:                         plan.DTMFType.ValueString(),
 		EncodeContactHeaderEnabled:       plan.EncodeContactHeaderEnabled.ValueBool(),
+		EncryptedMedia:                   nil, // As specified in the Terraform config
 		OnnetT38PassthroughEnabled:       plan.OnnetT38PassthroughEnabled.ValueBool(),
 		MicrosoftTeamsSbc:                plan.MicrosoftTeamsSBC.ValueBool(),
 		WebhookEventURL:                  plan.WebhookEventURL.ValueString(),
@@ -446,51 +620,49 @@ func (r *FQDNConnectionResource) Update(ctx context.Context, req resource.Update
 		WebhookAPIVersion:                plan.WebhookAPIVersion.ValueString(),
 		WebhookTimeoutSecs:               int(plan.WebhookTimeoutSecs.ValueInt64()),
 		RTCPSettings: telnyx.RTCPSettings{
-			Port:                plan.RTCPSettings.Port.ValueString(),
-			CaptureEnabled:      plan.RTCPSettings.CaptureEnabled.ValueBool(),
-			ReportFrequencySecs: int(plan.RTCPSettings.ReportFrequencySecs.ValueInt64()),
+			Port:                plan.RTCPSettings.Attributes()["port"].(types.String).ValueString(),
+			CaptureEnabled:      plan.RTCPSettings.Attributes()["capture_enabled"].(types.Bool).ValueBool(),
+			ReportFrequencySecs: int(plan.RTCPSettings.Attributes()["report_frequency_secs"].(types.Int64).ValueInt64()),
 		},
 		Inbound: telnyx.InboundSettings{
-			ANINumberFormat:             plan.Inbound.ANINumberFormat.ValueString(),
-			DNISNumberFormat:            plan.Inbound.DNISNumberFormat.ValueString(),
-			Codecs:                      codecs,
-			DefaultRoutingMethod:        plan.Inbound.DefaultRoutingMethod.ValueString(),
-			ChannelLimit:                int(plan.Inbound.ChannelLimit.ValueInt64()),
-			GenerateRingbackTone:        plan.Inbound.GenerateRingbackTone.ValueBool(),
-			ISUPHeadersEnabled:          plan.Inbound.ISUPHeadersEnabled.ValueBool(),
-			PRACKEnabled:                plan.Inbound.PRACKEnabled.ValueBool(),
-			PrivacyZoneEnabled:          plan.Inbound.PrivacyZoneEnabled.ValueBool(),
-			SIPCompactHeadersEnabled:    plan.Inbound.SIPCompactHeadersEnabled.ValueBool(),
-			SIPRegion:                   plan.Inbound.SIPRegion.ValueString(),
-			SIPSubdomain:                plan.Inbound.SIPSubdomain.ValueString(),
-			SIPSubdomainReceiveSettings: plan.Inbound.SIPSubdomainReceiveSettings.ValueString(),
-			Timeout1xxSecs:              int(plan.Inbound.Timeout1xxSecs.ValueInt64()),
-			Timeout2xxSecs:              int(plan.Inbound.Timeout2xxSecs.ValueInt64()),
-			ShakenSTIREnabled:           plan.Inbound.ShakenSTIREnabled.ValueBool(),
+			ANINumberFormat:          plan.Inbound.Attributes()["ani_number_format"].(types.String).ValueString(),
+			DNISNumberFormat:         plan.Inbound.Attributes()["dnis_number_format"].(types.String).ValueString(),
+			Codecs:                   codecs,
+			DefaultRoutingMethod:     plan.Inbound.Attributes()["default_routing_method"].(types.String).ValueString(),
+			ChannelLimit:             int(plan.Inbound.Attributes()["channel_limit"].(types.Int64).ValueInt64()),
+			GenerateRingbackTone:     plan.Inbound.Attributes()["generate_ringback_tone"].(types.Bool).ValueBool(),
+			ISUPHeadersEnabled:       plan.Inbound.Attributes()["isup_headers_enabled"].(types.Bool).ValueBool(),
+			PRACKEnabled:             plan.Inbound.Attributes()["prack_enabled"].(types.Bool).ValueBool(),
+			PrivacyZoneEnabled:       plan.Inbound.Attributes()["privacy_zone_enabled"].(types.Bool).ValueBool(),
+			SIPCompactHeadersEnabled: plan.Inbound.Attributes()["sip_compact_headers_enabled"].(types.Bool).ValueBool(),
+			SIPRegion:                plan.Inbound.Attributes()["sip_region"].(types.String).ValueString(),
+			SIPSubdomain:             plan.Inbound.Attributes()["sip_subdomain"].(types.String).ValueString(),
+			SIPSubdomainReceiveSettings: plan.Inbound.Attributes()["sip_subdomain_receive_settings"].(types.String).ValueString(),
+			Timeout1xxSecs:           int(plan.Inbound.Attributes()["timeout_1xx_secs"].(types.Int64).ValueInt64()),
+			Timeout2xxSecs:           int(plan.Inbound.Attributes()["timeout_2xx_secs"].(types.Int64).ValueInt64()),
+			ShakenSTIREnabled:        plan.Inbound.Attributes()["shaken_stir_enabled"].(types.Bool).ValueBool(),
 		},
 		Outbound: telnyx.OutboundSettings{
-			ANIOverride:            plan.Outbound.ANIOverride.ValueString(),
-			ANIOverrideType:        plan.Outbound.ANIOverrideType.ValueString(),
-			CallParkingEnabled:     plan.Outbound.CallParkingEnabled.ValueBool(),
-			ChannelLimit:           int(plan.Outbound.ChannelLimit.ValueInt64()),
-			GenerateRingbackTone:   plan.Outbound.GenerateRingbackTone.ValueBool(),
-			InstantRingbackEnabled: plan.Outbound.InstantRingbackEnabled.ValueBool(),
-			IPAuthenticationMethod: plan.Outbound.IPAuthenticationMethod.ValueString(),
-			IPAuthenticationToken:  plan.Outbound.IPAuthenticationToken.ValueString(),
-			Localization:           plan.Outbound.Localization.ValueString(),
-			OutboundVoiceProfileID: plan.Outbound.OutboundVoiceProfileID.ValueString(),
-			T38ReinviteSource:      plan.Outbound.T38ReinviteSource.ValueString(),
+			ANIOverride:            plan.Outbound.Attributes()["ani_override"].(types.String).ValueString(),
+			ANIOverrideType:        plan.Outbound.Attributes()["ani_override_type"].(types.String).ValueString(),
+			CallParkingEnabled:     plan.Outbound.Attributes()["call_parking_enabled"].(types.Bool).ValueBool(),
+			ChannelLimit:           int(plan.Outbound.Attributes()["channel_limit"].(types.Int64).ValueInt64()),
+			GenerateRingbackTone:   plan.Outbound.Attributes()["generate_ringback_tone"].(types.Bool).ValueBool(),
+			InstantRingbackEnabled: plan.Outbound.Attributes()["instant_ringback_enabled"].(types.Bool).ValueBool(),
+			IPAuthenticationMethod: plan.Outbound.Attributes()["ip_authentication_method"].(types.String).ValueString(),
+			IPAuthenticationToken:  plan.Outbound.Attributes()["ip_authentication_token"].(types.String).ValueString(),
+			Localization:           plan.Outbound.Attributes()["localization"].(types.String).ValueString(),
+			OutboundVoiceProfileID: plan.Outbound.Attributes()["outbound_voice_profile_id"].(types.String).ValueString(),
+			T38ReinviteSource:      plan.Outbound.Attributes()["t38_reinvite_source"].(types.String).ValueString(),
 		},
-		SipUriCallingPreference: telnyx.StringPtr(plan.SipUriCallingPreference.ValueString()),
-		Username:                telnyx.StringPtr(plan.Username.ValueString()),
-		Password:                telnyx.StringPtr(plan.Password.ValueString()),
 	}
 
-	if !plan.EncryptedMedia.IsNull() {
-		connection.EncryptedMedia = telnyx.StringPtr(plan.EncryptedMedia.ValueString())
-	}
+	// if !plan.EncryptedMedia.IsNull() {
+	// 	connection.EncryptedMedia = telnyx.StringPtr(nil)
+	// }
 
-	updatedConnection, err := client.UpdateFQDNConnection(state.ID.ValueString(), connection)
+	// Use state ID in update call
+	updatedConnection, err := r.client.UpdateFQDNConnection(state.ID.ValueString(), connection)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating FQDN connection",
@@ -503,9 +675,6 @@ func (r *FQDNConnectionResource) Update(ctx context.Context, req resource.Update
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *FQDNConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -516,110 +685,125 @@ func (r *FQDNConnectionResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	client := r.client
-
-	err := client.DeleteFQDNConnection(state.ID.ValueString())
+	err := r.client.DeleteFQDNConnection(state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error deleting FQDN connection",
-			"Could not delete FQDN connection, unexpected error: "+err.Error(),
-		)
-		return
+		resp.Diagnostics.AddError("Error deleting FQDN connection", err.Error())
 	}
+
+	tflog.Info(ctx, "Deleted FQDN Connection", map[string]interface{}{"id": state.ID.ValueString()})
+}
+
+func (r *FQDNConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
 func setFQDNConnectionState(ctx context.Context, state *FQDNConnectionResourceModel, connection *telnyx.FQDNConnection) {
 	state.ID = types.StringValue(connection.ID)
 	state.ConnectionName = types.StringValue(connection.ConnectionName)
-	// state.RecordType = types.StringValue(connection.RecordType)
+	state.Username = types.StringValue(*connection.Username)
+	state.Password = types.StringValue(*connection.Password)
 	state.Active = types.BoolValue(connection.Active)
 	state.AnchorsiteOverride = types.StringValue(connection.AnchorsiteOverride)
 	state.TransportProtocol = types.StringValue(connection.TransportProtocol)
 	state.DefaultOnHoldComfortNoiseEnabled = types.BoolValue(connection.DefaultOnHoldComfortNoiseEnabled)
 	state.DTMFType = types.StringValue(connection.DTMFType)
 	state.EncodeContactHeaderEnabled = types.BoolValue(connection.EncodeContactHeaderEnabled)
-	if connection.EncryptedMedia != nil {
-		state.EncryptedMedia = types.StringValue(*connection.EncryptedMedia)
-	} else {
-		state.EncryptedMedia = types.StringNull()
-	}
-
-	// if connection.IosPushCredentialID != nil {
-	// 	state.IosPushCredentialID = types.StringValue(*connection.IosPushCredentialID)
-	// } else {
-	// 	state.IosPushCredentialID = types.StringNull()
-	// }
-	// if connection.AndroidPushCredentialID != nil {
-	// 	state.AndroidPushCredentialID = types.StringValue(*connection.AndroidPushCredentialID)
-	// } else {
-	// 	state.AndroidPushCredentialID = types.StringNull()
-	// }
+	// state.EncryptedMedia = types.StringValue("") // Conforming to null value in Terraform config
+	state.OnnetT38PassthroughEnabled = types.BoolValue(connection.OnnetT38PassthroughEnabled)
 	// state.MicrosoftTeamsSBC = types.BoolValue(connection.MicrosoftTeamsSbc)
 	state.WebhookEventURL = types.StringValue(connection.WebhookEventURL)
 	state.WebhookEventFailoverURL = types.StringValue(connection.WebhookEventFailoverURL)
-
 	state.WebhookAPIVersion = types.StringValue(connection.WebhookAPIVersion)
 	state.WebhookTimeoutSecs = types.Int64Value(int64(connection.WebhookTimeoutSecs))
+
 	if connection.RTCPSettings != (telnyx.RTCPSettings{}) {
-		state.RTCPSettings = &FQDNRTCPSettingsModel{
-			Port:                types.StringValue(connection.RTCPSettings.Port),
-			CaptureEnabled:      types.BoolValue(connection.RTCPSettings.CaptureEnabled),
-			ReportFrequencySecs: types.Int64Value(int64(connection.RTCPSettings.ReportFrequencySecs)),
-		}
+		state.RTCPSettings = types.ObjectValueMust(
+			map[string]attr.Type{
+				"port":                types.StringType,
+				"capture_enabled":     types.BoolType,
+				"report_frequency_secs": types.Int64Type,
+			},
+			map[string]attr.Value{
+				"port":                types.StringValue(connection.RTCPSettings.Port),
+				"capture_enabled":     types.BoolValue(connection.RTCPSettings.CaptureEnabled),
+				"report_frequency_secs": types.Int64Value(int64(connection.RTCPSettings.ReportFrequencySecs)),
+			},
+		)
 	} else {
-		state.RTCPSettings = nil
-	}
-	state.Inbound = &FQDNConnectionInboundSettingsModel{
-		ANINumberFormat:             types.StringValue(connection.Inbound.ANINumberFormat),
-		DNISNumberFormat:            types.StringValue(connection.Inbound.DNISNumberFormat),
-		Codecs:                      convertStringsToList(connection.Inbound.Codecs),
-		DefaultRoutingMethod:        types.StringValue(connection.Inbound.DefaultRoutingMethod),
-		ChannelLimit:                types.Int64Value(int64(connection.Inbound.ChannelLimit)),
-		GenerateRingbackTone:        types.BoolValue(connection.Inbound.GenerateRingbackTone),
-		ISUPHeadersEnabled:          types.BoolValue(connection.Inbound.ISUPHeadersEnabled),
-		PRACKEnabled:                types.BoolValue(connection.Inbound.PRACKEnabled),
-		PrivacyZoneEnabled:          types.BoolValue(connection.Inbound.PrivacyZoneEnabled),
-		SIPCompactHeadersEnabled:    types.BoolValue(connection.Inbound.SIPCompactHeadersEnabled),
-		SIPRegion:                   types.StringValue(connection.Inbound.SIPRegion),
-		SIPSubdomain:                types.StringValue(connection.Inbound.SIPSubdomain),
-		SIPSubdomainReceiveSettings: types.StringValue(connection.Inbound.SIPSubdomainReceiveSettings),
-		Timeout1xxSecs:              types.Int64Value(int64(connection.Inbound.Timeout1xxSecs)),
-		Timeout2xxSecs:              types.Int64Value(int64(connection.Inbound.Timeout2xxSecs)),
-		ShakenSTIREnabled:           types.BoolValue(connection.Inbound.ShakenSTIREnabled),
-	}
-	state.Outbound = &FQDNConnectionOutboundSettingsModel{
-		ANIOverride:            types.StringValue(connection.Outbound.ANIOverride),
-		ANIOverrideType:        types.StringValue(connection.Outbound.ANIOverrideType),
-		CallParkingEnabled:     types.BoolValue(connection.Outbound.CallParkingEnabled),
-		ChannelLimit:           types.Int64Value(int64(connection.Outbound.ChannelLimit)),
-		GenerateRingbackTone:   types.BoolValue(connection.Outbound.GenerateRingbackTone),
-		InstantRingbackEnabled: types.BoolValue(connection.Outbound.InstantRingbackEnabled),
-		IPAuthenticationMethod: types.StringValue(connection.Outbound.IPAuthenticationMethod),
-		IPAuthenticationToken:  types.StringValue(connection.Outbound.IPAuthenticationToken),
-		Localization:           types.StringValue(connection.Outbound.Localization),
-		OutboundVoiceProfileID: types.StringValue(connection.Outbound.OutboundVoiceProfileID),
-		T38ReinviteSource:      types.StringValue(connection.Outbound.T38ReinviteSource),
-		// TechPrefix:             types.StringValue(connection.Outbound.TechPrefix),
-		// EncryptedMedia:         types.StringValue(connection.Outbound.EncryptedMedia),
-		// Timeout1xxSecs:         types.Int64Value(int64(connection.Outbound.Timeout1xxSecs)),
-		// Timeout2xxSecs:         types.Int64Value(int64(connection.Outbound.Timeout2xxSecs)),
-	}
-	if connection.SipUriCallingPreference != nil {
-		state.SipUriCallingPreference = types.StringValue(*connection.SipUriCallingPreference)
-	} else {
-		state.SipUriCallingPreference = types.StringNull()
+		state.RTCPSettings = types.ObjectNull(map[string]attr.Type{
+			"port":                types.StringType,
+			"capture_enabled":     types.BoolType,
+			"report_frequency_secs": types.Int64Type,
+		})
 	}
 
-	state.Username = types.StringValue(*connection.Username)
-	state.Password = types.StringValue(*connection.Password)
-	// if connection.Username != nil {
-	// 	state.Username = types.StringValue(*connection.Username)
-	// } else {
-	// 	state.Username = types.StringNull()
-	// }
-	// if connection.Password != nil {
-	// 	state.Password = types.StringValue(*connection.Password)
-	// } else {
-	// 	state.Password = types.StringNull()
-	// }
+	state.Inbound = types.ObjectValueMust(
+		map[string]attr.Type{
+			"ani_number_format":            types.StringType,
+			"dnis_number_format":           types.StringType,
+			"codecs":                       types.ListType{ElemType: types.StringType},
+			"default_routing_method":       types.StringType,
+			"channel_limit":                types.Int64Type,
+			"generate_ringback_tone":       types.BoolType,
+			"isup_headers_enabled":         types.BoolType,
+			"prack_enabled":                types.BoolType,
+			"privacy_zone_enabled":         types.BoolType,
+			"sip_compact_headers_enabled":  types.BoolType,
+			"sip_region":                   types.StringType,
+			"sip_subdomain":                types.StringType,
+			"sip_subdomain_receive_settings": types.StringType,
+			"timeout_1xx_secs":             types.Int64Type,
+			"timeout_2xx_secs":             types.Int64Type,
+			"shaken_stir_enabled":          types.BoolType,
+		},
+		map[string]attr.Value{
+			"ani_number_format":            types.StringValue(connection.Inbound.ANINumberFormat),
+			"dnis_number_format":           types.StringValue(connection.Inbound.DNISNumberFormat),
+			"codecs":                       convertStringsToList(connection.Inbound.Codecs),
+			"default_routing_method":       types.StringValue(connection.Inbound.DefaultRoutingMethod),
+			"channel_limit":                types.Int64Value(int64(connection.Inbound.ChannelLimit)),
+			"generate_ringback_tone":       types.BoolValue(connection.Inbound.GenerateRingbackTone),
+			"isup_headers_enabled":         types.BoolValue(connection.Inbound.ISUPHeadersEnabled),
+			"prack_enabled":                types.BoolValue(connection.Inbound.PRACKEnabled),
+			"privacy_zone_enabled":         types.BoolValue(connection.Inbound.PrivacyZoneEnabled),
+			"sip_compact_headers_enabled":  types.BoolValue(connection.Inbound.SIPCompactHeadersEnabled),
+			"sip_region":                   types.StringValue(connection.Inbound.SIPRegion),
+			"sip_subdomain":                types.StringValue(connection.Inbound.SIPSubdomain),
+			"sip_subdomain_receive_settings": types.StringValue(connection.Inbound.SIPSubdomainReceiveSettings),
+			"timeout_1xx_secs":             types.Int64Value(int64(connection.Inbound.Timeout1xxSecs)),
+			"timeout_2xx_secs":             types.Int64Value(int64(connection.Inbound.Timeout2xxSecs)),
+			"shaken_stir_enabled":          types.BoolValue(connection.Inbound.ShakenSTIREnabled),
+		},
+	)
+
+	state.Outbound = types.ObjectValueMust(
+		map[string]attr.Type{
+			"ani_override":                types.StringType,
+			"ani_override_type":           types.StringType,
+			"call_parking_enabled":        types.BoolType,
+			"channel_limit":               types.Int64Type,
+			"generate_ringback_tone":      types.BoolType,
+			"instant_ringback_enabled":    types.BoolType,
+			"ip_authentication_method":    types.StringType,
+			"ip_authentication_token":     types.StringType,
+			"localization":                types.StringType,
+			"outbound_voice_profile_id":   types.StringType,
+			"t38_reinvite_source":         types.StringType,
+		},
+		map[string]attr.Value{
+			"ani_override":                types.StringValue(connection.Outbound.ANIOverride),
+			"ani_override_type":           types.StringValue(connection.Outbound.ANIOverrideType),
+			"call_parking_enabled":        types.BoolValue(connection.Outbound.CallParkingEnabled),
+			"channel_limit":               types.Int64Value(int64(connection.Outbound.ChannelLimit)),
+			"generate_ringback_tone":      types.BoolValue(connection.Outbound.GenerateRingbackTone),
+			"instant_ringback_enabled":    types.BoolValue(connection.Outbound.InstantRingbackEnabled),
+			"ip_authentication_method":    types.StringValue(connection.Outbound.IPAuthenticationMethod),
+			"ip_authentication_token":     types.StringValue(connection.Outbound.IPAuthenticationToken),
+			"localization":                types.StringValue(connection.Outbound.Localization),
+			"outbound_voice_profile_id":   types.StringValue(connection.Outbound.OutboundVoiceProfileID),
+			"t38_reinvite_source":         types.StringValue(connection.Outbound.T38ReinviteSource),
+		},
+	)
+
+	state.SipUriCallingPreference = types.StringValue("")
 }
