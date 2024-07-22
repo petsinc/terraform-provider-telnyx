@@ -213,10 +213,11 @@ resource "telnyx_number_order" "test" {
     }
   ]
 
-data "telnyx_phone_number_lookup" "test" {
-  starts_with = "312"
+resource "telnyx_phone_number_lookup" "test" {
+  starts_with  = "312"
   country_code = "US"
-  limit = 1
+  limit        = 1
+  features     = ["sms", "voice"]
 }
 
 output "phone_numbers" {
@@ -438,10 +439,11 @@ resource "telnyx_number_order" "test" {
   ]
 }
 
-data "telnyx_phone_number_lookup" "test" {
-  starts_with = "312"
+resource "telnyx_phone_number_lookup" "test" {
+  starts_with  = "330"
   country_code = "US"
-  limit = 1
+  limit        = 1
+  features     = ["sms", "voice"]
 }
 
 output "phone_numbers" {

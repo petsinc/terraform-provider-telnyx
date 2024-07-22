@@ -6,39 +6,27 @@ import (
 	"sort"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/petsinc/telnyx-rest-client/pkg/telnyx"
 )
 
-type PhoneNumberLookupDataSource struct {
+type PhoneNumberLookupResource struct {
 	client *telnyx.TelnyxClient
 }
 
-func NewPhoneNumberLookupDataSource() datasource.DataSource {
-	return &PhoneNumberLookupDataSource{}
+func NewPhoneNumberLookupResource() resource.Resource {
+	return &PhoneNumberLookupResource{}
 }
 
-func (d *PhoneNumberLookupDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	if req.ProviderData != nil {
-		client, ok := req.ProviderData.(*telnyx.TelnyxClient)
-		if !ok {
-			resp.Diagnostics.AddError(
-				"Unexpected Resource Configure Type",
-				fmt.Sprintf("Expected *telnyx.TelnyxClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-			)
-			return
-		}
-		d.client = client
-	}
-}
-
-func (d *PhoneNumberLookupDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (r *PhoneNumberLookupResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_phone_number_lookup"
 }
 
-func (d *PhoneNumberLookupDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (r *PhoneNumberLookupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"starts_with": schema.StringAttribute{
@@ -67,6 +55,10 @@ func (d *PhoneNumberLookupDataSource) Schema(_ context.Context, _ datasource.Sch
 			},
 			"phone_number_type": schema.StringAttribute{
 				Optional: true,
+			},
+			"features": schema.ListAttribute{
+				Optional:    true,
+				ElementType: types.StringType,
 			},
 			"limit": schema.Int64Attribute{
 				Optional: true,
@@ -110,6 +102,21 @@ func (d *PhoneNumberLookupDataSource) Schema(_ context.Context, _ datasource.Sch
 	}
 }
 
+func (r *PhoneNumberLookupResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if req.ProviderData != nil {
+		client, ok := req.ProviderData.(*telnyx.TelnyxClient)
+		if !ok {
+			resp.Diagnostics.AddError(
+				"Unexpected Resource Configure Type",
+				fmt.Sprintf("Expected *telnyx.TelnyxClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			)
+			return
+		}
+		r.client = client
+		tflog.Info(ctx, "Configured Telnyx client for PhoneNumberLookupResource")
+	}
+}
+
 type PhoneNumberLookupModel struct {
 	StartsWith              types.String `tfsdk:"starts_with"`
 	EndsWith                types.String `tfsdk:"ends_with"`
@@ -120,6 +127,7 @@ type PhoneNumberLookupModel struct {
 	NationalDestinationCode types.String `tfsdk:"national_destination_code"`
 	RateCenter              types.String `tfsdk:"rate_center"`
 	PhoneNumberType         types.String `tfsdk:"phone_number_type"`
+	Features                types.List   `tfsdk:"features"`
 	Limit                   types.Int64  `tfsdk:"limit"`
 	BestEffort              types.Bool   `tfsdk:"best_effort"`
 	Quickship               types.Bool   `tfsdk:"quickship"`
@@ -128,33 +136,43 @@ type PhoneNumberLookupModel struct {
 	PhoneNumbers            types.List   `tfsdk:"phone_numbers"`
 }
 
-func (d *PhoneNumberLookupDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var config PhoneNumberLookupModel
+func (r *PhoneNumberLookupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan PhoneNumberLookupModel
 
-	diags := req.Config.Get(ctx, &config)
+	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	filters := telnyx.AvailablePhoneNumbersRequest{
-		StartsWith:              config.StartsWith.ValueString(),
-		EndsWith:                config.EndsWith.ValueString(),
-		Contains:                config.Contains.ValueString(),
-		Locality:                config.Locality.ValueString(),
-		AdministrativeArea:      config.AdministrativeArea.ValueString(),
-		CountryCode:             config.CountryCode.ValueString(),
-		NationalDestinationCode: config.NationalDestinationCode.ValueString(),
-		RateCenter:              config.RateCenter.ValueString(),
-		PhoneNumberType:         config.PhoneNumberType.ValueString(),
-		Limit:                   int(config.Limit.ValueInt64()),
-		BestEffort:              config.BestEffort.ValueBool(),
-		Quickship:               config.Quickship.ValueBool(),
-		Reservable:              config.Reservable.ValueBool(),
-		ExcludeHeldNumbers:      config.ExcludeHeldNumbers.ValueBool(),
+		StartsWith:              plan.StartsWith.ValueString(),
+		EndsWith:                plan.EndsWith.ValueString(),
+		Contains:                plan.Contains.ValueString(),
+		Locality:                plan.Locality.ValueString(),
+		AdministrativeArea:      plan.AdministrativeArea.ValueString(),
+		CountryCode:             plan.CountryCode.ValueString(),
+		NationalDestinationCode: plan.NationalDestinationCode.ValueString(),
+		RateCenter:              plan.RateCenter.ValueString(),
+		PhoneNumberType:         plan.PhoneNumberType.ValueString(),
+		Limit:                   int(plan.Limit.ValueInt64()),
+		BestEffort:              plan.BestEffort.ValueBool(),
+		Quickship:               plan.Quickship.ValueBool(),
+		Reservable:              plan.Reservable.ValueBool(),
+		ExcludeHeldNumbers:      plan.ExcludeHeldNumbers.ValueBool(),
 	}
 
-	client := d.client
+	if !plan.Features.IsNull() && !plan.Features.IsUnknown() {
+		var features []string
+		diags = plan.Features.ElementsAs(ctx, &features, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		filters.Features = features
+	}
+
+	client := r.client
 	response, err := client.ListAvailablePhoneNumbers(filters)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -166,16 +184,13 @@ func (d *PhoneNumberLookupDataSource) Read(ctx context.Context, req datasource.R
 
 	phoneNumbers := make([]attr.Value, len(response.Data))
 	for i, phoneNumber := range response.Data {
-		// Convert features to a slice of strings
 		featureNames := make([]string, len(phoneNumber.Features))
 		for j, feature := range phoneNumber.Features {
 			featureNames[j] = feature.Name
 		}
 
-		// Sort the feature names
 		sort.Strings(featureNames)
 
-		// Convert sorted feature names to attr.Value
 		features := make([]attr.Value, len(featureNames))
 		for j, featureName := range featureNames {
 			features[j] = types.StringValue(featureName)
@@ -213,11 +228,61 @@ func (d *PhoneNumberLookupDataSource) Read(ctx context.Context, req datasource.R
 		},
 	}, phoneNumbers)
 
-	diags = resp.State.Set(ctx, &PhoneNumberLookupModel{
-		PhoneNumbers: phoneNumbersList,
-	})
+	state := PhoneNumberLookupModel{
+		StartsWith:              plan.StartsWith,
+		EndsWith:                plan.EndsWith,
+		Contains:                plan.Contains,
+		Locality:                plan.Locality,
+		AdministrativeArea:      plan.AdministrativeArea,
+		CountryCode:             plan.CountryCode,
+		NationalDestinationCode: plan.NationalDestinationCode,
+		RateCenter:              plan.RateCenter,
+		PhoneNumberType:         plan.PhoneNumberType,
+		Features:                plan.Features,
+		Limit:                   plan.Limit,
+		 BestEffort:             plan.BestEffort,
+		Quickship:               plan.Quickship,
+		Reservable:              plan.Reservable,
+		ExcludeHeldNumbers:      plan.ExcludeHeldNumbers,
+		PhoneNumbers:            phoneNumbersList,
+	}
+
+	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+}
+
+func (r *PhoneNumberLookupResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state PhoneNumberLookupModel
+
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// No API call is needed, just return the current state
+	diags = resp.State.Set(ctx, state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+
+func (r *PhoneNumberLookupResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	// Use the same logic as Create, cuz resource is static
+	r.Create(ctx, resource.CreateRequest{Plan: req.Plan}, (*resource.CreateResponse)(resp))
+}
+
+
+func (r *PhoneNumberLookupResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// Remove the resource from the state
+	resp.State.RemoveResource(ctx)
+}
+
+// Implement ImportState function
+func (r *PhoneNumberLookupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

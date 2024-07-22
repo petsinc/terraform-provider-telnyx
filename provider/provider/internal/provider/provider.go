@@ -56,11 +56,10 @@ func (p *TelnyxProvider) Resources(_ context.Context) []func() resource.Resource
 		NewFQDNResource,
 		NewNumberOrderResource,
 		NewTeXMLApplicationResource,
+		NewPhoneNumberLookupResource,
 	}
 }
 
 func (p *TelnyxProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		NewPhoneNumberLookupDataSource,
-	}
+	return []func() datasource.DataSource{}
 }
