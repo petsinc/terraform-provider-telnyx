@@ -11,7 +11,6 @@ import (
 const (
 	providerConfig = `
 provider "telnyx" {
-  endpoint = "https://api.telnyx.com/v2"
 }
 `
 )
