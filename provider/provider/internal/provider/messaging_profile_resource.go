@@ -8,6 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/petsinc/telnyx-rest-client/pkg/telnyx"
@@ -70,16 +73,20 @@ func (r *MessagingProfileResource) Schema(ctx context.Context, req resource.Sche
 				Description: "The failover URL where webhooks related to this messaging profile will be sent if sending to the primary URL fails",
 				Optional:    true,
 				Computed:    true,
+				Default:     stringdefault.StaticString(""),
 			},
 			"webhook_api_version": schema.StringAttribute{
 				Description: "Determines which webhook format will be used, Telnyx API v1, v2, or a legacy 2010-04-01 format",
 				Optional:    true,
 				Computed:    true,
+				Default:     stringdefault.StaticString("2"),
 			},
 			"whitelisted_destinations": schema.ListAttribute{
 				Description: "Destinations to which the messaging profile is allowed to send",
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{types.StringValue("US")})),
 			},
 			"created_at": schema.StringAttribute{
 				Description: "ISO 8601 formatted date indicating when the resource was created",
