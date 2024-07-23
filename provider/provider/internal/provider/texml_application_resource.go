@@ -4,9 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -14,7 +19,8 @@ import (
 )
 
 var (
-	_ resource.Resource = &TeXMLApplicationResource{}
+	_ resource.Resource              = &TeXMLApplicationResource{}
+	_ resource.ResourceWithConfigure = &TeXMLApplicationResource{}
 )
 
 func NewTeXMLApplicationResource() resource.Resource {
@@ -26,34 +32,22 @@ type TeXMLApplicationResource struct {
 }
 
 type TeXMLApplicationResourceModel struct {
-	ID                      types.String               `tfsdk:"id"`
-	FriendlyName            types.String               `tfsdk:"friendly_name"`
-	Active                  types.Bool                 `tfsdk:"active"`
-	AnchorsiteOverride      types.String               `tfsdk:"anchorsite_override"`
-	DTMFType                types.String               `tfsdk:"dtmf_type"`
-	FirstCommandTimeout     types.Bool                 `tfsdk:"first_command_timeout"`
-	FirstCommandTimeoutSecs types.Int64                `tfsdk:"first_command_timeout_secs"`
-	VoiceURL                types.String               `tfsdk:"voice_url"`
-	VoiceFallbackURL        types.String               `tfsdk:"voice_fallback_url"`
-	VoiceMethod             types.String               `tfsdk:"voice_method"`
-	StatusCallback          types.String               `tfsdk:"status_callback"`
-	StatusCallbackMethod    types.String               `tfsdk:"status_callback_method"`
-	Inbound                 InboundTeXMLSettingsModel  `tfsdk:"inbound"`
-	Outbound                OutboundTeXMLSettingsModel `tfsdk:"outbound"`
-	CreatedAt               types.String               `tfsdk:"created_at"`
-	UpdatedAt               types.String               `tfsdk:"updated_at"`
-}
-
-type InboundTeXMLSettingsModel struct {
-	ChannelLimit                types.Int64  `tfsdk:"channel_limit"`
-	ShakenStirEnabled           types.Bool   `tfsdk:"shaken_stir_enabled"`
-	SIPSubdomain                types.String `tfsdk:"sip_subdomain"`
-	SIPSubdomainReceiveSettings types.String `tfsdk:"sip_subdomain_receive_settings"`
-}
-
-type OutboundTeXMLSettingsModel struct {
-	ChannelLimit           types.Int64  `tfsdk:"channel_limit"`
-	OutboundVoiceProfileID types.String `tfsdk:"outbound_voice_profile_id"`
+	ID                      types.String `tfsdk:"id"`
+	FriendlyName            types.String `tfsdk:"friendly_name"`
+	Active                  types.Bool   `tfsdk:"active"`
+	AnchorsiteOverride      types.String `tfsdk:"anchorsite_override"`
+	DTMFType                types.String `tfsdk:"dtmf_type"`
+	FirstCommandTimeout     types.Bool   `tfsdk:"first_command_timeout"`
+	FirstCommandTimeoutSecs types.Int64  `tfsdk:"first_command_timeout_secs"`
+	VoiceURL                types.String `tfsdk:"voice_url"`
+	VoiceFallbackURL        types.String `tfsdk:"voice_fallback_url"`
+	VoiceMethod             types.String `tfsdk:"voice_method"`
+	StatusCallback          types.String `tfsdk:"status_callback"`
+	StatusCallbackMethod    types.String `tfsdk:"status_callback_method"`
+	Inbound                 types.Object `tfsdk:"inbound"`
+	Outbound                types.Object `tfsdk:"outbound"`
+	CreatedAt               types.String `tfsdk:"created_at"`
+	UpdatedAt               types.String `tfsdk:"updated_at"`
 }
 
 func (r *TeXMLApplicationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -79,26 +73,31 @@ func (r *TeXMLApplicationResource) Schema(ctx context.Context, req resource.Sche
 				Description: "Specifies whether the connection can be used",
 				Optional:    true,
 				Computed:    true,
+				Default:     booldefault.StaticBool(true),
 			},
 			"anchorsite_override": schema.StringAttribute{
 				Description: "Anchorsite Override",
 				Optional:    true,
 				Computed:    true,
+				Default:     stringdefault.StaticString("Amsterdam, Netherlands"),
 			},
 			"dtmf_type": schema.StringAttribute{
 				Description: "DTMF Type",
 				Optional:    true,
 				Computed:    true,
+				Default:     stringdefault.StaticString("Inband"),
 			},
 			"first_command_timeout": schema.BoolAttribute{
-				Description: "Specifies whether calls should hangup after timing out",
+				Description: "Specifies whether calls should hang up after timing out",
 				Optional:    true,
 				Computed:    true,
+				Default:     booldefault.StaticBool(true),
 			},
 			"first_command_timeout_secs": schema.Int64Attribute{
 				Description: "Specifies how many seconds to wait before timing out a dial command",
 				Optional:    true,
 				Computed:    true,
+				Default:     int64default.StaticInt64(10),
 			},
 			"voice_url": schema.StringAttribute{
 				Description: "URL to deliver XML Translator webhooks",
@@ -108,61 +107,95 @@ func (r *TeXMLApplicationResource) Schema(ctx context.Context, req resource.Sche
 				Description: "Fallback URL to deliver XML Translator webhooks if the primary URL fails",
 				Optional:    true,
 				Computed:    true,
+				Default:     stringdefault.StaticString("https://example.com/failover"),
 			},
 			"voice_method": schema.StringAttribute{
 				Description: "HTTP request method for voice webhooks",
 				Optional:    true,
 				Computed:    true,
+				Default:     stringdefault.StaticString("post"),
 			},
 			"status_callback": schema.StringAttribute{
 				Description: "URL for status callback",
 				Optional:    true,
 				Computed:    true,
+				Default:     stringdefault.StaticString("https://example.com/status"),
 			},
 			"status_callback_method": schema.StringAttribute{
 				Description: "HTTP request method for status callback",
 				Optional:    true,
 				Computed:    true,
+				Default:     stringdefault.StaticString("post"),
 			},
 			"inbound": schema.SingleNestedAttribute{
 				Description: "Inbound settings for the TeXML application",
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
+				Default: objectdefault.StaticValue(types.ObjectValueMust(
+					map[string]attr.Type{
+						"channel_limit":                  types.Int64Type,
+						"shaken_stir_enabled":            types.BoolType,
+						"sip_subdomain":                  types.StringType,
+						"sip_subdomain_receive_settings": types.StringType,
+					},
+					map[string]attr.Value{
+						"channel_limit":                  types.Int64Value(10),
+						"shaken_stir_enabled":            types.BoolValue(true),
+						"sip_subdomain":                  types.StringValue("hpterraformexample"),
+						"sip_subdomain_receive_settings": types.StringValue("from_anyone"),
+					},
+				)),
 				Attributes: map[string]schema.Attribute{
 					"channel_limit": schema.Int64Attribute{
 						Description: "Limits the total number of inbound calls",
 						Optional:    true,
 						Computed:    true,
+						Default:     int64default.StaticInt64(10),
 					},
 					"shaken_stir_enabled": schema.BoolAttribute{
 						Description: "Enables Shaken/Stir data for inbound calls",
 						Optional:    true,
 						Computed:    true,
+						Default:     booldefault.StaticBool(true),
 					},
 					"sip_subdomain": schema.StringAttribute{
 						Description: "Subdomain for receiving inbound calls",
 						Optional:    true,
 						Computed:    true,
+						Default:     stringdefault.StaticString("hpterraformexample"),
 					},
 					"sip_subdomain_receive_settings": schema.StringAttribute{
 						Description: "Receive calls from specified endpoints",
 						Optional:    true,
 						Computed:    true,
+						Default:     stringdefault.StaticString("from_anyone"),
 					},
 				},
 			},
 			"outbound": schema.SingleNestedAttribute{
 				Description: "Outbound settings for the TeXML application",
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
+				Default: objectdefault.StaticValue(types.ObjectValueMust(
+					map[string]attr.Type{
+						"channel_limit":             types.Int64Type,
+						"outbound_voice_profile_id": types.StringType,
+					},
+					map[string]attr.Value{
+						"channel_limit":             types.Int64Value(10),
+						"outbound_voice_profile_id": types.StringValue(""),
+					},
+				)),
 				Attributes: map[string]schema.Attribute{
 					"channel_limit": schema.Int64Attribute{
 						Description: "Limits the total number of outbound calls",
 						Optional:    true,
 						Computed:    true,
+						Default:     int64default.StaticInt64(10),
 					},
 					"outbound_voice_profile_id": schema.StringAttribute{
 						Description: "Associated outbound voice profile ID",
 						Optional:    true,
-						Computed:    true,
 					},
 				},
 			},
@@ -201,6 +234,9 @@ func (r *TeXMLApplicationResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
+	inboundAttributes := plan.Inbound.Attributes()
+	outboundAttributes := plan.Outbound.Attributes()
+
 	applicationRequest := telnyx.TeXMLApplicationRequest{
 		FriendlyName:            plan.FriendlyName.ValueString(),
 		Active:                  plan.Active.ValueBool(),
@@ -214,14 +250,14 @@ func (r *TeXMLApplicationResource) Create(ctx context.Context, req resource.Crea
 		StatusCallback:          plan.StatusCallback.ValueString(),
 		StatusCallbackMethod:    plan.StatusCallbackMethod.ValueString(),
 		Inbound: telnyx.InboundTeXMLSettings{
-			ChannelLimit:                int(plan.Inbound.ChannelLimit.ValueInt64()),
-			ShakenStirEnabled:           plan.Inbound.ShakenStirEnabled.ValueBool(),
-			SIPSubdomain:                plan.Inbound.SIPSubdomain.ValueString(),
-			SIPSubdomainReceiveSettings: plan.Inbound.SIPSubdomainReceiveSettings.ValueString(),
+			ChannelLimit:                int(inboundAttributes["channel_limit"].(types.Int64).ValueInt64()),
+			ShakenStirEnabled:           inboundAttributes["shaken_stir_enabled"].(types.Bool).ValueBool(),
+			SIPSubdomain:                inboundAttributes["sip_subdomain"].(types.String).ValueString(),
+			SIPSubdomainReceiveSettings: inboundAttributes["sip_subdomain_receive_settings"].(types.String).ValueString(),
 		},
 		Outbound: telnyx.OutboundTeXMLSettings{
-			ChannelLimit:           int(plan.Outbound.ChannelLimit.ValueInt64()),
-			OutboundVoiceProfileID: plan.Outbound.OutboundVoiceProfileID.ValueString(),
+			ChannelLimit:           int(outboundAttributes["channel_limit"].(types.Int64).ValueInt64()),
+			OutboundVoiceProfileID: outboundAttributes["outbound_voice_profile_id"].(types.String).ValueString(),
 		},
 	}
 
@@ -266,6 +302,9 @@ func (r *TeXMLApplicationResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
+	inboundAttributes := plan.Inbound.Attributes()
+	outboundAttributes := plan.Outbound.Attributes()
+
 	applicationRequest := telnyx.TeXMLApplicationRequest{
 		FriendlyName:            plan.FriendlyName.ValueString(),
 		Active:                  plan.Active.ValueBool(),
@@ -279,14 +318,14 @@ func (r *TeXMLApplicationResource) Update(ctx context.Context, req resource.Upda
 		StatusCallback:          plan.StatusCallback.ValueString(),
 		StatusCallbackMethod:    plan.StatusCallbackMethod.ValueString(),
 		Inbound: telnyx.InboundTeXMLSettings{
-			ChannelLimit:                int(plan.Inbound.ChannelLimit.ValueInt64()),
-			ShakenStirEnabled:           plan.Inbound.ShakenStirEnabled.ValueBool(),
-			SIPSubdomain:                plan.Inbound.SIPSubdomain.ValueString(),
-			SIPSubdomainReceiveSettings: plan.Inbound.SIPSubdomainReceiveSettings.ValueString(),
+			ChannelLimit:                int(inboundAttributes["channel_limit"].(types.Int64).ValueInt64()),
+			ShakenStirEnabled:           inboundAttributes["shaken_stir_enabled"].(types.Bool).ValueBool(),
+			SIPSubdomain:                inboundAttributes["sip_subdomain"].(types.String).ValueString(),
+			SIPSubdomainReceiveSettings: inboundAttributes["sip_subdomain_receive_settings"].(types.String).ValueString(),
 		},
 		Outbound: telnyx.OutboundTeXMLSettings{
-			ChannelLimit:           int(plan.Outbound.ChannelLimit.ValueInt64()),
-			OutboundVoiceProfileID: plan.Outbound.OutboundVoiceProfileID.ValueString(),
+			ChannelLimit:           int(outboundAttributes["channel_limit"].(types.Int64).ValueInt64()),
+			OutboundVoiceProfileID: outboundAttributes["outbound_voice_profile_id"].(types.String).ValueString(),
 		},
 	}
 
@@ -332,16 +371,24 @@ func setStateFromTeXMLApplicationResponse(state *TeXMLApplicationResourceModel, 
 	state.VoiceMethod = types.StringValue(application.VoiceMethod)
 	state.StatusCallback = types.StringValue(application.StatusCallback)
 	state.StatusCallbackMethod = types.StringValue(application.StatusCallbackMethod)
-	state.Inbound = InboundTeXMLSettingsModel{
-		ChannelLimit:                types.Int64Value(int64(application.Inbound.ChannelLimit)),
-		ShakenStirEnabled:           types.BoolValue(application.Inbound.ShakenStirEnabled),
-		SIPSubdomain:                types.StringValue(application.Inbound.SIPSubdomain),
-		SIPSubdomainReceiveSettings: types.StringValue(application.Inbound.SIPSubdomainReceiveSettings),
-	}
-	state.Outbound = OutboundTeXMLSettingsModel{
-		ChannelLimit:           types.Int64Value(int64(application.Outbound.ChannelLimit)),
-		OutboundVoiceProfileID: types.StringValue(application.Outbound.OutboundVoiceProfileID),
-	}
+	state.Inbound, _ = types.ObjectValue(map[string]attr.Type{
+		"channel_limit":                  types.Int64Type,
+		"shaken_stir_enabled":            types.BoolType,
+		"sip_subdomain":                  types.StringType,
+		"sip_subdomain_receive_settings": types.StringType,
+	}, map[string]attr.Value{
+		"channel_limit":                  types.Int64Value(int64(application.Inbound.ChannelLimit)),
+		"shaken_stir_enabled":            types.BoolValue(application.Inbound.ShakenStirEnabled),
+		"sip_subdomain":                  types.StringValue(application.Inbound.SIPSubdomain),
+		"sip_subdomain_receive_settings": types.StringValue(application.Inbound.SIPSubdomainReceiveSettings),
+	})
+	state.Outbound, _ = types.ObjectValue(map[string]attr.Type{
+		"channel_limit":             types.Int64Type,
+		"outbound_voice_profile_id": types.StringType,
+	}, map[string]attr.Value{
+		"channel_limit":             types.Int64Value(int64(application.Outbound.ChannelLimit)),
+		"outbound_voice_profile_id": types.StringValue(application.Outbound.OutboundVoiceProfileID),
+	})
 	state.CreatedAt = types.StringValue(application.CreatedAt.String())
 	state.UpdatedAt = types.StringValue(application.UpdatedAt.String())
 }

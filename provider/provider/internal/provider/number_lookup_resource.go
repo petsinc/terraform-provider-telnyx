@@ -240,7 +240,7 @@ func (r *PhoneNumberLookupResource) Create(ctx context.Context, req resource.Cre
 		PhoneNumberType:         plan.PhoneNumberType,
 		Features:                plan.Features,
 		Limit:                   plan.Limit,
-		 BestEffort:             plan.BestEffort,
+		BestEffort:              plan.BestEffort,
 		Quickship:               plan.Quickship,
 		Reservable:              plan.Reservable,
 		ExcludeHeldNumbers:      plan.ExcludeHeldNumbers,
@@ -275,7 +275,6 @@ func (r *PhoneNumberLookupResource) Update(ctx context.Context, req resource.Upd
 	// Use the same logic as Create, cuz resource is static
 	r.Create(ctx, resource.CreateRequest{Plan: req.Plan}, (*resource.CreateResponse)(resp))
 }
-
 
 func (r *PhoneNumberLookupResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Remove the resource from the state

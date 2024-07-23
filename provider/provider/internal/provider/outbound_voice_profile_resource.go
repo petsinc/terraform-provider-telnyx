@@ -4,18 +4,18 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/petsinc/telnyx-rest-client/pkg/telnyx"
@@ -36,20 +36,20 @@ type OutboundVoiceProfileResource struct {
 }
 
 type OutboundVoiceProfileResourceModel struct {
-	ID                      types.String `tfsdk:"id"`
-	Name                    types.String `tfsdk:"name"`
-	BillingGroupID          types.String `tfsdk:"billing_group_id"`
-	TrafficType             types.String `tfsdk:"traffic_type"`
-	ServicePlan             types.String `tfsdk:"service_plan"`
-	ConcurrentCallLimit     types.Int64  `tfsdk:"concurrent_call_limit"`
-	Enabled                 types.Bool   `tfsdk:"enabled"`
-	Tags                    types.List   `tfsdk:"tags"`
-	UsagePaymentMethod      types.String `tfsdk:"usage_payment_method"`
-	WhitelistedDestinations types.List   `tfsdk:"whitelisted_destinations"`
+	ID                      types.String  `tfsdk:"id"`
+	Name                    types.String  `tfsdk:"name"`
+	BillingGroupID          types.String  `tfsdk:"billing_group_id"`
+	TrafficType             types.String  `tfsdk:"traffic_type"`
+	ServicePlan             types.String  `tfsdk:"service_plan"`
+	ConcurrentCallLimit     types.Int64   `tfsdk:"concurrent_call_limit"`
+	Enabled                 types.Bool    `tfsdk:"enabled"`
+	Tags                    types.List    `tfsdk:"tags"`
+	UsagePaymentMethod      types.String  `tfsdk:"usage_payment_method"`
+	WhitelistedDestinations types.List    `tfsdk:"whitelisted_destinations"`
 	MaxDestinationRate      types.Float64 `tfsdk:"max_destination_rate"`
-	DailySpendLimit         types.String `tfsdk:"daily_spend_limit"`
-	DailySpendLimitEnabled  types.Bool   `tfsdk:"daily_spend_limit_enabled"`
-	CallRecording           types.Object `tfsdk:"call_recording"`
+	DailySpendLimit         types.String  `tfsdk:"daily_spend_limit"`
+	DailySpendLimitEnabled  types.Bool    `tfsdk:"daily_spend_limit_enabled"`
+	CallRecording           types.Object  `tfsdk:"call_recording"`
 }
 
 func (r *OutboundVoiceProfileResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -143,16 +143,16 @@ func (r *OutboundVoiceProfileResource) Schema(ctx context.Context, req resource.
 				Computed:    true,
 				Default: objectdefault.StaticValue(types.ObjectValueMust(
 					map[string]attr.Type{
-						"call_recording_type":                types.StringType,
+						"call_recording_type":                 types.StringType,
 						"call_recording_caller_phone_numbers": types.ListType{ElemType: types.StringType},
-						"call_recording_channels":            types.StringType,
-						"call_recording_format":              types.StringType,
+						"call_recording_channels":             types.StringType,
+						"call_recording_format":               types.StringType,
 					},
 					map[string]attr.Value{
-						"call_recording_type":                types.StringValue("all"),
+						"call_recording_type":                 types.StringValue("all"),
 						"call_recording_caller_phone_numbers": types.ListValueMust(types.StringType, []attr.Value{}),
-						"call_recording_channels":            types.StringValue("single"),
-						"call_recording_format":              types.StringValue("wav"),
+						"call_recording_channels":             types.StringValue("single"),
+						"call_recording_format":               types.StringValue("wav"),
 					},
 				)),
 				Attributes: map[string]schema.Attribute{
@@ -294,15 +294,15 @@ func (r *OutboundVoiceProfileResource) Read(ctx context.Context, req resource.Re
 	state.DailySpendLimit = types.StringValue(profile.DailySpendLimit)
 	state.DailySpendLimitEnabled = types.BoolValue(profile.DailySpendLimitEnabled)
 	state.CallRecording, diags = types.ObjectValue(map[string]attr.Type{
-		"call_recording_type":                types.StringType,
+		"call_recording_type":                 types.StringType,
 		"call_recording_caller_phone_numbers": types.ListType{ElemType: types.StringType},
-		"call_recording_channels":            types.StringType,
-		"call_recording_format":              types.StringType,
+		"call_recording_channels":             types.StringType,
+		"call_recording_format":               types.StringType,
 	}, map[string]attr.Value{
-		"call_recording_type":                types.StringValue(profile.CallRecording.Type),
+		"call_recording_type":                 types.StringValue(profile.CallRecording.Type),
 		"call_recording_caller_phone_numbers": convertStringsToList(profile.CallRecording.CallerPhoneNumbers),
-		"call_recording_channels":            types.StringValue(profile.CallRecording.Channels),
-		"call_recording_format":              types.StringValue(profile.CallRecording.Format),
+		"call_recording_channels":             types.StringValue(profile.CallRecording.Channels),
+		"call_recording_format":               types.StringValue(profile.CallRecording.Format),
 	})
 	resp.Diagnostics.Append(diags...)
 

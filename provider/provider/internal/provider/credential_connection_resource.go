@@ -4,24 +4,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/petsinc/telnyx-rest-client/pkg/telnyx"
 )
 
 var (
-	_ resource.Resource                = &CredentialConnectionResource{}
-	_ resource.ResourceWithConfigure   = &CredentialConnectionResource{}
+	_ resource.Resource              = &CredentialConnectionResource{}
+	_ resource.ResourceWithConfigure = &CredentialConnectionResource{}
 )
 
 func NewCredentialConnectionResource() resource.Resource {
@@ -150,13 +150,13 @@ func (r *CredentialConnectionResource) Schema(ctx context.Context, req resource.
 				Computed:    true,
 				Default: objectdefault.StaticValue(types.ObjectValueMust(
 					map[string]attr.Type{
-						"port":                types.StringType,
-						"capture_enabled":     types.BoolType,
+						"port":                  types.StringType,
+						"capture_enabled":       types.BoolType,
 						"report_frequency_secs": types.Int64Type,
 					},
 					map[string]attr.Value{
-						"port":                types.StringValue("rtp+1"),
-						"capture_enabled":     types.BoolValue(false),
+						"port":                  types.StringValue("rtp+1"),
+						"capture_enabled":       types.BoolValue(false),
 						"report_frequency_secs": types.Int64Value(5),
 					},
 				)),
@@ -187,34 +187,34 @@ func (r *CredentialConnectionResource) Schema(ctx context.Context, req resource.
 				Computed:    true,
 				Default: objectdefault.StaticValue(types.ObjectValueMust(
 					map[string]attr.Type{
-						"ani_number_format":            types.StringType,
-						"dnis_number_format":           types.StringType,
-						"codecs":                       types.ListType{ElemType: types.StringType},
-						"default_routing_method":       types.StringType,
-						"channel_limit":                types.Int64Type,
-						"generate_ringback_tone":       types.BoolType,
-						"isup_headers_enabled":         types.BoolType,
-						"prack_enabled":                types.BoolType,
-						"privacy_zone_enabled":         types.BoolType,
-						"sip_compact_headers_enabled":  types.BoolType,
-						"timeout_1xx_secs":             types.Int64Type,
-						"timeout_2xx_secs":             types.Int64Type,
-						"shaken_stir_enabled":          types.BoolType,
+						"ani_number_format":           types.StringType,
+						"dnis_number_format":          types.StringType,
+						"codecs":                      types.ListType{ElemType: types.StringType},
+						"default_routing_method":      types.StringType,
+						"channel_limit":               types.Int64Type,
+						"generate_ringback_tone":      types.BoolType,
+						"isup_headers_enabled":        types.BoolType,
+						"prack_enabled":               types.BoolType,
+						"privacy_zone_enabled":        types.BoolType,
+						"sip_compact_headers_enabled": types.BoolType,
+						"timeout_1xx_secs":            types.Int64Type,
+						"timeout_2xx_secs":            types.Int64Type,
+						"shaken_stir_enabled":         types.BoolType,
 					},
 					map[string]attr.Value{
-						"ani_number_format":            types.StringValue("E.164-national"),
-						"dnis_number_format":           types.StringValue("e164"),
-						"codecs":                       types.ListValueMust(types.StringType, []attr.Value{types.StringValue("G722"), types.StringValue("G711U"), types.StringValue("G711A"), types.StringValue("G729"), types.StringValue("OPUS"), types.StringValue("H.264")}),
-						"default_routing_method":       types.StringValue("sequential"),
-						"channel_limit":                types.Int64Value(10),
-						"generate_ringback_tone":       types.BoolValue(true),
-						"isup_headers_enabled":         types.BoolValue(true),
-						"prack_enabled":                types.BoolValue(true),
-						"privacy_zone_enabled":         types.BoolValue(true),
-						"sip_compact_headers_enabled":  types.BoolValue(true),
-						"timeout_1xx_secs":             types.Int64Value(3),
-						"timeout_2xx_secs":             types.Int64Value(90),
-						"shaken_stir_enabled":          types.BoolValue(true),
+						"ani_number_format":           types.StringValue("E.164-national"),
+						"dnis_number_format":          types.StringValue("e164"),
+						"codecs":                      types.ListValueMust(types.StringType, []attr.Value{types.StringValue("G722"), types.StringValue("G711U"), types.StringValue("G711A"), types.StringValue("G729"), types.StringValue("OPUS"), types.StringValue("H.264")}),
+						"default_routing_method":      types.StringValue("sequential"),
+						"channel_limit":               types.Int64Value(10),
+						"generate_ringback_tone":      types.BoolValue(true),
+						"isup_headers_enabled":        types.BoolValue(true),
+						"prack_enabled":               types.BoolValue(true),
+						"privacy_zone_enabled":        types.BoolValue(true),
+						"sip_compact_headers_enabled": types.BoolValue(true),
+						"timeout_1xx_secs":            types.Int64Value(3),
+						"timeout_2xx_secs":            types.Int64Value(90),
+						"shaken_stir_enabled":         types.BoolValue(true),
 					},
 				)),
 				Attributes: map[string]schema.Attribute{
@@ -305,26 +305,26 @@ func (r *CredentialConnectionResource) Schema(ctx context.Context, req resource.
 				Computed:    true,
 				Default: objectdefault.StaticValue(types.ObjectValueMust(
 					map[string]attr.Type{
-						"ani_override":                types.StringType,
-						"ani_override_type":           types.StringType,
-						"call_parking_enabled":        types.BoolType,
-						"channel_limit":               types.Int64Type,
-						"generate_ringback_tone":      types.BoolType,
-						"instant_ringback_enabled":    types.BoolType,
-						"localization":                types.StringType,
-						"outbound_voice_profile_id":   types.StringType,
-						"t38_reinvite_source":         types.StringType,
+						"ani_override":              types.StringType,
+						"ani_override_type":         types.StringType,
+						"call_parking_enabled":      types.BoolType,
+						"channel_limit":             types.Int64Type,
+						"generate_ringback_tone":    types.BoolType,
+						"instant_ringback_enabled":  types.BoolType,
+						"localization":              types.StringType,
+						"outbound_voice_profile_id": types.StringType,
+						"t38_reinvite_source":       types.StringType,
 					},
 					map[string]attr.Value{
-						"ani_override":                types.StringValue("+12345678901"),
-						"ani_override_type":           types.StringValue("always"),
-						"call_parking_enabled":        types.BoolValue(true),
-						"channel_limit":               types.Int64Value(10),
-						"generate_ringback_tone":      types.BoolValue(true),
-						"instant_ringback_enabled":    types.BoolValue(false),
-						"localization":                types.StringValue("US"),
-						"outbound_voice_profile_id":   types.StringValue(""),
-						"t38_reinvite_source":         types.StringValue("customer"),
+						"ani_override":              types.StringValue("+12345678901"),
+						"ani_override_type":         types.StringValue("always"),
+						"call_parking_enabled":      types.BoolValue(true),
+						"channel_limit":             types.Int64Value(10),
+						"generate_ringback_tone":    types.BoolValue(true),
+						"instant_ringback_enabled":  types.BoolValue(false),
+						"localization":              types.StringValue("US"),
+						"outbound_voice_profile_id": types.StringValue(""),
+						"t38_reinvite_source":       types.StringValue("customer"),
 					},
 				)),
 				Attributes: map[string]schema.Attribute{
@@ -606,11 +606,6 @@ func (r *CredentialConnectionResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	fmt.Println("DELETING\n\n\n\n\n\n|")
-	fmt.Println(state.ID.ValueString())
-	fmt.Println("DELETING\n\n\n\n\n\n|")
-
-
 	err := r.client.DeleteCredentialConnection(state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error deleting credential connection", err.Error())
@@ -643,79 +638,79 @@ func setCredentialConnectionState(ctx context.Context, state *CredentialConnecti
 	if connection.RTCPSettings != (telnyx.RTCPSettings{}) {
 		state.RTCPSettings = types.ObjectValueMust(
 			map[string]attr.Type{
-				"port":                types.StringType,
-				"capture_enabled":     types.BoolType,
+				"port":                  types.StringType,
+				"capture_enabled":       types.BoolType,
 				"report_frequency_secs": types.Int64Type,
 			},
 			map[string]attr.Value{
-				"port":                types.StringValue(connection.RTCPSettings.Port),
-				"capture_enabled":     types.BoolValue(connection.RTCPSettings.CaptureEnabled),
+				"port":                  types.StringValue(connection.RTCPSettings.Port),
+				"capture_enabled":       types.BoolValue(connection.RTCPSettings.CaptureEnabled),
 				"report_frequency_secs": types.Int64Value(int64(connection.RTCPSettings.ReportFrequencySecs)),
 			},
 		)
 	} else {
 		state.RTCPSettings = types.ObjectNull(map[string]attr.Type{
-			"port":                types.StringType,
-			"capture_enabled":     types.BoolType,
+			"port":                  types.StringType,
+			"capture_enabled":       types.BoolType,
 			"report_frequency_secs": types.Int64Type,
 		})
 	}
 
 	state.Inbound = types.ObjectValueMust(
 		map[string]attr.Type{
-			"ani_number_format":            types.StringType,
-			"dnis_number_format":           types.StringType,
-			"codecs":                       types.ListType{ElemType: types.StringType},
-			"default_routing_method":       types.StringType,
-			"channel_limit":                types.Int64Type,
-			"generate_ringback_tone":       types.BoolType,
-			"isup_headers_enabled":         types.BoolType,
-			"prack_enabled":                types.BoolType,
-			"privacy_zone_enabled":         types.BoolType,
-			"sip_compact_headers_enabled":  types.BoolType,
-			"timeout_1xx_secs":             types.Int64Type,
-			"timeout_2xx_secs":             types.Int64Type,
-			"shaken_stir_enabled":          types.BoolType,
+			"ani_number_format":           types.StringType,
+			"dnis_number_format":          types.StringType,
+			"codecs":                      types.ListType{ElemType: types.StringType},
+			"default_routing_method":      types.StringType,
+			"channel_limit":               types.Int64Type,
+			"generate_ringback_tone":      types.BoolType,
+			"isup_headers_enabled":        types.BoolType,
+			"prack_enabled":               types.BoolType,
+			"privacy_zone_enabled":        types.BoolType,
+			"sip_compact_headers_enabled": types.BoolType,
+			"timeout_1xx_secs":            types.Int64Type,
+			"timeout_2xx_secs":            types.Int64Type,
+			"shaken_stir_enabled":         types.BoolType,
 		},
 		map[string]attr.Value{
-			"ani_number_format":            types.StringValue(connection.Inbound.ANINumberFormat),
-			"dnis_number_format":           types.StringValue(connection.Inbound.DNISNumberFormat),
-			"codecs":                       convertStringsToList(connection.Inbound.Codecs),
-			"default_routing_method":       types.StringValue(connection.Inbound.DefaultRoutingMethod),
-			"channel_limit":                types.Int64Value(int64(connection.Inbound.ChannelLimit)),
-			"generate_ringback_tone":       types.BoolValue(connection.Inbound.GenerateRingbackTone),
-			"isup_headers_enabled":         types.BoolValue(connection.Inbound.ISUPHeadersEnabled),
-			"prack_enabled":                types.BoolValue(connection.Inbound.PRACKEnabled),
-			"privacy_zone_enabled":         types.BoolValue(connection.Inbound.PrivacyZoneEnabled),
-			"sip_compact_headers_enabled":  types.BoolValue(connection.Inbound.SIPCompactHeadersEnabled),
-			"timeout_1xx_secs":             types.Int64Value(int64(connection.Inbound.Timeout1xxSecs)),
-			"timeout_2xx_secs":             types.Int64Value(int64(connection.Inbound.Timeout2xxSecs)),
-			"shaken_stir_enabled":          types.BoolValue(connection.Inbound.ShakenSTIREnabled),
+			"ani_number_format":           types.StringValue(connection.Inbound.ANINumberFormat),
+			"dnis_number_format":          types.StringValue(connection.Inbound.DNISNumberFormat),
+			"codecs":                      convertStringsToList(connection.Inbound.Codecs),
+			"default_routing_method":      types.StringValue(connection.Inbound.DefaultRoutingMethod),
+			"channel_limit":               types.Int64Value(int64(connection.Inbound.ChannelLimit)),
+			"generate_ringback_tone":      types.BoolValue(connection.Inbound.GenerateRingbackTone),
+			"isup_headers_enabled":        types.BoolValue(connection.Inbound.ISUPHeadersEnabled),
+			"prack_enabled":               types.BoolValue(connection.Inbound.PRACKEnabled),
+			"privacy_zone_enabled":        types.BoolValue(connection.Inbound.PrivacyZoneEnabled),
+			"sip_compact_headers_enabled": types.BoolValue(connection.Inbound.SIPCompactHeadersEnabled),
+			"timeout_1xx_secs":            types.Int64Value(int64(connection.Inbound.Timeout1xxSecs)),
+			"timeout_2xx_secs":            types.Int64Value(int64(connection.Inbound.Timeout2xxSecs)),
+			"shaken_stir_enabled":         types.BoolValue(connection.Inbound.ShakenSTIREnabled),
 		},
 	)
 
 	state.Outbound = types.ObjectValueMust(
 		map[string]attr.Type{
-			"ani_override":                types.StringType,
-			"ani_override_type":           types.StringType,
-			"call_parking_enabled":        types.BoolType,
-			"channel_limit":               types.Int64Type,
-			"generate_ringback_tone":      types.BoolType,
-			"instant_ringback_enabled":    types.BoolType,
-			"localization":                types.StringType,
-			"outbound_voice_profile_id":   types.StringType,
-			"t38_reinvite_source":         types.StringType,
+			"ani_override":              types.StringType,
+			"ani_override_type":         types.StringType,
+			"call_parking_enabled":      types.BoolType,
+			"channel_limit":             types.Int64Type,
+			"generate_ringback_tone":    types.BoolType,
+			"instant_ringback_enabled":  types.BoolType,
+			"localization":              types.StringType,
+			"outbound_voice_profile_id": types.StringType,
+			"t38_reinvite_source":       types.StringType,
 		},
 		map[string]attr.Value{
-			"ani_override":                types.StringValue(connection.Outbound.ANIOverride),
-			"ani_override_type":           types.StringValue(connection.Outbound.ANIOverrideType),
-			"call_parking_enabled":        types.BoolValue(connection.Outbound.CallParkingEnabled),
-			"channel_limit":               types.Int64Value(int64(connection.Outbound.ChannelLimit)),
-			"generate_ringback_tone":      types.BoolValue(connection.Outbound.GenerateRingbackTone),
-			"instant_ringback_enabled":    types.BoolValue(connection.Outbound.InstantRingbackEnabled),
-			"localization":                types.StringValue(connection.Outbound.Localization),
-			"outbound_voice_profile_id":   types.StringValue(connection.Outbound.OutboundVoiceProfileID),
-			"t38_reinvite_source":         types.StringValue(connection.Outbound.T38ReinviteSource),
+			"ani_override":              types.StringValue(connection.Outbound.ANIOverride),
+			"ani_override_type":         types.StringValue(connection.Outbound.ANIOverrideType),
+			"call_parking_enabled":      types.BoolValue(connection.Outbound.CallParkingEnabled),
+			"channel_limit":             types.Int64Value(int64(connection.Outbound.ChannelLimit)),
+			"generate_ringback_tone":    types.BoolValue(connection.Outbound.GenerateRingbackTone),
+			"instant_ringback_enabled":  types.BoolValue(connection.Outbound.InstantRingbackEnabled),
+			"localization":              types.StringValue(connection.Outbound.Localization),
+			"outbound_voice_profile_id": types.StringValue(connection.Outbound.OutboundVoiceProfileID),
+			"t38_reinvite_source":       types.StringValue(connection.Outbound.T38ReinviteSource),
 		},
 	)
 }
