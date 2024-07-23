@@ -65,7 +65,7 @@ resource "telnyx_credential_connection" "test" {
 
 resource "telnyx_fqdn_connection" "test" {
   connection_name = "Test FQDN Connection Terraform"
-  user_name       = "test12345terraformlmao"
+  username       = "test12345terraformlmao"
   password        = "test12345terraformlmao"
   inbound = {
     codecs                     = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
@@ -91,6 +91,7 @@ resource "telnyx_texml_application" "test" {
   voice_fallback_url = "https://example.com/failover"
   voice_method     = "post"
   inbound = {
+    codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
     sip_subdomain_receive_settings = "from_anyone"
   }
   outbound = {
@@ -165,7 +166,7 @@ resource "telnyx_credential_connection" "test" {
 
 resource "telnyx_fqdn_connection" "test" {
   connection_name = "Updated Test FQDN Connection Terraform"
-  user_name       = "test12345terraformlmao"
+  username       = "test12345terraformlmao"
   password        = "test12345terraformlmao"
   inbound = {
     codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
@@ -191,6 +192,7 @@ resource "telnyx_texml_application" "test" {
   voice_fallback_url      = "https://example.com/failover"
   voice_method = "post"
   inbound = {
+    codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
     sip_subdomain_receive_settings = "from_anyone"
   }
   outbound = {

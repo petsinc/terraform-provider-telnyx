@@ -35,7 +35,7 @@ type FQDNConnectionResource struct {
 type FQDNConnectionResourceModel struct {
 	ID                               types.String `tfsdk:"id"`
 	ConnectionName                   types.String `tfsdk:"connection_name"`
-	Username                         types.String `tfsdk:"user_name"`
+	Username                         types.String `tfsdk:"username"`
 	Password                         types.String `tfsdk:"password"`
 	Active                           types.Bool   `tfsdk:"active"`
 	AnchorsiteOverride               types.String `tfsdk:"anchorsite_override"`
@@ -72,7 +72,7 @@ func (r *FQDNConnectionResource) Schema(ctx context.Context, req resource.Schema
 				Description: "Name of the FQDN connection",
 				Required:    true,
 			},
-			"user_name": schema.StringAttribute{
+			"username": schema.StringAttribute{
 				Description: "Username for the FQDN connection",
 				Required:    true,
 			},
