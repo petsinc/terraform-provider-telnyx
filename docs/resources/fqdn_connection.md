@@ -3,12 +3,12 @@
 page_title: "telnyx_fqdn_connection Resource - telnyx"
 subcategory: ""
 description: |-
-  
+  Resource for managing Telnyx FQDN Connections
 ---
 
 # telnyx_fqdn_connection (Resource)
 
-
+Resource for managing Telnyx FQDN Connections
 
 
 
@@ -17,55 +17,55 @@ description: |-
 
 ### Required
 
-- `active` (Boolean)
-- `connection_name` (String)
+- `connection_name` (String) Name of the FQDN connection
+- `password` (String, Sensitive) Password for the FQDN connection
+- `username` (String) Username for the FQDN connection
 
 ### Optional
 
-- `anchorsite_override` (String)
-- `default_on_hold_comfort_noise_enabled` (Boolean)
-- `dtmf_type` (String)
-- `encode_contact_header_enabled` (Boolean)
-- `encrypted_media` (String)
-- `inbound` (Attributes) (see [below for nested schema](#nestedatt--inbound))
-- `microsoft_teams_sbc` (Boolean)
-- `onnet_t38_passthrough_enabled` (Boolean)
-- `outbound` (Attributes) (see [below for nested schema](#nestedatt--outbound))
-- `password` (String, Sensitive)
-- `rtcp_settings` (Attributes) (see [below for nested schema](#nestedatt--rtcp_settings))
-- `sip_uri_calling_preference` (String)
-- `transport_protocol` (String)
-- `username` (String)
-- `webhook_api_version` (String)
-- `webhook_event_failover_url` (String)
-- `webhook_event_url` (String)
-- `webhook_timeout_secs` (Number)
+- `active` (Boolean) Specifies whether the FQDN connection is active or not
+- `anchorsite_override` (String) Anchorsite override setting
+- `default_on_hold_comfort_noise_enabled` (Boolean) Default on-hold comfort noise enabled setting
+- `dtmf_type` (String) DTMF type
+- `encode_contact_header_enabled` (Boolean) Encode contact header enabled setting
+- `encrypted_media` (String) Encrypted media
+- `inbound` (Attributes) Inbound settings (see [below for nested schema](#nestedatt--inbound))
+- `microsoft_teams_sbc` (Boolean) Microsoft Teams SBC setting
+- `onnet_t38_passthrough_enabled` (Boolean) On-net T38 passthrough enabled setting
+- `outbound` (Attributes) Outbound settings (see [below for nested schema](#nestedatt--outbound))
+- `rtcp_settings` (Attributes) RTCP settings (see [below for nested schema](#nestedatt--rtcp_settings))
+- `sip_uri_calling_preference` (String) SIP URI calling preference
+- `transport_protocol` (String) Transport protocol
+- `webhook_api_version` (String) Webhook API version
+- `webhook_event_failover_url` (String) Webhook event failover URL
+- `webhook_event_url` (String) Webhook event URL
+- `webhook_timeout_secs` (Number) Webhook timeout in seconds
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) Unique identifier of the FQDN connection
 
 <a id="nestedatt--inbound"></a>
 ### Nested Schema for `inbound`
 
 Optional:
 
-- `ani_number_format` (String)
-- `channel_limit` (Number)
-- `codecs` (List of String)
-- `default_routing_method` (String)
-- `dnis_number_format` (String)
-- `generate_ringback_tone` (Boolean)
-- `isup_headers_enabled` (Boolean)
-- `prack_enabled` (Boolean)
-- `privacy_zone_enabled` (Boolean)
-- `shaken_stir_enabled` (Boolean)
-- `sip_compact_headers_enabled` (Boolean)
-- `sip_region` (String)
-- `sip_subdomain` (String)
-- `sip_subdomain_receive_settings` (String)
-- `timeout_1xx_secs` (Number)
-- `timeout_2xx_secs` (Number)
+- `ani_number_format` (String) ANI number format
+- `channel_limit` (Number) Channel limit
+- `codecs` (List of String) List of codecs
+- `default_routing_method` (String) Default routing method
+- `dnis_number_format` (String) DNIS number format
+- `generate_ringback_tone` (Boolean) Generate ringback tone
+- `isup_headers_enabled` (Boolean) ISUP headers enabled
+- `prack_enabled` (Boolean) PRACK enabled
+- `privacy_zone_enabled` (Boolean) Privacy zone enabled
+- `shaken_stir_enabled` (Boolean) SHAKEN/STIR enabled
+- `sip_compact_headers_enabled` (Boolean) SIP compact headers enabled
+- `sip_region` (String) SIP region
+- `sip_subdomain` (String) SIP subdomain
+- `sip_subdomain_receive_settings` (String) SIP subdomain receive settings
+- `timeout_1xx_secs` (Number) Timeout for 1xx responses in seconds
+- `timeout_2xx_secs` (Number) Timeout for 2xx responses in seconds
 
 
 <a id="nestedatt--outbound"></a>
@@ -73,17 +73,17 @@ Optional:
 
 Optional:
 
-- `ani_override` (String)
-- `ani_override_type` (String)
-- `call_parking_enabled` (Boolean)
-- `channel_limit` (Number)
-- `generate_ringback_tone` (Boolean)
-- `instant_ringback_enabled` (Boolean)
-- `ip_authentication_method` (String)
-- `ip_authentication_token` (String)
-- `localization` (String)
-- `outbound_voice_profile_id` (String)
-- `t38_reinvite_source` (String)
+- `ani_override` (String) ANI override
+- `ani_override_type` (String) ANI override type
+- `call_parking_enabled` (Boolean) Call parking enabled
+- `channel_limit` (Number) Channel limit
+- `generate_ringback_tone` (Boolean) Generate ringback tone
+- `instant_ringback_enabled` (Boolean) Instant ringback enabled
+- `ip_authentication_method` (String) IP authentication method
+- `ip_authentication_token` (String) IP authentication token
+- `localization` (String) Localization
+- `outbound_voice_profile_id` (String) Outbound voice profile ID
+- `t38_reinvite_source` (String) T38 reinvite source
 
 
 <a id="nestedatt--rtcp_settings"></a>
@@ -91,6 +91,6 @@ Optional:
 
 Optional:
 
-- `capture_enabled` (Boolean)
-- `port` (String)
-- `report_frequency_secs` (Number)
+- `capture_enabled` (Boolean) Capture enabled for RTCP
+- `port` (String) Port for RTCP
+- `report_frequency_secs` (Number) Report frequency for RTCP in seconds

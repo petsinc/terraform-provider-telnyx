@@ -19,13 +19,13 @@ Resource for managing Telnyx Messaging Profiles
 
 - `enabled` (Boolean) Specifies whether the messaging profile is enabled or not
 - `name` (String) Name of the messaging profile
-- `whitelisted_destinations` (List of String) Destinations to which the messaging profile is allowed to send
 
 ### Optional
 
 - `webhook_api_version` (String) Determines which webhook format will be used, Telnyx API v1, v2, or a legacy 2010-04-01 format
 - `webhook_failover_url` (String) The failover URL where webhooks related to this messaging profile will be sent if sending to the primary URL fails
 - `webhook_url` (String) The URL where webhooks related to this messaging profile will be sent
+- `whitelisted_destinations` (List of String) Destinations to which the messaging profile is allowed to send
 
 ### Read-Only
 

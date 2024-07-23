@@ -18,13 +18,16 @@ Resource for managing Telnyx Outbound Voice Profiles
 ### Required
 
 - `billing_group_id` (String) Billing group ID associated with the profile
+- `name` (String) Name of the outbound voice profile
+
+### Optional
+
 - `call_recording` (Attributes) Call recording settings (see [below for nested schema](#nestedatt--call_recording))
 - `concurrent_call_limit` (Number) Concurrent call limit
 - `daily_spend_limit` (String) Daily spend limit
 - `daily_spend_limit_enabled` (Boolean) Is daily spend limit enabled?
 - `enabled` (Boolean) Is the profile enabled?
 - `max_destination_rate` (Number) Max destination rate
-- `name` (String) Name of the outbound voice profile
 - `service_plan` (String) Service plan
 - `tags` (List of String) Tags for the profile
 - `traffic_type` (String) Type of traffic
@@ -38,9 +41,9 @@ Resource for managing Telnyx Outbound Voice Profiles
 <a id="nestedatt--call_recording"></a>
 ### Nested Schema for `call_recording`
 
-Required:
+Optional:
 
-- `caller_phone_numbers` (List of String) Caller phone numbers for recording
-- `channels` (String) Recording channels
-- `format` (String) Recording format
-- `type` (String) Call recording type
+- `call_recording_caller_phone_numbers` (List of String) Caller phone numbers for recording
+- `call_recording_channels` (String) Recording channels
+- `call_recording_format` (String) Recording format
+- `call_recording_type` (String) Call recording type

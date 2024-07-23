@@ -18,8 +18,6 @@ Resource for managing Telnyx TeXML applications
 ### Required
 
 - `friendly_name` (String) User-assigned name for the application
-- `inbound` (Attributes) Inbound settings for the TeXML application (see [below for nested schema](#nestedatt--inbound))
-- `outbound` (Attributes) Outbound settings for the TeXML application (see [below for nested schema](#nestedatt--outbound))
 - `voice_url` (String) URL to deliver XML Translator webhooks
 
 ### Optional
@@ -27,8 +25,10 @@ Resource for managing Telnyx TeXML applications
 - `active` (Boolean) Specifies whether the connection can be used
 - `anchorsite_override` (String) Anchorsite Override
 - `dtmf_type` (String) DTMF Type
-- `first_command_timeout` (Boolean) Specifies whether calls should hangup after timing out
+- `first_command_timeout` (Boolean) Specifies whether calls should hang up after timing out
 - `first_command_timeout_secs` (Number) Specifies how many seconds to wait before timing out a dial command
+- `inbound` (Attributes) Inbound settings for the TeXML application (see [below for nested schema](#nestedatt--inbound))
+- `outbound` (Attributes) Outbound settings for the TeXML application (see [below for nested schema](#nestedatt--outbound))
 - `status_callback` (String) URL for status callback
 - `status_callback_method` (String) HTTP request method for status callback
 - `voice_fallback_url` (String) Fallback URL to deliver XML Translator webhooks if the primary URL fails
@@ -46,6 +46,7 @@ Resource for managing Telnyx TeXML applications
 Optional:
 
 - `channel_limit` (Number) Limits the total number of inbound calls
+- `codecs` (List of String) List of codecs
 - `shaken_stir_enabled` (Boolean) Enables Shaken/Stir data for inbound calls
 - `sip_subdomain` (String) Subdomain for receiving inbound calls
 - `sip_subdomain_receive_settings` (String) Receive calls from specified endpoints
