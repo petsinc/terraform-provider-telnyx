@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -133,12 +134,14 @@ func (r *TeXMLApplicationResource) Schema(ctx context.Context, req resource.Sche
 				Computed:    true,
 				Default: objectdefault.StaticValue(types.ObjectValueMust(
 					map[string]attr.Type{
+						"codecs":                         types.ListType{ElemType: types.StringType},
 						"channel_limit":                  types.Int64Type,
 						"shaken_stir_enabled":            types.BoolType,
 						"sip_subdomain":                  types.StringType,
 						"sip_subdomain_receive_settings": types.StringType,
 					},
 					map[string]attr.Value{
+						"codecs":                         types.ListValueMust(types.StringType, []attr.Value{types.StringValue("G722"), types.StringValue("G711U"), types.StringValue("G711A"), types.StringValue("G729"), types.StringValue("OPUS"), types.StringValue("H.264")}),
 						"channel_limit":                  types.Int64Value(10),
 						"shaken_stir_enabled":            types.BoolValue(true),
 						"sip_subdomain":                  types.StringValue("hpterraformexample"),
@@ -146,6 +149,13 @@ func (r *TeXMLApplicationResource) Schema(ctx context.Context, req resource.Sche
 					},
 				)),
 				Attributes: map[string]schema.Attribute{
+					"codecs": schema.ListAttribute{
+						Description: "List of codecs",
+						Optional:    true,
+						Computed:    true,
+						ElementType: types.StringType,
+						Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{types.StringValue("G722"), types.StringValue("G711U"), types.StringValue("G711A"), types.StringValue("G729"), types.StringValue("OPUS"), types.StringValue("H.264")})),
+					},
 					"channel_limit": schema.Int64Attribute{
 						Description: "Limits the total number of inbound calls",
 						Optional:    true,
@@ -237,6 +247,12 @@ func (r *TeXMLApplicationResource) Create(ctx context.Context, req resource.Crea
 	inboundAttributes := plan.Inbound.Attributes()
 	outboundAttributes := plan.Outbound.Attributes()
 
+	codecs, diagCodecs := convertListToStrings(ctx, inboundAttributes["codecs"].(types.List))
+	resp.Diagnostics.Append(diagCodecs...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	applicationRequest := telnyx.TeXMLApplicationRequest{
 		FriendlyName:            plan.FriendlyName.ValueString(),
 		Active:                  plan.Active.ValueBool(),
@@ -250,6 +266,7 @@ func (r *TeXMLApplicationResource) Create(ctx context.Context, req resource.Crea
 		StatusCallback:          plan.StatusCallback.ValueString(),
 		StatusCallbackMethod:    plan.StatusCallbackMethod.ValueString(),
 		Inbound: telnyx.InboundTeXMLSettings{
+			Codecs:                      codecs,
 			ChannelLimit:                int(inboundAttributes["channel_limit"].(types.Int64).ValueInt64()),
 			ShakenStirEnabled:           inboundAttributes["shaken_stir_enabled"].(types.Bool).ValueBool(),
 			SIPSubdomain:                inboundAttributes["sip_subdomain"].(types.String).ValueString(),
@@ -305,6 +322,12 @@ func (r *TeXMLApplicationResource) Update(ctx context.Context, req resource.Upda
 	inboundAttributes := plan.Inbound.Attributes()
 	outboundAttributes := plan.Outbound.Attributes()
 
+	codecs, diagCodecs := convertListToStrings(ctx, inboundAttributes["codecs"].(types.List))
+	resp.Diagnostics.Append(diagCodecs...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	applicationRequest := telnyx.TeXMLApplicationRequest{
 		FriendlyName:            plan.FriendlyName.ValueString(),
 		Active:                  plan.Active.ValueBool(),
@@ -318,6 +341,7 @@ func (r *TeXMLApplicationResource) Update(ctx context.Context, req resource.Upda
 		StatusCallback:          plan.StatusCallback.ValueString(),
 		StatusCallbackMethod:    plan.StatusCallbackMethod.ValueString(),
 		Inbound: telnyx.InboundTeXMLSettings{
+			Codecs:                      codecs,
 			ChannelLimit:                int(inboundAttributes["channel_limit"].(types.Int64).ValueInt64()),
 			ShakenStirEnabled:           inboundAttributes["shaken_stir_enabled"].(types.Bool).ValueBool(),
 			SIPSubdomain:                inboundAttributes["sip_subdomain"].(types.String).ValueString(),
@@ -371,12 +395,17 @@ func setStateFromTeXMLApplicationResponse(state *TeXMLApplicationResourceModel, 
 	state.VoiceMethod = types.StringValue(application.VoiceMethod)
 	state.StatusCallback = types.StringValue(application.StatusCallback)
 	state.StatusCallbackMethod = types.StringValue(application.StatusCallbackMethod)
+
+	codecsList := convertStringsToList(application.Inbound.Codecs)
+
 	state.Inbound, _ = types.ObjectValue(map[string]attr.Type{
+		"codecs":                         types.ListType{ElemType: types.StringType},
 		"channel_limit":                  types.Int64Type,
 		"shaken_stir_enabled":            types.BoolType,
 		"sip_subdomain":                  types.StringType,
 		"sip_subdomain_receive_settings": types.StringType,
 	}, map[string]attr.Value{
+		"codecs":                         codecsList,
 		"channel_limit":                  types.Int64Value(int64(application.Inbound.ChannelLimit)),
 		"shaken_stir_enabled":            types.BoolValue(application.Inbound.ShakenStirEnabled),
 		"sip_subdomain":                  types.StringValue(application.Inbound.SIPSubdomain),
@@ -392,3 +421,4 @@ func setStateFromTeXMLApplicationResponse(state *TeXMLApplicationResourceModel, 
 	state.CreatedAt = types.StringValue(application.CreatedAt.String())
 	state.UpdatedAt = types.StringValue(application.UpdatedAt.String())
 }
+

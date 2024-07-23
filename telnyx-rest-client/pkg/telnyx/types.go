@@ -504,6 +504,7 @@ type TeXMLApplication struct {
 
 // InboundTeXMLSettings represents the inbound settings for a TeXML application.
 type InboundTeXMLSettings struct {
+	Codecs                      []string `json:"codecs"`
 	ChannelLimit                int    `json:"channel_limit"`
 	ShakenStirEnabled           bool   `json:"shaken_stir_enabled"`
 	SIPSubdomain                string `json:"sip_subdomain"`
