@@ -265,14 +265,14 @@ func (r *TeXMLApplicationResource) Create(ctx context.Context, req resource.Crea
 		VoiceMethod:             plan.VoiceMethod.ValueString(),
 		StatusCallback:          plan.StatusCallback.ValueString(),
 		StatusCallbackMethod:    plan.StatusCallbackMethod.ValueString(),
-		Inbound: telnyx.InboundTeXMLSettings{
+		Inbound: telnyx.InboundSettings{
 			Codecs:                      codecs,
 			ChannelLimit:                int(inboundAttributes["channel_limit"].(types.Int64).ValueInt64()),
-			ShakenStirEnabled:           inboundAttributes["shaken_stir_enabled"].(types.Bool).ValueBool(),
+			ShakenSTIREnabled:           inboundAttributes["shaken_stir_enabled"].(types.Bool).ValueBool(),
 			SIPSubdomain:                inboundAttributes["sip_subdomain"].(types.String).ValueString(),
 			SIPSubdomainReceiveSettings: inboundAttributes["sip_subdomain_receive_settings"].(types.String).ValueString(),
 		},
-		Outbound: telnyx.OutboundTeXMLSettings{
+		Outbound: telnyx.OutboundSettings{
 			ChannelLimit:           int(outboundAttributes["channel_limit"].(types.Int64).ValueInt64()),
 			OutboundVoiceProfileID: outboundAttributes["outbound_voice_profile_id"].(types.String).ValueString(),
 		},
@@ -340,14 +340,14 @@ func (r *TeXMLApplicationResource) Update(ctx context.Context, req resource.Upda
 		VoiceMethod:             plan.VoiceMethod.ValueString(),
 		StatusCallback:          plan.StatusCallback.ValueString(),
 		StatusCallbackMethod:    plan.StatusCallbackMethod.ValueString(),
-		Inbound: telnyx.InboundTeXMLSettings{
+		Inbound: telnyx.InboundSettings{
 			Codecs:                      codecs,
 			ChannelLimit:                int(inboundAttributes["channel_limit"].(types.Int64).ValueInt64()),
-			ShakenStirEnabled:           inboundAttributes["shaken_stir_enabled"].(types.Bool).ValueBool(),
+			ShakenSTIREnabled:           inboundAttributes["shaken_stir_enabled"].(types.Bool).ValueBool(),
 			SIPSubdomain:                inboundAttributes["sip_subdomain"].(types.String).ValueString(),
 			SIPSubdomainReceiveSettings: inboundAttributes["sip_subdomain_receive_settings"].(types.String).ValueString(),
 		},
-		Outbound: telnyx.OutboundTeXMLSettings{
+		Outbound: telnyx.OutboundSettings{
 			ChannelLimit:           int(outboundAttributes["channel_limit"].(types.Int64).ValueInt64()),
 			OutboundVoiceProfileID: outboundAttributes["outbound_voice_profile_id"].(types.String).ValueString(),
 		},
@@ -407,7 +407,7 @@ func setStateFromTeXMLApplicationResponse(state *TeXMLApplicationResourceModel, 
 	}, map[string]attr.Value{
 		"codecs":                         codecsList,
 		"channel_limit":                  types.Int64Value(int64(application.Inbound.ChannelLimit)),
-		"shaken_stir_enabled":            types.BoolValue(application.Inbound.ShakenStirEnabled),
+		"shaken_stir_enabled":            types.BoolValue(application.Inbound.ShakenSTIREnabled),
 		"sip_subdomain":                  types.StringValue(application.Inbound.SIPSubdomain),
 		"sip_subdomain_receive_settings": types.StringValue(application.Inbound.SIPSubdomainReceiveSettings),
 	})
@@ -421,4 +421,3 @@ func setStateFromTeXMLApplicationResponse(state *TeXMLApplicationResourceModel, 
 	state.CreatedAt = types.StringValue(application.CreatedAt.String())
 	state.UpdatedAt = types.StringValue(application.UpdatedAt.String())
 }
-

@@ -68,12 +68,14 @@ resource "telnyx_fqdn_connection" "test" {
   username       = "test12345terraformlmao"
   password        = "test12345terraformlmao"
   inbound = {
+    sip_subdomain              = "terraform.test.fqdn.connection.uniqueexample.sip.telnyx.com"
     codecs                     = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
     sip_subdomain_receive_settings = "from_anyone"
   }
   outbound = {
     ani_override              = "+12345678901"
     ani_override_type         = "always"
+    ip_authentication_token   = "BBcD1234aBcD12345"
     outbound_voice_profile_id = telnyx_outbound_voice_profile.test.id
   }
 }
@@ -169,10 +171,12 @@ resource "telnyx_fqdn_connection" "test" {
   username       = "test12345terraformlmao"
   password        = "test12345terraformlmao"
   inbound = {
+    sip_subdomain              = "terraform.test.fqdn.connection.uniqueexample.sip.telnyx.com"
     codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
     sip_subdomain_receive_settings = "from_anyone"
   }
   outbound = {
+    ip_authentication_token   = "BBcD1234aBcD12345"
     ani_override              = "+12345678901"
     ani_override_type         = "always"
     outbound_voice_profile_id = telnyx_outbound_voice_profile.test.id

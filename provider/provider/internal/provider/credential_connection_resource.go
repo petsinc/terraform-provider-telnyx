@@ -447,7 +447,7 @@ func (r *CredentialConnectionResource) Create(ctx context.Context, req resource.
 			CaptureEnabled:      rtcpSettingsAttributes["capture_enabled"].(types.Bool).ValueBool(),
 			ReportFrequencySecs: int(rtcpSettingsAttributes["report_frequency_secs"].(types.Int64).ValueInt64()),
 		},
-		Inbound: telnyx.CredentialConnectionInboundSettings{
+		Inbound: telnyx.InboundSettings{
 			ANINumberFormat:          inboundAttributes["ani_number_format"].(types.String).ValueString(),
 			DNISNumberFormat:         inboundAttributes["dnis_number_format"].(types.String).ValueString(),
 			Codecs:                   codecs,
@@ -462,7 +462,7 @@ func (r *CredentialConnectionResource) Create(ctx context.Context, req resource.
 			Timeout2xxSecs:           int(inboundAttributes["timeout_2xx_secs"].(types.Int64).ValueInt64()),
 			ShakenSTIREnabled:        inboundAttributes["shaken_stir_enabled"].(types.Bool).ValueBool(),
 		},
-		Outbound: telnyx.CredentialConnectionOutboundSettings{
+		Outbound: telnyx.OutboundSettings{
 			ANIOverride:            outboundAttributes["ani_override"].(types.String).ValueString(),
 			ANIOverrideType:        outboundAttributes["ani_override_type"].(types.String).ValueString(),
 			CallParkingEnabled:     outboundAttributes["call_parking_enabled"].(types.Bool).ValueBool(),
@@ -554,7 +554,7 @@ func (r *CredentialConnectionResource) Update(ctx context.Context, req resource.
 			CaptureEnabled:      plan.RTCPSettings.Attributes()["capture_enabled"].(types.Bool).ValueBool(),
 			ReportFrequencySecs: int(plan.RTCPSettings.Attributes()["report_frequency_secs"].(types.Int64).ValueInt64()),
 		},
-		Inbound: telnyx.CredentialConnectionInboundSettings{
+		Inbound: telnyx.InboundSettings{
 			ANINumberFormat:          plan.Inbound.Attributes()["ani_number_format"].(types.String).ValueString(),
 			DNISNumberFormat:         plan.Inbound.Attributes()["dnis_number_format"].(types.String).ValueString(),
 			Codecs:                   codecs,
@@ -569,7 +569,7 @@ func (r *CredentialConnectionResource) Update(ctx context.Context, req resource.
 			Timeout2xxSecs:           int(plan.Inbound.Attributes()["timeout_2xx_secs"].(types.Int64).ValueInt64()),
 			ShakenSTIREnabled:        plan.Inbound.Attributes()["shaken_stir_enabled"].(types.Bool).ValueBool(),
 		},
-		Outbound: telnyx.CredentialConnectionOutboundSettings{
+		Outbound: telnyx.OutboundSettings{
 			ANIOverride:            plan.Outbound.Attributes()["ani_override"].(types.String).ValueString(),
 			ANIOverrideType:        plan.Outbound.Attributes()["ani_override_type"].(types.String).ValueString(),
 			CallParkingEnabled:     plan.Outbound.Attributes()["call_parking_enabled"].(types.Bool).ValueBool(),
