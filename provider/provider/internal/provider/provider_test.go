@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"flag"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -16,10 +17,24 @@ provider "telnyx" {
 )
 
 var (
+	includeNumberOrder bool
+
 	testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
 		"telnyx": providerserver.NewProtocol6WithError(New("test")()),
 	}
 )
+
+func init() {
+	// Define flags
+	flag.BoolVar(&includeNumberOrder, "include-number-order", false, "Include number order test")
+}
+
+func TestMain(m *testing.M) {
+	// Parse the flags for testing
+	flag.Parse()
+	// Run the tests
+	m.Run()
+}
 
 func TestAccTelnyxResources(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -94,6 +109,7 @@ resource "telnyx_texml_application" "test" {
   voice_method     = "post"
   inbound = {
     codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
+    sip_subdomain                  = "lmao.terraform.test.provider.lol"
     sip_subdomain_receive_settings = "from_anyone"
   }
   outbound = {
@@ -107,7 +123,7 @@ resource "telnyx_phone_number_lookup" "test" {
   limit        = 1
   features     = ["sms", "voice"]
 }
-`,
+` + getOptionalNumberOrderConfig(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("telnyx_billing_group.test", "name", "Test Billing Group Terraform"),
 					resource.TestCheckResourceAttr("telnyx_outbound_voice_profile.test", "name", "Test Outbound Voice Profile Terraform"),
@@ -130,6 +146,10 @@ resource "telnyx_phone_number_lookup" "test" {
 			},
 			{
 				Config: providerConfig + `
+locals {
+  api_number = telnyx_phone_number_lookup.test.phone_numbers[0].phone_number
+}
+
 resource "telnyx_billing_group" "test" {
   name = "Updated Billing Group Terraform"
 }
@@ -193,10 +213,11 @@ resource "telnyx_fqdn" "test" {
 resource "telnyx_texml_application" "test" {
   friendly_name            = "Updated Test TeXML Application Terraform"
   voice_url                = "https://example.com/voice"
-  voice_fallback_url      = "https://example.com/failover"
-  voice_method = "post"
+  voice_fallback_url       = "https://example.com/failover"
+  voice_method             = "post"
   inbound = {
     codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
+    sip_subdomain                  = "lmao.terraform.test.provider.lol"
     sip_subdomain_receive_settings = "from_anyone"
   }
   outbound = {
@@ -210,7 +231,7 @@ resource "telnyx_phone_number_lookup" "test" {
   limit        = 1
   features     = ["sms", "voice"]
 }
-`,
+` + getOptionalNumberOrderConfig(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("telnyx_billing_group.test", "name", "Updated Billing Group Terraform"),
 					resource.TestCheckResourceAttr("telnyx_outbound_voice_profile.test", "name", "Updated Test Outbound Voice Profile Terraform"),
@@ -233,4 +254,22 @@ resource "telnyx_phone_number_lookup" "test" {
 			},
 		},
 	})
+}
+
+func getOptionalNumberOrderConfig() string {
+	if includeNumberOrder {
+		return `
+resource "telnyx_number_order" "this" {
+  connection_id      = telnyx_texml_application.test.id
+  billing_group_id   = telnyx_billing_group.test.id
+  customer_reference = "terraform-test-api-number"
+  phone_numbers = [
+    {
+      phone_number = telnyx_phone_number_lookup.test.phone_numbers[0].phone_number
+    }
+  ]
+}
+`
+	}
+	return ""
 }
