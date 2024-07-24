@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -90,7 +91,9 @@ func (r *NumberOrderResource) Schema(ctx context.Context, req resource.SchemaReq
 			},
 			"messaging_profile_id": schema.StringAttribute{
 				Description: "Messaging profile ID associated with the number order",
-				Required:    true,
+				Required:    false,
+				Computed:    true,
+				Default:     stringdefault.StaticString(""),
 			},
 			"billing_group_id": schema.StringAttribute{
 				Description: "Billing group ID associated with the number order",
