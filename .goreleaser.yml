@@ -1,90 +1,49 @@
 version: 2
 
-before:
-  hooks:
-    - 'go mod download'
-
 builds:
   - dir: provider
-    # Binary naming only required for Terraform CLI 0.12
-    binary: '{{ .ProjectName }}_v{{ .Version }}_x5'
     env:
       - CGO_ENABLED=0
+    mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
     ldflags:
       - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
     goos:
-      - darwin
-      - freebsd
       - linux
-      - openbsd
-      - windows
+      - darwin
     goarch:
-      - '386'
       - amd64
-      - arm
       - arm64
-    ignore:
-      - goarch: arm
-        goos: windows
-      - goarch: arm64
-        goos: freebsd
-      - goarch: arm64
-        goos: windows
-      - goarch: arm64
-        goos: openbsd
-    mod_timestamp: '{{ .CommitTimestamp }}'
+    binary: 'terraform-provider-telnyx_v{{ .Version }}'
 
 archives:
-  - files:
-      # Ensure only built binary and license file are archived
-      - src: LICENSE
-        dst: LICENSE.txt
-    format: zip
-    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  - format: zip
+    name_template: 'terraform-provider-telnyx_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 
 checksum:
+  name_template: 'terraform-provider-telnyx_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
-  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   extra_files:
     - glob: 'terraform-registry-manifest.json'
-      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
+      name_template: 'terraform-provider-telnyx_{{ .Version }}_manifest.json'
 
-hooks:
-  after:
-    - |
-      HASHES_FILE="dist/terraform-provider-telnyx_{{ .Version }}_HASHES.txt"
-      touch "$HASHES_FILE"
-      for file in dist/*; do
-        if [[ -f "$file" && "$file" != "$HASHES_FILE" ]]; then
-          h1_hash=$(shasum -a 256 "$file" | awk '{print $1}' | xxd -r -p | base64)
-          echo "h1:${h1_hash} ${file}" >> "$HASHES_FILE"
-          
-          zh_hash=$(shasum -a 256 "$file" | awk '{print $1}')
-          echo "zh:${zh_hash} ${file}" >> "$HASHES_FILE"
-        fi
-      done
+signs:
+  - artifacts: checksum
+    args:
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--pinentry-mode"
+      - "loopback"
+      - "--passphrase"
+      - "{{ .Env.GPG_PASS }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
 
 release:
   extra_files:
     - glob: 'terraform-registry-manifest.json'
-      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
-    - glob: 'dist/terraform-provider-telnyx_{{ .Version }}_HASHES.txt'
-      name_template: 'terraform-provider-telnyx_{{ .Version }}_HASHES.txt'
-  ids:
-    - none
-
-signs:
-  - args: ["sign", "--dearmor", "--file", "${artifact}", "--out", "${signature}"]
-    artifacts: checksum
-    cmd: signore
-    signature: ${artifact}.sig
-  - args: ["sign", "--dearmor", "--file", "${artifact}", "--out", "${signature}"]
-    artifacts: checksum
-    cmd: signore
-    id: key-id
-    signature: ${artifact}.72D7468F.sig
-
-snapshot:
-  name_template: "{{ .Tag }}-next"
+      name_template: 'terraform-provider-telnyx_{{ .Version }}_manifest.json'
