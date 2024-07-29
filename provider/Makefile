@@ -34,7 +34,7 @@ run:
 
 # Run tests
 test:
-	cd $(PROVIDER_DIR) && . .env && TELNYX_API_TOKEN=$$TELNYX_API_TOKEN TF_ACC=1 $(GOTEST) ./internal/provider -v --count=1
+	cd $(PROVIDER_DIR) && . .env && TELNYX_API_KEY=$$TELNYX_API_KEY TF_ACC=1 $(GOTEST) ./internal/provider -v --count=1
 
 # Format code
 format:

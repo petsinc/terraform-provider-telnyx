@@ -17,9 +17,9 @@ type TelnyxClient struct {
 }
 
 func NewClient() *TelnyxClient {
-	apiKey := os.Getenv("TELNYX_API_TOKEN")
+	apiKey := os.Getenv("TELNYX_API_KEY")
 	if apiKey == "" {
-		panic("TELNYX_API_TOKEN environment variable must be set")
+		panic("TELNYX_API_KEY environment variable must be set")
 	}
 
 	logger, _ := zap.NewProduction()
@@ -33,7 +33,7 @@ func (client *TelnyxClient) doRequest(method, path string, body interface{}, v i
 			client.logger.Error("Error encoding request body", zap.Error(err))
 			return err
 		}
-		client.logger.Debug("Request Body", zap.String("body", buf.String()))
+		client.logger.Info("Request Body", zap.String("body", buf.String()))
 	}
 
 	req, err := http.NewRequest(method, client.baseURL+path, &buf)
@@ -58,7 +58,7 @@ func (client *TelnyxClient) doRequest(method, path string, body interface{}, v i
 		return err
 	}
 
-	client.logger.Debug("Response Body", zap.String("response", string(respBody)))
+	client.logger.Info("Response Body", zap.String("response", string(respBody)))
 
 	if resp.StatusCode >= 400 {
 		client.logger.Error("Received error response from API", zap.Int("status_code", resp.StatusCode), zap.String("response", string(respBody)))

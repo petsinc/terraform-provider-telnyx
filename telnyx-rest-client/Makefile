@@ -22,7 +22,7 @@ run:
 	$(GORUN) $(MAIN_DIR)/main.go
 
 test:
-	TELNYX_API_TOKEN="w/e" TF_ACC=1 $(GOTEST) ./internal/provider -v --count=1
+	TELNYX_API_KEY="w/e" TF_ACC=1 $(GOTEST) ./internal/provider -v --count=1
 
 format:
 	$(GOFMT) ./...
