@@ -1,5 +1,3 @@
-project_name: terraform-provider-telnyx
-
 version: 2
 
 builds:
@@ -36,10 +34,6 @@ signs:
       - "--batch"
       - "--local-user"
       - "{{ .Env.GPG_FINGERPRINT }}"
-      - "--pinentry-mode"
-      - "loopback"
-      - "--passphrase"
-      - "{{ .Env.GPG_PASS }}"
       - "--output"
       - "${signature}"
       - "--detach-sign"
