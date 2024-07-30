@@ -1,3 +1,5 @@
+project_name: terraform-provider-telnyx
+
 version: 2
 
 builds:
@@ -23,10 +25,10 @@ archives:
 
 checksum:
   algorithm: sha256
+  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   extra_files:
     - glob: 'terraform-registry-manifest.json'
       name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
-  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
 
 signs:
   - artifacts: checksum
@@ -34,6 +36,10 @@ signs:
       - "--batch"
       - "--local-user"
       - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--pinentry-mode"
+      - "loopback"
+      - "--passphrase"
+      - "{{ .Env.GPG_PASS }}"
       - "--output"
       - "${signature}"
       - "--detach-sign"
