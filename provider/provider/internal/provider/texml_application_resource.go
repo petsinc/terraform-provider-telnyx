@@ -144,7 +144,7 @@ func (r *TeXMLApplicationResource) Schema(ctx context.Context, req resource.Sche
 						"codecs":                         types.ListValueMust(types.StringType, []attr.Value{types.StringValue("G722"), types.StringValue("G711U"), types.StringValue("G711A"), types.StringValue("G729"), types.StringValue("OPUS"), types.StringValue("H.264")}),
 						"channel_limit":                  types.Int64Value(10),
 						"shaken_stir_enabled":            types.BoolValue(true),
-						"sip_subdomain":                  types.StringValue("hpterraformexample"),
+						"sip_subdomain":                  types.StringValue(""),
 						"sip_subdomain_receive_settings": types.StringValue("from_anyone"),
 					},
 				)),
@@ -172,7 +172,7 @@ func (r *TeXMLApplicationResource) Schema(ctx context.Context, req resource.Sche
 						Description: "Subdomain for receiving inbound calls",
 						Optional:    true,
 						Computed:    true,
-						Default:     stringdefault.StaticString("hpterraformexample"),
+						Default:     stringdefault.StaticString(""),
 					},
 					"sip_subdomain_receive_settings": schema.StringAttribute{
 						Description: "Receive calls from specified endpoints",

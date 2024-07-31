@@ -109,7 +109,6 @@ resource "telnyx_texml_application" "test" {
   voice_method     = "post"
   inbound = {
     codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
-    sip_subdomain                  = "lmao.terraform.test.provider.lol"
     sip_subdomain_receive_settings = "from_anyone"
   }
   outbound = {
@@ -217,7 +216,20 @@ resource "telnyx_texml_application" "test" {
   voice_method             = "post"
   inbound = {
     codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
-    sip_subdomain                  = "lmao.terraform.test.provider.lol"
+    sip_subdomain_receive_settings = "from_anyone"
+  }
+  outbound = {
+    outbound_voice_profile_id = telnyx_outbound_voice_profile.test.id
+  }
+}
+
+resource "telnyx_texml_application" "test2" {
+  friendly_name            = "2 Test TeXML Application Terraform"
+  voice_url                = "https://example.com/voice"
+  voice_fallback_url       = "https://example.com/failover"
+  voice_method             = "post"
+  inbound = {
+    codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
     sip_subdomain_receive_settings = "from_anyone"
   }
   outbound = {
