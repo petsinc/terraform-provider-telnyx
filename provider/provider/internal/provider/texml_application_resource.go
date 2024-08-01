@@ -80,13 +80,13 @@ func (r *TeXMLApplicationResource) Schema(ctx context.Context, req resource.Sche
 				Description: "Anchorsite Override",
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString("Amsterdam, Netherlands"),
+				Default:     stringdefault.StaticString("Latency"),
 			},
 			"dtmf_type": schema.StringAttribute{
 				Description: "DTMF Type",
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString("Inband"),
+				Default:     stringdefault.StaticString("RFC 2833"),
 			},
 			"first_command_timeout": schema.BoolAttribute{
 				Description: "Specifies whether calls should hang up after timing out",
@@ -108,7 +108,7 @@ func (r *TeXMLApplicationResource) Schema(ctx context.Context, req resource.Sche
 				Description: "Fallback URL to deliver XML Translator webhooks if the primary URL fails",
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString("https://example.com/failover"),
+				Default:     stringdefault.StaticString(""),
 			},
 			"voice_method": schema.StringAttribute{
 				Description: "HTTP request method for voice webhooks",
@@ -120,7 +120,7 @@ func (r *TeXMLApplicationResource) Schema(ctx context.Context, req resource.Sche
 				Description: "URL for status callback",
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString("https://example.com/status"),
+				Default:     stringdefault.StaticString(""),
 			},
 			"status_callback_method": schema.StringAttribute{
 				Description: "HTTP request method for status callback",
