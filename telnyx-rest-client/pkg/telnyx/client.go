@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -22,8 +23,28 @@ func NewClient() *TelnyxClient {
 		panic("TELNYX_API_KEY environment variable must be set")
 	}
 
-	logger, _ := zap.NewProduction()
+	logLevel := getLogLevelFromEnv()
+	config := zap.NewProductionConfig()
+	config.Level = zap.NewAtomicLevelAt(logLevel)
+	logger, _ := config.Build()
+
 	return &TelnyxClient{apiKey: apiKey, baseURL: "https://api.telnyx.com/v2", logger: logger}
+}
+
+func getLogLevelFromEnv() zapcore.Level {
+	level := os.Getenv("TELNYX_REST_CLIENT_LOG_LEVEL")
+	switch level {
+	case "debug":
+		return zapcore.DebugLevel
+	case "info":
+		return zapcore.InfoLevel
+	case "warn":
+		return zapcore.WarnLevel
+	case "error":
+		return zapcore.ErrorLevel
+	default:
+		return zapcore.InfoLevel
+	}
 }
 
 func (client *TelnyxClient) doRequest(method, path string, body interface{}, v interface{}) error {
