@@ -139,13 +139,13 @@ func (r *FQDNConnectionResource) Schema(ctx context.Context, req resource.Schema
 				Description: "Webhook event URL",
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString("https://www.example.com/hooks"),
+				Default:     stringdefault.StaticString(""),
 			},
 			"webhook_event_failover_url": schema.StringAttribute{
 				Description: "Webhook event failover URL",
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString("https://failover.example.com/hooks"),
+				Default:     stringdefault.StaticString(""),
 			},
 			"webhook_api_version": schema.StringAttribute{
 				Description: "Webhook API version",

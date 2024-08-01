@@ -55,7 +55,7 @@ resource "telnyx_outbound_voice_profile" "test" {
 resource "telnyx_messaging_profile" "test" {
   name                = "Test Messaging Profile Terraform"
   enabled             = true
-  webhook_url         = "https://example.com/webhook"
+  webhook_url         = ""
   webhook_api_version = "2"
 }
 
@@ -63,8 +63,8 @@ resource "telnyx_credential_connection" "test" {
   connection_name            = "Test Credential Connection Terraform"
   username                   = "test12345terraform"
   password                   = "test12345terraform"
-  webhook_event_url          = "https://www.example.com/hooks"
-  webhook_event_failover_url = "https://failover.example.com/hooks"
+  webhook_event_url          = ""
+  webhook_event_failover_url = ""
   webhook_api_version        = "2"
   inbound = {
     codecs                     = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
@@ -105,7 +105,7 @@ resource "telnyx_fqdn" "test" {
 resource "telnyx_texml_application" "test" {
   friendly_name    = "Test TeXML Application Terraform"
   voice_url        = "https://example.com/voice"
-  voice_fallback_url = "https://example.com/failover"
+  voice_fallback_url = ""
   voice_method     = "post"
   inbound = {
     codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
@@ -134,7 +134,7 @@ resource "telnyx_phone_number_lookup" "test" {
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "port", "5060"),
 					resource.TestCheckResourceAttr("telnyx_texml_application.test", "friendly_name", "Test TeXML Application Terraform"),
 					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_url", "https://example.com/voice"),
-					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_fallback_url", "https://example.com/failover"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_fallback_url", ""),
 					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_method", "post"),
 				),
 			},
@@ -162,7 +162,7 @@ resource "telnyx_outbound_voice_profile" "test" {
 resource "telnyx_messaging_profile" "test" {
   name                      = "Updated Test Messaging Profile Terraform"
   enabled                   = true
-  webhook_url               = "https://example.com/webhook"
+  webhook_url               = ""
   webhook_api_version       = "2"
 }
 
@@ -170,8 +170,8 @@ resource "telnyx_credential_connection" "test" {
   connection_name                 = "Updated Test Credential Connection Terraform"
   username                        = "test12345terraform"
   password                        = "test12345terraform"
-  webhook_event_url               = "https://www.example.com/hooks"
-  webhook_event_failover_url      = "https://failover.example.com/hooks"
+  webhook_event_url               = ""
+  webhook_event_failover_url      = ""
   webhook_api_version             = "2"
   inbound = {
     codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
@@ -212,7 +212,7 @@ resource "telnyx_fqdn" "test" {
 resource "telnyx_texml_application" "test" {
   friendly_name            = "Updated Test TeXML Application Terraform"
   voice_url                = "https://example.com/voice"
-  voice_fallback_url       = "https://example.com/failover"
+  voice_fallback_url       = ""
   voice_method             = "post"
   inbound = {
     codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
@@ -226,7 +226,7 @@ resource "telnyx_texml_application" "test" {
 resource "telnyx_texml_application" "test2" {
   friendly_name            = "2 Test TeXML Application Terraform"
   voice_url                = "https://example.com/voice"
-  voice_fallback_url       = "https://example.com/failover"
+  voice_fallback_url       = ""
   voice_method             = "post"
   inbound = {
     codecs = ["G722", "G711U", "G711A", "G729", "OPUS", "H.264"]
@@ -255,7 +255,7 @@ resource "telnyx_phone_number_lookup" "test" {
 					resource.TestCheckResourceAttr("telnyx_fqdn.test", "port", "5060"),
 					resource.TestCheckResourceAttr("telnyx_texml_application.test", "friendly_name", "Updated Test TeXML Application Terraform"),
 					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_url", "https://example.com/voice"),
-					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_fallback_url", "https://example.com/failover"),
+					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_fallback_url", ""),
 					resource.TestCheckResourceAttr("telnyx_texml_application.test", "voice_method", "post"),
 				),
 			},
