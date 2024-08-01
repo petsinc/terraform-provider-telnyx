@@ -359,7 +359,7 @@ func (r *FQDNConnectionResource) Schema(ctx context.Context, req resource.Schema
 					map[string]attr.Value{
 						"ani_override":              types.StringValue("+12345678901"),
 						"ani_override_type":         types.StringValue("always"),
-						"call_parking_enabled":      types.BoolValue(true),
+						"call_parking_enabled":      types.BoolValue(false),
 						"channel_limit":             types.Int64Value(10),
 						"generate_ringback_tone":    types.BoolValue(true),
 						"instant_ringback_enabled":  types.BoolValue(false),

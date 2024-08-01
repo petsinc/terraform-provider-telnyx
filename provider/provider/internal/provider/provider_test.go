@@ -272,9 +272,10 @@ func getOptionalNumberOrderConfig() string {
 	if includeNumberOrder {
 		return `
 resource "telnyx_number_order" "this" {
-  connection_id      = telnyx_texml_application.test.id
-  billing_group_id   = telnyx_billing_group.test.id
-  customer_reference = "terraform-test-api-number"
+  connection_id       = telnyx_texml_application.test.id
+  billing_group_id    = telnyx_billing_group.test.id
+  customer_reference  = "terraform-test-api-number"
+  messaging_profile_id = telnyx_messaging_profile.test.id
   phone_numbers = [
     {
       phone_number = telnyx_phone_number_lookup.test.phone_numbers[0].phone_number
