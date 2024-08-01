@@ -387,7 +387,7 @@ func (r *FQDNConnectionResource) Schema(ctx context.Context, req resource.Schema
 						Description: "Call parking enabled",
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(true),
+						Default:     booldefault.StaticBool(false),
 					},
 					"channel_limit": schema.Int64Attribute{
 						Description: "Channel limit",
