@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 )
 
 type TelnyxClient struct {
@@ -66,32 +67,46 @@ func (client *TelnyxClient) doRequest(method, path string, body interface{}, v i
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+client.apiKey)
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		client.logger.Error("Error making request", zap.Error(err))
-		return err
-	}
-	defer resp.Body.Close()
+	var resp *http.Response
+	var respBody []byte
 
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		client.logger.Error("Error reading response body", zap.Error(err))
-		return err
-	}
-
-	client.logger.Info("Response Body", zap.String("response", string(respBody)))
-
-	if resp.StatusCode >= 400 {
-		client.logger.Error("Received error response from API", zap.Int("status_code", resp.StatusCode), zap.String("response", string(respBody)))
-		return fmt.Errorf("received error response from API: %s", string(respBody))
-	}
-
-	if v != nil {
-		if err := json.Unmarshal(respBody, v); err != nil {
-			client.logger.Error("Error unmarshaling response", zap.Error(err))
+	for attempts := 0; attempts < 5; attempts++ { // Maximum of 5 attempts
+		resp, err = http.DefaultClient.Do(req)
+		if err != nil {
+			client.logger.Error("Error making request", zap.Error(err))
 			return err
 		}
+		defer resp.Body.Close()
+
+		respBody, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			client.logger.Error("Error reading response body", zap.Error(err))
+			return err
+		}
+
+		client.logger.Info("Response Body", zap.String("response", string(respBody)))
+
+		if resp.StatusCode == http.StatusTooManyRequests {
+			client.logger.Warn("Rate limited, retrying...", zap.Int("attempt", attempts+1))
+			time.Sleep(time.Duration(attempts+1) * time.Second) // Exponential backoff
+			continue
+		}
+
+		if resp.StatusCode >= 400 {
+			client.logger.Error("Received error response from API", zap.Int("status_code", resp.StatusCode), zap.String("response", string(respBody)))
+			return fmt.Errorf("received error response from API: %s", string(respBody))
+		}
+
+		if v != nil {
+			if err := json.Unmarshal(respBody, v); err != nil {
+				client.logger.Error("Error unmarshaling response", zap.Error(err))
+				return err
+			}
+		}
+
+		return nil
 	}
 
-	return nil
+	client.logger.Error("Exceeded maximum retry attempts due to rate limiting")
+	return fmt.Errorf("exceeded maximum retry attempts due to rate limiting: %s", string(respBody))
 }
