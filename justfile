@@ -7,4 +7,4 @@ test:
     cd {{provider_dir}}
 
     export TF_ACC_TERRAFORM_PATH=$(asdf which terraform)
-    TF_ACC=true go test
+    TF_ACC=true go test 2>&1 | tee -a {{justfile_directory()}}/last-test.log ; ( exit ${PIPESTATUS} )
