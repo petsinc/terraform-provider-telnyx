@@ -49,36 +49,48 @@ func getLogLevelFromEnv() zapcore.Level {
 }
 
 func (client *TelnyxClient) doRequest(method, path string, body interface{}, v interface{}) error {
-	var buf bytes.Buffer
+	var bodyBytes []byte
+	var err error
 	if body != nil {
-		if err := json.NewEncoder(&buf).Encode(body); err != nil {
+		bodyBytes, err = json.Marshal(body)
+		if err != nil {
 			client.logger.Error("Error encoding request body", zap.Error(err))
 			return err
 		}
-		client.logger.Info("Request Body", zap.String("body", buf.String()))
+		client.logger.Info("Request Body", zap.String("body", string(bodyBytes)))
 	}
 
-	req, err := http.NewRequest(method, client.baseURL+path, &buf)
-	if err != nil {
-		client.logger.Error("Error creating request", zap.Error(err))
-		return err
-	}
+	return client.retryRequest(method, path, bodyBytes, v)
+}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+client.apiKey)
+func (client *TelnyxClient) retryRequest(method, path string, bodyBytes []byte, v interface{}) error {
+	retryAttempts := 5
+	var lastErr error
 
-	var resp *http.Response
-	var respBody []byte
+	for attempt := 0; attempt < retryAttempts; attempt++ {
+		if attempt > 0 {
+			waitTime := time.Duration(attempt*attempt) * time.Second // exponential backoff
+			client.logger.Info("Retrying request", zap.Int("attempt", attempt), zap.Duration("wait_time", waitTime))
+			time.Sleep(waitTime)
+		}
 
-	for attempts := 0; attempts < 5; attempts++ { // Maximum of 5 attempts
-		resp, err = http.DefaultClient.Do(req)
+		req, err := http.NewRequest(method, client.baseURL+path, bytes.NewReader(bodyBytes))
+		if err != nil {
+			client.logger.Error("Error creating request", zap.Error(err))
+			return err
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+client.apiKey)
+
+		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			client.logger.Error("Error making request", zap.Error(err))
 			return err
 		}
 		defer resp.Body.Close()
 
-		respBody, err = ioutil.ReadAll(resp.Body)
+		respBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			client.logger.Error("Error reading response body", zap.Error(err))
 			return err
@@ -86,9 +98,9 @@ func (client *TelnyxClient) doRequest(method, path string, body interface{}, v i
 
 		client.logger.Info("Response Body", zap.String("response", string(respBody)))
 
-		if resp.StatusCode == http.StatusTooManyRequests {
-			client.logger.Warn("Rate limited, retrying...", zap.Int("attempt", attempts+1))
-			time.Sleep(time.Duration(attempts+1) * time.Second) // Exponential backoff
+		if resp.StatusCode == 429 {
+			client.logger.Warn("Received 429 Too Many Requests", zap.Int("status_code", resp.StatusCode), zap.String("response", string(respBody)))
+			lastErr = fmt.Errorf("received 429 Too Many Requests: %s", string(respBody))
 			continue
 		}
 
@@ -107,6 +119,5 @@ func (client *TelnyxClient) doRequest(method, path string, body interface{}, v i
 		return nil
 	}
 
-	client.logger.Error("Exceeded maximum retry attempts due to rate limiting")
-	return fmt.Errorf("exceeded maximum retry attempts due to rate limiting: %s", string(respBody))
+	return lastErr
 }
