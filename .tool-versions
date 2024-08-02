@@ -1,0 +1,4 @@
+terraform 1.7.3
+
+# Be sure to keep this in sync with .github/release.yml
+golang 1.22.5
