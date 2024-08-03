@@ -44,6 +44,7 @@ jobs:
         uses: cycjimmy/semantic-release-action@v3
 
       - uses: goreleaser/goreleaser-action@v4
+        if: steps.semantic-release.outputs.new_release_published == 'true'
         with:
           version: "~> v2"
           workdir: ./provider
