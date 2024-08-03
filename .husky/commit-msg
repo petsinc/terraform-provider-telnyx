@@ -1,0 +1,8 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Workaround to get lint-staged to work outside of main shell
+# (e.g. Git GUIs)
+ASDF_SHIMS_PATH=$(realpath ~/.asdf/shims)
+ASDF_BIN_PATH=$(realpath ~/.asdf/bin)
+PATH="$ASDF_SHIMS_PATH:$ASDF_BIN_PATH:$PATH" npx --no -- commitlint --edit "$1"

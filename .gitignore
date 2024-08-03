@@ -2,3 +2,4 @@
 **/.env
 **/output.txt
 last-test.log
+node_modules/

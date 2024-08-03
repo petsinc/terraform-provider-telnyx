@@ -2,8 +2,10 @@ name: Release
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - main
+      - alpha
+      - beta
 
 jobs:
   release:
@@ -37,7 +39,13 @@ jobs:
         working-directory: ./provider/provider
         run: go mod tidy
 
-      - name: Run GoReleaser
-        working-directory: provider
-        run: |
-          curl -sL https://git.io/goreleaser | bash
+      - name: Semantic Release
+        id: semantic-release
+        uses: cycjimmy/semantic-release-action@v3
+
+      - uses: goreleaser/goreleaser-action@v4
+        if: steps.semantic-release.outputs.new_release_published == 'true'
+        with:
+          version: "~> v2"
+          workdir: ./provider
+          args: release

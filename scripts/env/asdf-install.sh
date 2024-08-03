@@ -9,7 +9,7 @@ fi
 
 # Install asdf plugins
 plugin_list=$(asdf plugin-list)
-plugins=("golang" "terraform")
+plugins=("golang" "terraform" "nodejs" "pnpm")
 
 for plugin in "${plugins[@]}"; do
   if ! echo $plugin_list | grep -q " $plugin "; then

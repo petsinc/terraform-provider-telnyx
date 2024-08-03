@@ -1,4 +1,6 @@
 terraform 1.7.3
+nodejs 18.19.0
+pnpm 8.10.2
 
 # Be sure to keep this in sync with .github/release.yml
 golang 1.22.5

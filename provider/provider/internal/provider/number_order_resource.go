@@ -92,7 +92,7 @@ func (r *NumberOrderResource) Schema(ctx context.Context, req resource.SchemaReq
 			"messaging_profile_id": schema.StringAttribute{
 				Description: "Messaging profile ID associated with the number order",
 				Optional:    true,
-				Computed:	 true,
+				Computed:    true,
 				Default:     stringdefault.StaticString(""),
 			},
 			"billing_group_id": schema.StringAttribute{
