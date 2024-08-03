@@ -1,15 +1,12 @@
 # Terraform Telnyx Provider
 
-This is a Terraform provider for Telnyx. Currently, it includes a placeholder "Hello World" resource for testing.
+This is a Terraform provider for Telnyx. It is currently in alpha status and not recommended
+for production use.
 
 ## Example Usage
 
-```hcl
-provider "telnyx" {
-  endpoint = "http://httpbin.org/post"
-}
+TODO: Add examples
 
-resource "telnyx_request" "test" {
-  message = "Hello, World!"
-}
+```hcl
+provider "telnyx" {}
 ```
