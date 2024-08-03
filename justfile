@@ -3,7 +3,6 @@ provider_dir := "provider/provider/internal/provider"
 test:
     #!/usr/bin/env bash
     set -eou pipefail
-
     cd {{provider_dir}}
 
     export TF_ACC_TERRAFORM_PATH=$(asdf which terraform)
@@ -24,3 +23,7 @@ format-hcl *FILES='.':
             terraform fmt "$file"
         fi
     done
+
+format-go *FILES=provider_dir:
+    gofmt -w {{FILES}}
+
