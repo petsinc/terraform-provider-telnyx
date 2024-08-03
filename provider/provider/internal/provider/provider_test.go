@@ -90,7 +90,6 @@ resource "telnyx_fqdn_connection" "test" {
   outbound = {
     ani_override              = "+12345678901"
     ani_override_type         = "always"
-    ip_authentication_token   = "BBcD1234aBcD12345"
     outbound_voice_profile_id = telnyx_outbound_voice_profile.test.id
   }
 }

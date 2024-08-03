@@ -364,7 +364,7 @@ func (r *FQDNConnectionResource) Schema(ctx context.Context, req resource.Schema
 						"generate_ringback_tone":    types.BoolValue(true),
 						"instant_ringback_enabled":  types.BoolValue(false),
 						"ip_authentication_method":  types.StringValue("token"),
-						"ip_authentication_token":   types.StringValue(""),
+						"ip_authentication_token":   types.StringNull(),
 						"localization":              types.StringValue("US"),
 						"outbound_voice_profile_id": types.StringValue(""),
 						"t38_reinvite_source":       types.StringValue("customer"),
@@ -417,7 +417,6 @@ func (r *FQDNConnectionResource) Schema(ctx context.Context, req resource.Schema
 						Description: "IP authentication token",
 						Optional:    true,
 						Computed:    true,
-						Default:     stringdefault.StaticString(""),
 					},
 					"localization": schema.StringAttribute{
 						Description: "Localization",
