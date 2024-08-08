@@ -58,8 +58,10 @@ func (client *TelnyxClient) doRequest(method, path string, body interface{}, v i
 			client.logger.Error("Error encoding request body", zap.Error(err))
 			return err
 		}
-		msg := fmt.Sprintf("Request Body for: %s %s", method, path)
-		client.logger.Info(msg, zap.String("body", string(bodyBytes)))
+		err := PrettyPrintRequestBody(body)
+		if err != nil {
+			return err
+		}
 	}
 
 	return client.retryRequest(method, path, bodyBytes, v)
@@ -98,8 +100,10 @@ func (client *TelnyxClient) retryRequest(method, path string, bodyBytes []byte, 
 			return err
 		}
 
-		msg := fmt.Sprintf("Response Body for: %s %s", method, path)
-		client.logger.Info(msg, zap.String("response", string(respBody)))
+		err = PrettyPrintResponseBody(respBody)
+		if err != nil {
+			return err
+		}
 
 		if resp.StatusCode == 429 {
 			client.logger.Warn("Received 429 Too Many Requests", zap.Int("status_code", resp.StatusCode), zap.String("response", string(respBody)))

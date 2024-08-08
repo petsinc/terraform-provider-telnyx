@@ -226,36 +226,32 @@ type InboundSettings struct {
 	DNISNumberFormat            string   `json:"dnis_number_format"`
 	Codecs                      []string `json:"codecs"`
 	DefaultRoutingMethod        string   `json:"default_routing_method"`
-	ChannelLimit                int      `json:"channel_limit"`
-	GenerateRingbackTone        bool     `json:"generate_ringback_tone"`
-	ISUPHeadersEnabled          bool     `json:"isup_headers_enabled"`
-	PRACKEnabled                bool     `json:"prack_enabled"`
-	PrivacyZoneEnabled          bool     `json:"privacy_zone_enabled"`
-	SIPCompactHeadersEnabled    bool     `json:"sip_compact_headers_enabled"`
+	ChannelLimit                *int     `json:"channel_limit,omitempty"`
+	GenerateRingbackTone        *bool    `json:"generate_ringback_tone,omitempty"`
+	ISUPHeadersEnabled          *bool    `json:"isup_headers_enabled,omitempty"`
+	PRACKEnabled                *bool    `json:"prack_enabled,omitempty"`
+	PrivacyZoneEnabled          *bool    `json:"privacy_zone_enabled,omitempty"`
+	SIPCompactHeadersEnabled    *bool    `json:"sip_compact_headers_enabled,omitempty"`
 	SIPRegion                   string   `json:"sip_region"`
 	SIPSubdomain                string   `json:"sip_subdomain"`
 	SIPSubdomainReceiveSettings string   `json:"sip_subdomain_receive_settings"`
-	Timeout1xxSecs              int      `json:"timeout_1xx_secs"`
-	Timeout2xxSecs              int      `json:"timeout_2xx_secs"`
-	ShakenSTIREnabled           bool     `json:"shaken_stir_enabled"`
+	Timeout1xxSecs              *int     `json:"timeout_1xx_secs,omitempty"`
+	Timeout2xxSecs              *int     `json:"timeout_2xx_secs,omitempty"`
+	ShakenSTIREnabled           *bool    `json:"shaken_stir_enabled,omitempty"`
 }
 
 type OutboundSettings struct {
-	ANIOverride            string `json:"ani_override"`
-	ANIOverrideType        string `json:"ani_override_type"`
-	CallParkingEnabled     bool   `json:"call_parking_enabled"`
-	ChannelLimit           int    `json:"channel_limit"`
-	GenerateRingbackTone   bool   `json:"generate_ringback_tone"`
-	InstantRingbackEnabled bool   `json:"instant_ringback_enabled"`
-	IPAuthenticationMethod string `json:"ip_authentication_method"`
-	IPAuthenticationToken  string `json:"ip_authentication_token"`
-	Localization           string `json:"localization"`
-	OutboundVoiceProfileID string `json:"outbound_voice_profile_id"`
-	T38ReinviteSource      string `json:"t38_reinvite_source"`
-	// TechPrefix             string `json:"tech_prefix"`
-	// EncryptedMedia         string `json:"encrypted_media"`
-	// Timeout1xxSecs         int    `json:"timeout_1xx_secs"`
-	// Timeout2xxSecs         int    `json:"timeout_2xx_secs"`
+	ANIOverride            string  `json:"ani_override"`
+	ANIOverrideType        string  `json:"ani_override_type"`
+	CallParkingEnabled     *bool   `json:"call_parking_enabled,omitempty"`
+	ChannelLimit           *int    `json:"channel_limit,omitempty"`
+	GenerateRingbackTone   *bool   `json:"generate_ringback_tone,omitempty"`
+	InstantRingbackEnabled *bool   `json:"instant_ringback_enabled,omitempty"`
+	IPAuthenticationMethod string  `json:"ip_authentication_method"`
+	IPAuthenticationToken  *string `json:"ip_authentication_token,omitempty"`
+	Localization           string  `json:"localization"`
+	OutboundVoiceProfileID string  `json:"outbound_voice_profile_id"`
+	T38ReinviteSource      string  `json:"t38_reinvite_source"`
 }
 
 // New FQDN Struct
