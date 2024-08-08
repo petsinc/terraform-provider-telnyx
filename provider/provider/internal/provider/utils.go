@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/petsinc/telnyx-rest-client/pkg/telnyx"
 )
 
 func convertListToStrings(ctx context.Context, list types.List) ([]string, diag.Diagnostics) {
@@ -66,4 +67,48 @@ func ConvertRegulatoryRequirementsToList(ctx context.Context, requirements []Reg
 		)
 	}
 	return types.ListValueMust(types.ObjectType{AttrTypes: RegulatoryRequirementResourceModel{}.AttrTypes()}, elements), nil
+}
+
+func getString(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}
+
+func getInt64(value *int) int64 {
+	if value == nil {
+		return 0
+	}
+	return int64(*value)
+}
+
+func getBool(value *bool) bool {
+	if value == nil {
+		return false
+	}
+	return *value
+}
+
+func getStringPointer(value types.String) *string {
+	if value.IsNull() || value.IsUnknown() {
+		return nil
+	}
+	return telnyx.StringPtr(value.ValueString())
+}
+
+func getIntPointer(value types.Int64) *int {
+	if value.IsNull() || value.IsUnknown() {
+		return nil
+	}
+	val := int(value.ValueInt64())
+	return &val
+}
+
+func getBoolPointer(value types.Bool) *bool {
+	if value.IsNull() || value.IsUnknown() {
+		return nil
+	}
+	val := value.ValueBool()
+	return &val
 }

@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type TelnyxClient struct {
@@ -57,7 +58,10 @@ func (client *TelnyxClient) doRequest(method, path string, body interface{}, v i
 			client.logger.Error("Error encoding request body", zap.Error(err))
 			return err
 		}
-		client.logger.Info("Request Body", zap.String("body", string(bodyBytes)))
+		err := PrettyPrintRequestBody(body)
+		if err != nil {
+			return err
+		}
 	}
 
 	return client.retryRequest(method, path, bodyBytes, v)
@@ -96,7 +100,10 @@ func (client *TelnyxClient) retryRequest(method, path string, bodyBytes []byte, 
 			return err
 		}
 
-		client.logger.Info("Response Body", zap.String("response", string(respBody)))
+		err = PrettyPrintResponseBody(respBody)
+		if err != nil {
+			return err
+		}
 
 		if resp.StatusCode == 429 {
 			client.logger.Warn("Received 429 Too Many Requests", zap.Int("status_code", resp.StatusCode), zap.String("response", string(respBody)))
