@@ -112,3 +112,18 @@ func getBoolPointer(value types.Bool) *bool {
 	val := value.ValueBool()
 	return &val
 }
+
+func getFloat64(value *float64) float64 {
+	if value == nil {
+		return 0
+	}
+	return *value
+}
+
+func getFloat64Pointer(value types.Float64) *float64 {
+	if value.IsNull() || value.IsUnknown() {
+		return nil
+	}
+	val := value.ValueFloat64()
+	return &val
+}
