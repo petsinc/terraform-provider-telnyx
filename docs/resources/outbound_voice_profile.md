@@ -43,7 +43,7 @@ Resource for managing Telnyx Outbound Voice Profiles
 
 Optional:
 
-- `call_recording_caller_phone_numbers` (List of String) Caller phone numbers for recording
-- `call_recording_channels` (String) Recording channels
-- `call_recording_format` (String) Recording format
-- `call_recording_type` (String) Call recording type
+- `caller_phone_numbers` (List of String) Caller phone numbers for recording
+- `channels` (String) Recording channels
+- `format` (String) Recording format
+- `type` (String) Call recording type
