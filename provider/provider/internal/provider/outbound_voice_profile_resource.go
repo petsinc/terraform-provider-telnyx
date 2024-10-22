@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -90,7 +89,6 @@ func (r *OutboundVoiceProfileResource) Schema(ctx context.Context, req resource.
 				Description: "Concurrent call limit",
 				Optional:    true,
 				Computed:    true,
-				Default:     int64default.StaticInt64(10),
 			},
 			"enabled": schema.BoolAttribute{
 				Description: "Is the profile enabled?",
@@ -227,12 +225,18 @@ func (r *OutboundVoiceProfileResource) Create(ctx context.Context, req resource.
 		return
 	}
 
+	var concurrentCallLimitPointer *int
+	if !plan.ConcurrentCallLimit.IsNull() && plan.ConcurrentCallLimit.ValueInt64() != 0 {
+		value := int(plan.ConcurrentCallLimit.ValueInt64())
+		concurrentCallLimitPointer = &value
+	}
+
 	profile, err := r.client.CreateOutboundVoiceProfile(telnyx.OutboundVoiceProfile{
 		Name:                    plan.Name.ValueString(),
 		BillingGroupID:          plan.BillingGroupID.ValueString(),
 		TrafficType:             plan.TrafficType.ValueString(),
 		ServicePlan:             plan.ServicePlan.ValueString(),
-		ConcurrentCallLimit:     int(plan.ConcurrentCallLimit.ValueInt64()),
+		ConcurrentCallLimit:     concurrentCallLimitPointer,
 		Enabled:                 plan.Enabled.ValueBool(),
 		Tags:                    tags,
 		UsagePaymentMethod:      plan.UsagePaymentMethod.ValueString(),
@@ -265,6 +269,12 @@ func (r *OutboundVoiceProfileResource) Create(ctx context.Context, req resource.
 		plan.MaxDestinationRate = types.Float64Value(*profile.MaxDestinationRate)
 	}
 
+	if profile.ConcurrentCallLimit == nil {
+		plan.ConcurrentCallLimit = types.Int64Null()
+	} else {
+		plan.ConcurrentCallLimit = types.Int64Value(int64(*profile.ConcurrentCallLimit))
+	}
+
 	plan.ID = types.StringValue(profile.ID)
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
@@ -288,7 +298,13 @@ func (r *OutboundVoiceProfileResource) Read(ctx context.Context, req resource.Re
 	state.BillingGroupID = types.StringValue(profile.BillingGroupID)
 	state.TrafficType = types.StringValue(profile.TrafficType)
 	state.ServicePlan = types.StringValue(profile.ServicePlan)
-	state.ConcurrentCallLimit = types.Int64Value(int64(profile.ConcurrentCallLimit))
+
+	if profile.ConcurrentCallLimit == nil {
+		state.ConcurrentCallLimit = types.Int64Null()
+	} else {
+		state.ConcurrentCallLimit = types.Int64Value(int64(*profile.ConcurrentCallLimit))
+	}
+
 	state.Enabled = types.BoolValue(profile.Enabled)
 	state.Tags = convertStringsToList(profile.Tags)
 	state.UsagePaymentMethod = types.StringValue(profile.UsagePaymentMethod)
@@ -353,6 +369,12 @@ func (r *OutboundVoiceProfileResource) Update(ctx context.Context, req resource.
 		return
 	}
 
+	var concurrentCallLimitPointer *int
+	if !plan.ConcurrentCallLimit.IsNull() && plan.ConcurrentCallLimit.ValueInt64() != 0 {
+		value := int(plan.ConcurrentCallLimit.ValueInt64())
+		concurrentCallLimitPointer = &value
+	}
+
 	var dailySpendLimitPointer *string
 	if plan.DailySpendLimit.IsNull() || plan.DailySpendLimit.ValueString() == "" {
 		dailySpendLimitPointer = nil
@@ -372,7 +394,7 @@ func (r *OutboundVoiceProfileResource) Update(ctx context.Context, req resource.
 		BillingGroupID:          plan.BillingGroupID.ValueString(),
 		TrafficType:             plan.TrafficType.ValueString(),
 		ServicePlan:             plan.ServicePlan.ValueString(),
-		ConcurrentCallLimit:     int(plan.ConcurrentCallLimit.ValueInt64()),
+		ConcurrentCallLimit:     concurrentCallLimitPointer,
 		Enabled:                 plan.Enabled.ValueBool(),
 		Tags:                    tags,
 		UsagePaymentMethod:      plan.UsagePaymentMethod.ValueString(),
@@ -403,6 +425,12 @@ func (r *OutboundVoiceProfileResource) Update(ctx context.Context, req resource.
 		plan.MaxDestinationRate = types.Float64Null()
 	} else {
 		plan.MaxDestinationRate = types.Float64Value(*profile.MaxDestinationRate)
+	}
+
+	if profile.ConcurrentCallLimit == nil {
+		plan.ConcurrentCallLimit = types.Int64Null()
+	} else {
+		plan.ConcurrentCallLimit = types.Int64Value(int64(*profile.ConcurrentCallLimit))
 	}
 
 	diags = resp.State.Set(ctx, plan)
