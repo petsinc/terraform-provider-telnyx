@@ -74,13 +74,13 @@ type OutboundVoiceProfile struct {
 	ConnectionsCount        int           `json:"connections_count,omitempty"`
 	TrafficType             string        `json:"traffic_type"`
 	ServicePlan             string        `json:"service_plan"`
-	ConcurrentCallLimit     int           `json:"concurrent_call_limit"`
+	ConcurrentCallLimit     *int          `json:"concurrent_call_limit,omitempty"`
 	Enabled                 bool          `json:"enabled"`
 	Tags                    []string      `json:"tags"`
 	UsagePaymentMethod      string        `json:"usage_payment_method"`
 	WhitelistedDestinations []string      `json:"whitelisted_destinations"`
-	MaxDestinationRate      *float64       `json:"max_destination_rate"`
-	DailySpendLimit         *string        `json:"daily_spend_limit"`
+	MaxDestinationRate      *float64      `json:"max_destination_rate"`
+	DailySpendLimit         *string       `json:"daily_spend_limit"`
 	DailySpendLimitEnabled  bool          `json:"daily_spend_limit_enabled"`
 	CallRecording           CallRecording `json:"call_recording"`
 	BillingGroupID          string        `json:"billing_group_id"`
