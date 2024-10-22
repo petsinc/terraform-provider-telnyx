@@ -9,8 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -91,7 +89,6 @@ func (r *OutboundVoiceProfileResource) Schema(ctx context.Context, req resource.
 				Description: "Concurrent call limit",
 				Optional:    true,
 				Computed:    true,
-				Default:     int64default.StaticInt64(10),
 			},
 			"enabled": schema.BoolAttribute{
 				Description: "Is the profile enabled?",
@@ -123,19 +120,17 @@ func (r *OutboundVoiceProfileResource) Schema(ctx context.Context, req resource.
 				Description: "Max destination rate",
 				Optional:    true,
 				Computed:    true,
-				Default:     float64default.StaticFloat64(10.0),
 			},
 			"daily_spend_limit": schema.StringAttribute{
 				Description: "Daily spend limit",
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString("100.00"),
 			},
 			"daily_spend_limit_enabled": schema.BoolAttribute{
 				Description: "Is daily spend limit enabled?",
 				Optional:    true,
 				Computed:    true,
-				Default:     booldefault.StaticBool(true),
+				Default:     booldefault.StaticBool(false),
 			},
 			"call_recording": schema.SingleNestedAttribute{
 				Description: "Call recording settings",
@@ -143,39 +138,39 @@ func (r *OutboundVoiceProfileResource) Schema(ctx context.Context, req resource.
 				Computed:    true,
 				Default: objectdefault.StaticValue(types.ObjectValueMust(
 					map[string]attr.Type{
-						"call_recording_type":                 types.StringType,
-						"call_recording_caller_phone_numbers": types.ListType{ElemType: types.StringType},
-						"call_recording_channels":             types.StringType,
-						"call_recording_format":               types.StringType,
+						"type":                 types.StringType,
+						"caller_phone_numbers": types.ListType{ElemType: types.StringType},
+						"channels":             types.StringType,
+						"format":               types.StringType,
 					},
 					map[string]attr.Value{
-						"call_recording_type":                 types.StringValue("all"),
-						"call_recording_caller_phone_numbers": types.ListValueMust(types.StringType, []attr.Value{}),
-						"call_recording_channels":             types.StringValue("single"),
-						"call_recording_format":               types.StringValue("wav"),
+						"type":                 types.StringValue("none"),
+						"caller_phone_numbers": types.ListValueMust(types.StringType, []attr.Value{}),
+						"channels":             types.StringValue("single"),
+						"format":               types.StringValue("wav"),
 					},
 				)),
 				Attributes: map[string]schema.Attribute{
-					"call_recording_type": schema.StringAttribute{
+					"type": schema.StringAttribute{
 						Description: "Call recording type",
 						Optional:    true,
 						Computed:    true,
-						Default:     stringdefault.StaticString("all"),
+						Default:     stringdefault.StaticString("none"),
 					},
-					"call_recording_caller_phone_numbers": schema.ListAttribute{
+					"caller_phone_numbers": schema.ListAttribute{
 						Description: "Caller phone numbers for recording",
 						Optional:    true,
 						Computed:    true,
 						ElementType: types.StringType,
 						Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
 					},
-					"call_recording_channels": schema.StringAttribute{
+					"channels": schema.StringAttribute{
 						Description: "Recording channels",
 						Optional:    true,
 						Computed:    true,
 						Default:     stringdefault.StaticString("single"),
 					},
-					"call_recording_format": schema.StringAttribute{
+					"format": schema.StringAttribute{
 						Description: "Recording format",
 						Optional:    true,
 						Computed:    true,
@@ -205,7 +200,6 @@ func (r *OutboundVoiceProfileResource) Configure(ctx context.Context, req resour
 func (r *OutboundVoiceProfileResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan OutboundVoiceProfileResourceModel
 	diags := req.Plan.Get(ctx, &plan)
-	fmt.Println(plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -225,10 +219,16 @@ func (r *OutboundVoiceProfileResource) Create(ctx context.Context, req resource.
 
 	callRecordingAttributes := plan.CallRecording.Attributes()
 
-	callerPhoneNumbers, diagCP := convertListToStrings(ctx, callRecordingAttributes["call_recording_caller_phone_numbers"].(types.List))
+	callerPhoneNumbers, diagCP := convertListToStrings(ctx, callRecordingAttributes["caller_phone_numbers"].(types.List))
 	resp.Diagnostics.Append(diagCP...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	var concurrentCallLimitPointer *int
+	if !plan.ConcurrentCallLimit.IsNull() && plan.ConcurrentCallLimit.ValueInt64() != 0 {
+		value := int(plan.ConcurrentCallLimit.ValueInt64())
+		concurrentCallLimitPointer = &value
 	}
 
 	profile, err := r.client.CreateOutboundVoiceProfile(telnyx.OutboundVoiceProfile{
@@ -236,31 +236,46 @@ func (r *OutboundVoiceProfileResource) Create(ctx context.Context, req resource.
 		BillingGroupID:          plan.BillingGroupID.ValueString(),
 		TrafficType:             plan.TrafficType.ValueString(),
 		ServicePlan:             plan.ServicePlan.ValueString(),
-		ConcurrentCallLimit:     int(plan.ConcurrentCallLimit.ValueInt64()),
+		ConcurrentCallLimit:     concurrentCallLimitPointer,
 		Enabled:                 plan.Enabled.ValueBool(),
 		Tags:                    tags,
 		UsagePaymentMethod:      plan.UsagePaymentMethod.ValueString(),
 		WhitelistedDestinations: whitelistedDestinations,
-		MaxDestinationRate:      plan.MaxDestinationRate.ValueFloat64(),
-		DailySpendLimit:         plan.DailySpendLimit.ValueString(),
+		MaxDestinationRate:      getFloat64Pointer(plan.MaxDestinationRate),
+		DailySpendLimit:         getStringPointer(plan.DailySpendLimit),
 		DailySpendLimitEnabled:  plan.DailySpendLimitEnabled.ValueBool(),
 		CallRecording: telnyx.CallRecording{
-			Type:               callRecordingAttributes["call_recording_type"].(types.String).ValueString(),
+			Type:               callRecordingAttributes["type"].(types.String).ValueString(),
 			CallerPhoneNumbers: callerPhoneNumbers,
-			Channels:           callRecordingAttributes["call_recording_channels"].(types.String).ValueString(),
-			Format:             callRecordingAttributes["call_recording_format"].(types.String).ValueString(),
+			Channels:           callRecordingAttributes["channels"].(types.String).ValueString(),
+			Format:             callRecordingAttributes["format"].(types.String).ValueString(),
 		},
 	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating outbound voice profile", err.Error())
 		return
 	}
 
+	if profile.DailySpendLimit == nil {
+		plan.DailySpendLimit = types.StringNull()
+	} else {
+		plan.DailySpendLimit = types.StringValue(*profile.DailySpendLimit)
+	}
+
+	if profile.MaxDestinationRate == nil {
+		plan.MaxDestinationRate = types.Float64Null()
+	} else {
+		plan.MaxDestinationRate = types.Float64Value(*profile.MaxDestinationRate)
+	}
+
+	if profile.ConcurrentCallLimit == nil {
+		plan.ConcurrentCallLimit = types.Int64Null()
+	} else {
+		plan.ConcurrentCallLimit = types.Int64Value(int64(*profile.ConcurrentCallLimit))
+	}
+
 	plan.ID = types.StringValue(profile.ID)
-	plan.Name = types.StringValue(profile.Name)
-
-	tflog.Info(ctx, "Created Outbound Voice Profile", map[string]interface{}{"id": profile.ID, "name": profile.Name})
-
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 }
@@ -273,8 +288,6 @@ func (r *OutboundVoiceProfileResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	tflog.Info(ctx, "Reading Outbound Voice Profile", map[string]interface{}{"id": state.ID.ValueString()})
-
 	profile, err := r.client.GetOutboundVoiceProfile(state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading outbound voice profile", err.Error())
@@ -285,24 +298,42 @@ func (r *OutboundVoiceProfileResource) Read(ctx context.Context, req resource.Re
 	state.BillingGroupID = types.StringValue(profile.BillingGroupID)
 	state.TrafficType = types.StringValue(profile.TrafficType)
 	state.ServicePlan = types.StringValue(profile.ServicePlan)
-	state.ConcurrentCallLimit = types.Int64Value(int64(profile.ConcurrentCallLimit))
+
+	if profile.ConcurrentCallLimit == nil {
+		state.ConcurrentCallLimit = types.Int64Null()
+	} else {
+		state.ConcurrentCallLimit = types.Int64Value(int64(*profile.ConcurrentCallLimit))
+	}
+
 	state.Enabled = types.BoolValue(profile.Enabled)
 	state.Tags = convertStringsToList(profile.Tags)
 	state.UsagePaymentMethod = types.StringValue(profile.UsagePaymentMethod)
 	state.WhitelistedDestinations = convertStringsToList(profile.WhitelistedDestinations)
-	state.MaxDestinationRate = types.Float64Value(profile.MaxDestinationRate)
-	state.DailySpendLimit = types.StringValue(profile.DailySpendLimit)
+
+	if profile.MaxDestinationRate == nil {
+		state.MaxDestinationRate = types.Float64Null()
+	} else {
+		state.MaxDestinationRate = types.Float64Value(*profile.MaxDestinationRate)
+	}
+
+	if profile.DailySpendLimit == nil {
+		state.DailySpendLimit = types.StringValue("")
+	} else {
+		state.DailySpendLimit = types.StringValue(*profile.DailySpendLimit)
+	}
+
 	state.DailySpendLimitEnabled = types.BoolValue(profile.DailySpendLimitEnabled)
+
 	state.CallRecording, diags = types.ObjectValue(map[string]attr.Type{
-		"call_recording_type":                 types.StringType,
-		"call_recording_caller_phone_numbers": types.ListType{ElemType: types.StringType},
-		"call_recording_channels":             types.StringType,
-		"call_recording_format":               types.StringType,
+		"type":                 types.StringType,
+		"caller_phone_numbers": types.ListType{ElemType: types.StringType},
+		"channels":             types.StringType,
+		"format":               types.StringType,
 	}, map[string]attr.Value{
-		"call_recording_type":                 types.StringValue(profile.CallRecording.Type),
-		"call_recording_caller_phone_numbers": convertStringsToList(profile.CallRecording.CallerPhoneNumbers),
-		"call_recording_channels":             types.StringValue(profile.CallRecording.Channels),
-		"call_recording_format":               types.StringValue(profile.CallRecording.Format),
+		"type":                 types.StringValue(profile.CallRecording.Type),
+		"caller_phone_numbers": convertStringsToList(profile.CallRecording.CallerPhoneNumbers),
+		"channels":             types.StringValue(profile.CallRecording.Channels),
+		"format":               types.StringValue(profile.CallRecording.Format),
 	})
 	resp.Diagnostics.Append(diags...)
 
@@ -332,56 +363,75 @@ func (r *OutboundVoiceProfileResource) Update(ctx context.Context, req resource.
 
 	callRecordingAttributes := plan.CallRecording.Attributes()
 
-	callerPhoneNumbers, diagCP := convertListToStrings(ctx, callRecordingAttributes["call_recording_caller_phone_numbers"].(types.List))
+	callerPhoneNumbers, diagCP := convertListToStrings(ctx, callRecordingAttributes["caller_phone_numbers"].(types.List))
 	resp.Diagnostics.Append(diagCP...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, err := r.client.UpdateOutboundVoiceProfile(plan.ID.ValueString(), telnyx.OutboundVoiceProfile{
+	var concurrentCallLimitPointer *int
+	if !plan.ConcurrentCallLimit.IsNull() && plan.ConcurrentCallLimit.ValueInt64() != 0 {
+		value := int(plan.ConcurrentCallLimit.ValueInt64())
+		concurrentCallLimitPointer = &value
+	}
+
+	var dailySpendLimitPointer *string
+	if plan.DailySpendLimit.IsNull() || plan.DailySpendLimit.ValueString() == "" {
+		dailySpendLimitPointer = nil
+	} else {
+		dailySpendLimitPointer = getStringPointer(plan.DailySpendLimit)
+	}
+
+	var maxDestinationRatePointer *float64
+	if plan.MaxDestinationRate.IsNull() {
+		maxDestinationRatePointer = nil
+	} else {
+		maxDestinationRatePointer = getFloat64Pointer(plan.MaxDestinationRate)
+	}
+
+	profile, err := r.client.UpdateOutboundVoiceProfile(plan.ID.ValueString(), telnyx.OutboundVoiceProfile{
 		Name:                    plan.Name.ValueString(),
 		BillingGroupID:          plan.BillingGroupID.ValueString(),
 		TrafficType:             plan.TrafficType.ValueString(),
 		ServicePlan:             plan.ServicePlan.ValueString(),
-		ConcurrentCallLimit:     int(plan.ConcurrentCallLimit.ValueInt64()),
+		ConcurrentCallLimit:     concurrentCallLimitPointer,
 		Enabled:                 plan.Enabled.ValueBool(),
 		Tags:                    tags,
 		UsagePaymentMethod:      plan.UsagePaymentMethod.ValueString(),
 		WhitelistedDestinations: whitelistedDestinations,
-		MaxDestinationRate:      plan.MaxDestinationRate.ValueFloat64(),
-		DailySpendLimit:         plan.DailySpendLimit.ValueString(),
+		MaxDestinationRate:      maxDestinationRatePointer,
+		DailySpendLimit:         dailySpendLimitPointer,
 		DailySpendLimitEnabled:  plan.DailySpendLimitEnabled.ValueBool(),
 		CallRecording: telnyx.CallRecording{
-			Type:               callRecordingAttributes["call_recording_type"].(types.String).ValueString(),
+			Type:               callRecordingAttributes["type"].(types.String).ValueString(),
 			CallerPhoneNumbers: callerPhoneNumbers,
-			Channels:           callRecordingAttributes["call_recording_channels"].(types.String).ValueString(),
-			Format:             callRecordingAttributes["call_recording_format"].(types.String).ValueString(),
+			Channels:           callRecordingAttributes["channels"].(types.String).ValueString(),
+			Format:             callRecordingAttributes["format"].(types.String).ValueString(),
 		},
 	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Error updating outbound voice profile", err.Error())
 		return
 	}
 
-	tflog.Info(ctx, "Updated Outbound Voice Profile", map[string]interface{}{
-		"id":                        plan.ID.ValueString(),
-		"name":                      plan.Name.ValueString(),
-		"billing_group_id":          plan.BillingGroupID.ValueString(),
-		"traffic_type":              plan.TrafficType.ValueString(),
-		"service_plan":              plan.ServicePlan.ValueString(),
-		"concurrent_call_limit":     plan.ConcurrentCallLimit.ValueInt64(),
-		"enabled":                   plan.Enabled.ValueBool(),
-		"tags":                      tags,
-		"usage_payment_method":      plan.UsagePaymentMethod.ValueString(),
-		"whitelisted_destinations":  whitelistedDestinations,
-		"max_destination_rate":      plan.MaxDestinationRate.ValueFloat64(),
-		"daily_spend_limit":         plan.DailySpendLimit.ValueString(),
-		"daily_spend_limit_enabled": plan.DailySpendLimitEnabled.ValueBool(),
-		"call_recording_type":       callRecordingAttributes["call_recording_type"].(types.String).ValueString(),
-		"call_recording_channels":   callRecordingAttributes["call_recording_channels"].(types.String).ValueString(),
-		"call_recording_format":     callRecordingAttributes["call_recording_format"].(types.String).ValueString(),
-		"caller_phone_numbers":      callerPhoneNumbers,
-	})
+	if profile.DailySpendLimit == nil {
+		plan.DailySpendLimit = types.StringNull()
+	} else {
+		plan.DailySpendLimit = types.StringValue(*profile.DailySpendLimit)
+	}
+
+	if profile.MaxDestinationRate == nil {
+		plan.MaxDestinationRate = types.Float64Null()
+	} else {
+		plan.MaxDestinationRate = types.Float64Value(*profile.MaxDestinationRate)
+	}
+
+	if profile.ConcurrentCallLimit == nil {
+		plan.ConcurrentCallLimit = types.Int64Null()
+	} else {
+		plan.ConcurrentCallLimit = types.Int64Value(int64(*profile.ConcurrentCallLimit))
+	}
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
@@ -399,8 +449,6 @@ func (r *OutboundVoiceProfileResource) Delete(ctx context.Context, req resource.
 	if err != nil {
 		resp.Diagnostics.AddError("Error deleting outbound voice profile", err.Error())
 	}
-
-	tflog.Info(ctx, "Deleted Outbound Voice Profile", map[string]interface{}{"id": state.ID.ValueString()})
 }
 
 func (r *OutboundVoiceProfileResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

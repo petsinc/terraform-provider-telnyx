@@ -112,7 +112,7 @@ func (client *TelnyxClient) retryRequest(method, path string, bodyBytes []byte, 
 		}
 
 		if resp.StatusCode >= 400 {
-			client.logger.Error("Received error response from API", zap.Int("status_code", resp.StatusCode), zap.String("response", string(respBody)))
+			client.logger.Error("Received error response from API", zap.String("path", path), zap.Int("status_code", resp.StatusCode), zap.String("response", string(respBody)))
 			return fmt.Errorf("received error response from API: %s", string(respBody))
 		}
 
