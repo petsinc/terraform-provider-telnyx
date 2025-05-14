@@ -1,7 +1,7 @@
 # Directories
 MAIN_DIR := .
 BIN_DIR := ./bin
-DOCS_DIR := ../docs
+DOCS_DIR := ../../docs
 PROVIDER_DIR := ./provider
 
 # Binary name
@@ -13,6 +13,7 @@ GOBUILD := $(GOCMD) build
 GORUN := $(GOCMD) run
 GOTEST := $(GOCMD) test
 GOFMT := $(GOCMD) fmt
+VERSION := v0.0.1
 
 # Targets
 .PHONY: all build run test format clean docs help
@@ -26,7 +27,8 @@ deps:
 	
 # Build binary with version
 build:
-	cd $(PROVIDER_DIR) && $(GOBUILD) -ldflags "-X main.version=$(VERSION)" -o $(BIN_DIR)/$(BINARY) ./main.go
+	
+	cd $(PROVIDER_DIR) && GOARCH=arm64 GOOS=linux $(GOBUILD) -ldflags "-X main.version=$(VERSION)" -o $(BIN_DIR)/$(BINARY) ./main.go
 
 # Run the program
 run:
@@ -42,7 +44,11 @@ format:
 
 # Generate docs
 docs:
-	cd $(PROVIDER_DIR) && $(GOCMD) run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name telnyx --provider-dir . --rendered-website-dir $(DOCS_DIR)
+	cd $(PROVIDER_DIR) && PATH=$$PATH:/Users/pmcjury/.asdf/shims/terraform $(GOCMD) run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name telnyx --provider-dir . --rendered-website-dir $(DOCS_DIR)
+
+# Generate docs in docker container
+docs-docker:
+	cd $(PROVIDER_DIR) && GOARCH=arm64 GOOS=linux tfplugindocs generate --provider-name telnyx --provider-dir . --rendered-website-dir $(DOCS_DIR)
 
 # Clean build artifacts
 clean:

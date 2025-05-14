@@ -254,6 +254,20 @@ type OutboundSettings struct {
 	T38ReinviteSource      string  `json:"t38_reinvite_source"`
 }
 
+// CallControlInboundSettings is specific to the Call Control Application resource.
+type CallControlInboundSettings struct {
+	ChannelLimit                *int   `json:"channel_limit,omitempty"`
+	ShakenSTIREnabled           *bool  `json:"shaken_stir_enabled,omitempty"`
+	SIPSubdomain                string `json:"sip_subdomain,omitempty"`
+	SIPSubdomainReceiveSettings string `json:"sip_subdomain_receive_settings,omitempty"`
+}
+
+// CallControlOutboundSettings is specific to the Call Control Application resource.
+type CallControlOutboundSettings struct {
+	ChannelLimit           *int   `json:"channel_limit,omitempty"`
+	OutboundVoiceProfileID string `json:"outbound_voice_profile_id,omitempty"`
+}
+
 // New FQDN Struct
 type FQDN struct {
 	ID            string    `json:"id"`
@@ -483,4 +497,39 @@ type TeXMLApplicationRequest struct {
 	StatusCallbackMethod    string           `json:"status_callback_method"`
 	Inbound                 InboundSettings  `json:"inbound"`
 	Outbound                OutboundSettings `json:"outbound"`
+}
+
+// CallControlApplication represents a Call Control Application in Telnyx.
+type CallControlApplication struct {
+	ID                      string                      `json:"id"`
+	RecordType              string                      `json:"record_type"`
+	Active                  bool                        `json:"active"`
+	AnchorsiteOverride      string                      `json:"anchorsite_override"`
+	ApplicationName         string                      `json:"application_name"`
+	DTMFType                string                      `json:"dtmf_type"`
+	FirstCommandTimeout     bool                        `json:"first_command_timeout"`
+	FirstCommandTimeoutSecs int                         `json:"first_command_timeout_secs"`
+	Inbound                 CallControlInboundSettings  `json:"inbound"`
+	Outbound                CallControlOutboundSettings `json:"outbound"`
+	CreatedAt               time.Time                   `json:"created_at"`
+	UpdatedAt               time.Time                   `json:"updated_at"`
+	WebhookAPIVersion       string                      `json:"webhook_api_version"`
+	WebhookEventFailoverURL string                      `json:"webhook_event_failover_url"`
+	WebhookEventURL         string                      `json:"webhook_event_url"`
+	WebhookTimeoutSecs      int                         `json:"webhook_timeout_secs"`
+}
+
+type CallControlApplicationRequest struct {
+	Active                  bool                        `json:"active"`
+	AnchorsiteOverride      string                      `json:"anchorsite_override"`
+	ApplicationName         string                      `json:"application_name"`
+	DTMFType                string                      `json:"dtmf_type"`
+	FirstCommandTimeout     bool                        `json:"first_command_timeout"`
+	FirstCommandTimeoutSecs int                         `json:"first_command_timeout_secs"`
+	Inbound                 CallControlInboundSettings  `json:"inbound"`
+	Outbound                CallControlOutboundSettings `json:"outbound"`
+	WebhookAPIVersion       string                      `json:"webhook_api_version"`
+	WebhookEventFailoverURL string                      `json:"webhook_event_failover_url"`
+	WebhookEventURL         string                      `json:"webhook_event_url"`
+	WebhookTimeoutSecs      int                         `json:"webhook_timeout_secs"`
 }

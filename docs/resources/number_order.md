@@ -19,12 +19,12 @@ Resource for managing Telnyx Number Orders
 
 - `billing_group_id` (String) Billing group ID associated with the number order
 - `connection_id` (String) Connection ID associated with the number order
-- `messaging_profile_id` (String) Messaging profile ID associated with the number order
 - `phone_numbers` (Attributes List) List of phone numbers in the order (see [below for nested schema](#nestedatt--phone_numbers))
 
 ### Optional
 
 - `customer_reference` (String) Customer reference for the number order
+- `messaging_profile_id` (String) Messaging profile ID associated with the number order
 
 ### Read-Only
 

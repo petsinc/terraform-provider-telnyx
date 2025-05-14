@@ -8,12 +8,12 @@ if ! has asdf; then
 fi
 
 # Install asdf plugins
-plugin_list=$(asdf plugin-list)
+plugin_list=$(asdf plugin list)
 plugins=("golang" "terraform" "nodejs" "pnpm")
 
 for plugin in "${plugins[@]}"; do
   if ! echo $plugin_list | grep -q " $plugin "; then
-    asdf plugin-add $plugin
+    asdf plugin add $plugin
     echo "Added asdf plugin $plugin"
   fi
 done
