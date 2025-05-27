@@ -360,10 +360,23 @@ func setStateResponse(state *CallControlApplicationResourceModel, application *t
 	state.DTMFType = types.StringValue(application.DTMFType)
 	state.FirstCommandTimeout = types.BoolValue(application.FirstCommandTimeout)
 	state.FirstCommandTimeoutSecs = types.Int64Value(int64(application.FirstCommandTimeoutSecs))
+
+	// Fix for webhook_event_failover_url
+	if application.WebhookEventFailoverURL == "" {
+		state.WebhookEventFailoverURL = types.StringNull()
+	} else {
+		state.WebhookEventFailoverURL = types.StringValue(application.WebhookEventFailoverURL)
+	}
+
+	// Fix for webhook_timeout_secs
+	if application.WebhookTimeoutSecs == 0 {
+		state.WebhookTimeoutSecs = types.Int64Null()
+	} else {
+		state.WebhookTimeoutSecs = types.Int64Value(int64(application.WebhookTimeoutSecs))
+	}
+
 	state.WebhookAPIVersion = types.StringValue(application.WebhookAPIVersion)
-	state.WebhookEventFailoverURL = types.StringValue(application.WebhookEventFailoverURL)
 	state.WebhookEventURL = types.StringValue(application.WebhookEventURL)
-	state.WebhookTimeoutSecs = types.Int64Value(int64(application.WebhookTimeoutSecs))
 
 	state.Inbound = flattenInboundSettings(application.Inbound)
 	state.Outbound = flattenOutboundSettings(application.Outbound)
