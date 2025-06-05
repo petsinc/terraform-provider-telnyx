@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 const (
@@ -262,6 +263,116 @@ resource "telnyx_phone_number_lookup" "test" {
 				ResourceName:      "telnyx_billing_group.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccTelnyxCallControlApplication(t *testing.T) {
+	resourceName := "telnyx_call_control_application.test"
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy: func(state *terraform.State) error {
+			// Optionally, implement a check to ensure the resource is destroyed in Telnyx
+			return nil
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: providerConfig + `
+resource "telnyx_billing_group" "test" {
+  name = "Test Billing Group Call Control TF Call Control"
+}
+
+resource "telnyx_outbound_voice_profile" "test" {
+  name             = "Test Outbound Voice Profile Call Control TF Call Control"
+  billing_group_id = telnyx_billing_group.test.id
+  tags             = ["test-profile-tf-cc"]
+}
+
+resource "telnyx_call_control_application" "test" {
+  application_name = "Test Call Control App TF Call Control"
+  active           = true
+  inbound = {
+    channel_limit                  = 5
+    shaken_stir_enabled            = true
+    sip_subdomain                  = "terraform.test.callcontrol.sip.telnyx.com"
+    sip_subdomain_receive_settings = "from_anyone"
+  }
+  outbound = {
+    channel_limit             = 10
+    outbound_voice_profile_id = telnyx_outbound_voice_profile.test.id
+  }
+  webhook_api_version        = "2"
+  webhook_event_url          = "https://example.com/webhook"
+  webhook_event_failover_url = "https://example.com/webhook-failover"
+  webhook_timeout_secs       = 30
+}
+`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "application_name", "Test Call Control App TF Call Control"),
+					resource.TestCheckResourceAttr(resourceName, "active", "true"),
+					resource.TestCheckResourceAttr(resourceName, "inbound.channel_limit", "5"),
+					resource.TestCheckResourceAttr(resourceName, "inbound.shaken_stir_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "inbound.sip_subdomain", "terraform.test.callcontrol.sip.telnyx.com"),
+					resource.TestCheckResourceAttr(resourceName, "inbound.sip_subdomain_receive_settings", "from_anyone"),
+					resource.TestCheckResourceAttr(resourceName, "outbound.channel_limit", "10"),
+					resource.TestCheckResourceAttrPair(resourceName, "outbound.outbound_voice_profile_id", "telnyx_outbound_voice_profile.test", "id"),
+					resource.TestCheckResourceAttr(resourceName, "webhook_api_version", "2"),
+					resource.TestCheckResourceAttr(resourceName, "webhook_event_url", "https://example.com/webhook"),
+					resource.TestCheckResourceAttr(resourceName, "webhook_event_failover_url", "https://example.com/webhook-failover"),
+					resource.TestCheckResourceAttr(resourceName, "webhook_timeout_secs", "30"),
+				),
+			},
+			{
+				ResourceName:      "telnyx_billing_group.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: providerConfig + `
+resource "telnyx_billing_group" "test" {
+  name = "Updated Billing Group Call Control"
+}
+
+resource "telnyx_outbound_voice_profile" "test" {
+  name             = "Updated Outbound Voice Profile Call Control"
+  billing_group_id = telnyx_billing_group.test.id
+  tags             = ["test-profile"]
+}
+
+resource "telnyx_call_control_application" "test" {
+  application_name = "Updated Call Control App"
+  active           = false
+  inbound = {
+    channel_limit                  = 3
+    shaken_stir_enabled            = false
+    sip_subdomain                  = "updated.terraform.test.callcontrol.sip.telnyx.com"
+    sip_subdomain_receive_settings = "only_my_connections"
+  }
+  outbound = {
+    channel_limit             = 7
+    outbound_voice_profile_id = telnyx_outbound_voice_profile.test.id
+  }
+  webhook_api_version        = "1"
+  webhook_event_url          = "https://example.com/webhook-updated"
+  webhook_event_failover_url = "https://example.com/webhook-failover-updated"
+  webhook_timeout_secs       = 15
+}
+`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "application_name", "Updated Call Control App"),
+					resource.TestCheckResourceAttr(resourceName, "active", "false"),
+					resource.TestCheckResourceAttr(resourceName, "inbound.channel_limit", "3"),
+					resource.TestCheckResourceAttr(resourceName, "inbound.shaken_stir_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "inbound.sip_subdomain", "updated.terraform.test.callcontrol.sip.telnyx.com"),
+					resource.TestCheckResourceAttr(resourceName, "inbound.sip_subdomain_receive_settings", "only_my_connections"),
+					resource.TestCheckResourceAttr(resourceName, "outbound.channel_limit", "7"),
+					resource.TestCheckResourceAttrPair(resourceName, "outbound.outbound_voice_profile_id", "telnyx_outbound_voice_profile.test", "id"),
+					resource.TestCheckResourceAttr(resourceName, "webhook_api_version", "1"),
+					resource.TestCheckResourceAttr(resourceName, "webhook_event_url", "https://example.com/webhook-updated"),
+					resource.TestCheckResourceAttr(resourceName, "webhook_event_failover_url", "https://example.com/webhook-failover-updated"),
+					resource.TestCheckResourceAttr(resourceName, "webhook_timeout_secs", "15"),
+				),
 			},
 		},
 	})

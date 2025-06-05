@@ -45,11 +45,22 @@ Resource for managing Telnyx TeXML applications
 
 Optional:
 
-- `channel_limit` (Number) Limits the total number of inbound calls
+- `ani_number_format` (String) ANI number format
+- `channel_limit` (Number) Channel limit
 - `codecs` (List of String) List of codecs
-- `shaken_stir_enabled` (Boolean) Enables Shaken/Stir data for inbound calls
+- `default_routing_method` (String) Default routing method
+- `dnis_number_format` (String) DNIS number format
+- `generate_ringback_tone` (Boolean) Generate ringback tone
+- `isup_headers_enabled` (Boolean) ISUP headers enabled
+- `prack_enabled` (Boolean) PRACK enabled
+- `privacy_zone_enabled` (Boolean) Privacy zone enabled
+- `shaken_stir_enabled` (Boolean) SHAKEN/STIR enabled
+- `sip_compact_headers_enabled` (Boolean) SIP compact headers enabled
+- `sip_region` (String) SIP region
 - `sip_subdomain` (String) Subdomain for receiving inbound calls
 - `sip_subdomain_receive_settings` (String) Receive calls from specified endpoints
+- `timeout_1xx_secs` (Number) Timeout for 1xx responses in seconds
+- `timeout_2xx_secs` (Number) Timeout for 2xx responses in seconds
 
 
 <a id="nestedatt--outbound"></a>
@@ -57,5 +68,14 @@ Optional:
 
 Optional:
 
-- `channel_limit` (Number) Limits the total number of outbound calls
-- `outbound_voice_profile_id` (String) Associated outbound voice profile ID
+- `ani_override` (String) ANI override
+- `ani_override_type` (String) ANI override type
+- `call_parking_enabled` (Boolean) Call parking enabled
+- `channel_limit` (Number) Channel limit
+- `generate_ringback_tone` (Boolean) Generate ringback tone
+- `instant_ringback_enabled` (Boolean) Instant ringback enabled
+- `ip_authentication_method` (String) IP authentication method
+- `ip_authentication_token` (String) IP authentication token
+- `localization` (String) Localization
+- `outbound_voice_profile_id` (String) Outbound voice profile ID
+- `t38_reinvite_source` (String) T38 reinvite source
