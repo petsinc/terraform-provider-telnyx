@@ -1,6 +1,9 @@
 package telnyx
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 // Struct Definitions
 
@@ -532,4 +535,38 @@ type CallControlApplicationRequest struct {
 	WebhookEventFailoverURL string                      `json:"webhook_event_failover_url"`
 	WebhookEventURL         string                      `json:"webhook_event_url"`
 	WebhookTimeoutSecs      int                         `json:"webhook_timeout_secs"`
+}
+
+// TelnyxError represents an error from the Telnyx API
+type TelnyxError struct {
+	Errors []TelnyxErrorDetail `json:"errors"`
+}
+
+// TelnyxErrorDetail represents individual error details from the Telnyx API
+type TelnyxErrorDetail struct {
+	Code   string            `json:"code"`
+	Title  string            `json:"title"`
+	Detail string            `json:"detail"`
+	Source map[string]string `json:"source"`
+	Meta   map[string]string `json:"meta"`
+}
+
+// Error implements the error interface for TelnyxError
+func (e *TelnyxError) Error() string {
+	if len(e.Errors) == 0 {
+		return "unknown Telnyx API error"
+	}
+	msgBytes, err := json.Marshal(e.Errors)
+	if err != nil {
+		return "unknown Telnyx API error"
+	}
+	return string(msgBytes)
+}
+
+// https://developers.telnyx.com/api/errors/10005
+func (e *TelnyxError) IsResourceNotFound() bool {
+	if len(e.Errors) != 1 {
+		return false
+	}
+	return e.Errors[0].Code == "10005"
 }

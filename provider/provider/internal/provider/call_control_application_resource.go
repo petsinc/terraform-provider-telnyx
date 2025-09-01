@@ -259,13 +259,17 @@ func (r *CallControlApplicationResource) Read(ctx context.Context, req resource.
 		return
 	}
 	app, err := r.client.GetCallControlApplication(state.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Error reading Call Control Application", err.Error())
+	if err == nil {
+		setStateResponse(&state, app)
+		diags = resp.State.Set(ctx, &state)
+		resp.Diagnostics.Append(diags...)
 		return
 	}
-	setStateResponse(&state, app)
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
+	if telnyxErr, ok := err.(*telnyx.TelnyxError); ok && telnyxErr.IsResourceNotFound() {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+	resp.Diagnostics.AddError("Error reading Call Control Application", err.Error())
 }
 
 func (r *CallControlApplicationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -319,11 +323,15 @@ func (r *CallControlApplicationResource) Delete(ctx context.Context, req resourc
 		return
 	}
 	err := r.client.DeleteCallControlApplication(state.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Error deleting Call Control Application", err.Error())
+	if err == nil {
+		resp.State.RemoveResource(ctx)
+		return
 	}
-
-	resp.State.RemoveResource(ctx)
+	if telnyxErr, ok := err.(*telnyx.TelnyxError); ok && telnyxErr.IsResourceNotFound() {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+	resp.Diagnostics.AddError("Error deleting Call Control Application", err.Error())
 }
 
 func flattenInboundSettings(inbound telnyx.CallControlInboundSettings) types.Object {
