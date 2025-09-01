@@ -283,10 +283,8 @@ func (r *NumberOrderResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	// Cancel sub number orders if they exist
 	for _, subOrderID := range subNumberOrderIDs {
-		if subOrder, err := r.client.GetSubNumberOrder(subOrderID); err == nil {
-			if subOrder.Status == "deleted" {
-				continue
-			}
+		if subOrder, err := r.client.GetSubNumberOrder(subOrderID); err == nil && subOrder.Status == "deleted" {
+			continue
 		}
 		fmt.Printf("Cancelling sub number order with ID: %s\n", subOrderID)
 		_, err := r.client.CancelSubNumberOrder(subOrderID)
