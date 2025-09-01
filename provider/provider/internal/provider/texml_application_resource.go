@@ -467,15 +467,17 @@ func (r *TeXMLApplicationResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	application, err := r.client.GetTeXMLApplication(state.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Error reading TeXML application", err.Error())
+	if err == nil {
+		setStateFromTeXMLApplicationResponse(&state, application)
+		diags = resp.State.Set(ctx, state)
+		resp.Diagnostics.Append(diags...)
 		return
 	}
-	// Update state based on response from the API
-	setStateFromTeXMLApplicationResponse(&state, application)
-
-	diags = resp.State.Set(ctx, state)
-	resp.Diagnostics.Append(diags...)
+	if telnyxErr, ok := err.(*telnyx.TelnyxError); ok && telnyxErr.IsResourceNotFound() {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+	resp.Diagnostics.AddError("Error reading TeXML application", err.Error())
 }
 
 func (r *TeXMLApplicationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
