@@ -176,23 +176,26 @@ func (r *MessagingProfileResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	profile, err := r.client.GetMessagingProfile(state.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Error reading messaging profile", err.Error())
+	if err == nil {
+		state.Name = types.StringValue(profile.Name)
+		state.Enabled = types.BoolValue(profile.Enabled)
+		state.WebhookURL = types.StringValue(profile.WebhookURL)
+		state.WebhookFailoverURL = types.StringValue(profile.WebhookFailoverURL)
+		state.WebhookAPIVersion = types.StringValue(profile.WebhookAPIVersion)
+		state.WhitelistedDestinations = convertStringsToList(profile.WhitelistedDestinations)
+		state.CreatedAt = types.StringValue(profile.CreatedAt.String())
+		state.UpdatedAt = types.StringValue(profile.UpdatedAt.String())
+		state.V1Secret = types.StringValue(profile.V1Secret)
+
+		diags = resp.State.Set(ctx, state)
+		resp.Diagnostics.Append(diags...)
 		return
 	}
-
-	state.Name = types.StringValue(profile.Name)
-	state.Enabled = types.BoolValue(profile.Enabled)
-	state.WebhookURL = types.StringValue(profile.WebhookURL)
-	state.WebhookFailoverURL = types.StringValue(profile.WebhookFailoverURL)
-	state.WebhookAPIVersion = types.StringValue(profile.WebhookAPIVersion)
-	state.WhitelistedDestinations = convertStringsToList(profile.WhitelistedDestinations)
-	state.CreatedAt = types.StringValue(profile.CreatedAt.String())
-	state.UpdatedAt = types.StringValue(profile.UpdatedAt.String())
-	state.V1Secret = types.StringValue(profile.V1Secret)
-
-	diags = resp.State.Set(ctx, state)
-	resp.Diagnostics.Append(diags...)
+	if telnyxErr, ok := err.(*telnyx.TelnyxError); ok && telnyxErr.IsResourceNotFound() {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+	resp.Diagnostics.AddError("Error reading messaging profile", err.Error())
 }
 
 func (r *MessagingProfileResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
