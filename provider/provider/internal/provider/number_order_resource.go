@@ -283,8 +283,8 @@ func (r *NumberOrderResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	// Cancel sub number orders if they exist
 	for _, subOrderID := range subNumberOrderIDs {
-		if _, err := r.client.GetSubNumberOrder(subOrderID); err != nil {
-			if telnyxErr, ok := err.(*telnyx.TelnyxError); ok && telnyxErr.IsResourceNotFound() {
+		if subOrder, err := r.client.GetSubNumberOrder(subOrderID); err != nil {
+			if subOrder.Status == "deleted" {
 				continue
 			}
 		}
