@@ -561,6 +561,7 @@ func (r *FQDNConnectionResource) Read(ctx context.Context, req resource.ReadRequ
 		setFQDNConnectionState(ctx, &state, connection)
 		diags = resp.State.Set(ctx, state)
 		resp.Diagnostics.Append(diags...)
+		return
 	}
 	if telnyxErr, ok := err.(*telnyx.TelnyxError); ok && telnyxErr.IsResourceNotFound() {
 		resp.State.RemoveResource(ctx)
