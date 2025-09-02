@@ -37,6 +37,17 @@ func (client *TelnyxClient) GetNumberOrder(numberOrderID string) (*PhoneNumberOr
 	return &result.Data, nil
 }
 
+func (client *TelnyxClient) GetSubNumberOrder(subNumberOrderID string) (*SubNumberOrderResponse, error) {
+	var result struct {
+		Data SubNumberOrderResponse `json:"data"`
+	}
+	err := client.doRequest("GET", fmt.Sprintf("/sub_number_orders/%s", subNumberOrderID), nil, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result.Data, nil
+}
+
 func (client *TelnyxClient) CancelSubNumberOrder(subNumberOrderID string) (*SubNumberOrderResponse, error) {
 	var result struct {
 		Data SubNumberOrderResponse `json:"data"`

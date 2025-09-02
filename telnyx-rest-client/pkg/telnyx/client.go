@@ -113,6 +113,11 @@ func (client *TelnyxClient) retryRequest(method, path string, bodyBytes []byte, 
 
 		if resp.StatusCode >= 400 {
 			client.logger.Error("Received error response from API", zap.String("path", path), zap.Int("status_code", resp.StatusCode), zap.String("response", string(respBody)))
+
+			if telnyxErr := parseTelnyxError(respBody); telnyxErr != nil {
+				return telnyxErr
+			}
+
 			return fmt.Errorf("received error response from API: %s", string(respBody))
 		}
 
@@ -127,4 +132,12 @@ func (client *TelnyxClient) retryRequest(method, path string, bodyBytes []byte, 
 	}
 
 	return lastErr
+}
+
+func parseTelnyxError(respBody []byte) *TelnyxError {
+	var telnyxErr TelnyxError
+	if err := json.Unmarshal(respBody, &telnyxErr); err != nil {
+		return nil
+	}
+	return &telnyxErr
 }
