@@ -557,15 +557,16 @@ func (r *FQDNConnectionResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	connection, err := r.client.GetFQDNConnection(state.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Error reading FQDN connection", err.Error())
+	if err == nil {
+		setFQDNConnectionState(ctx, &state, connection)
+		diags = resp.State.Set(ctx, state)
+		resp.Diagnostics.Append(diags...)
+	}
+	if telnyxErr, ok := err.(*telnyx.TelnyxError); ok && telnyxErr.IsResourceNotFound() {
+		resp.State.RemoveResource(ctx)
 		return
 	}
-
-	setFQDNConnectionState(ctx, &state, connection)
-
-	diags = resp.State.Set(ctx, state)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.AddError("Error reading FQDN connection", err.Error())
 }
 
 func (r *FQDNConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
