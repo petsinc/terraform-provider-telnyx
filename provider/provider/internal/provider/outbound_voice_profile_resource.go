@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -73,6 +74,12 @@ func (r *OutboundVoiceProfileResource) Schema(ctx context.Context, req resource.
 			"billing_group_id": schema.StringAttribute{
 				Description: "Billing group ID associated with the profile",
 				Required:    true,
+			},
+			"connections_count": schema.Int64Attribute{
+				Description: "Number of connections for this profile",
+				Optional:    true,
+				Computed:    true,
+				Default:     int64default.StaticInt64(10),
 			},
 			"traffic_type": schema.StringAttribute{
 				Description: "Type of traffic",
@@ -298,6 +305,7 @@ func (r *OutboundVoiceProfileResource) Read(ctx context.Context, req resource.Re
 
 	state.Name = types.StringValue(profile.Name)
 	state.BillingGroupID = types.StringValue(profile.BillingGroupID)
+	state.ConnectionsCount = types.Int64Value(profile.ConnectionsCount)
 	state.TrafficType = types.StringValue(profile.TrafficType)
 	state.ServicePlan = types.StringValue(profile.ServicePlan)
 
