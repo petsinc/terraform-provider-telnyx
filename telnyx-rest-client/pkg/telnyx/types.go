@@ -74,7 +74,7 @@ type URLShortenerSettings struct {
 type OutboundVoiceProfile struct {
 	ID                      string        `json:"id,omitempty"`
 	Name                    string        `json:"name"`
-	ConnectionsCount        int           `json:"connections_count,omitempty"`
+	ConnectionsCount        int64         `json:"connections_count,omitempty"`
 	TrafficType             string        `json:"traffic_type"`
 	ServicePlan             string        `json:"service_plan"`
 	ConcurrentCallLimit     *int          `json:"concurrent_call_limit,omitempty"`
