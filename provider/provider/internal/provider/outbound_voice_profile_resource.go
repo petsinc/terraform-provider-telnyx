@@ -394,6 +394,7 @@ func (r *OutboundVoiceProfileResource) Update(ctx context.Context, req resource.
 	profile, err := r.client.UpdateOutboundVoiceProfile(plan.ID.ValueString(), telnyx.OutboundVoiceProfile{
 		Name:                    plan.Name.ValueString(),
 		BillingGroupID:          plan.BillingGroupID.ValueString(),
+		ConnectionsCount:        plan.ConnectionsCount.ValueInt64(),
 		TrafficType:             plan.TrafficType.ValueString(),
 		ServicePlan:             plan.ServicePlan.ValueString(),
 		ConcurrentCallLimit:     concurrentCallLimitPointer,
