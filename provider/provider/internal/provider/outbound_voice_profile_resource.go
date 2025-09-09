@@ -37,6 +37,7 @@ type OutboundVoiceProfileResourceModel struct {
 	ID                      types.String  `tfsdk:"id"`
 	Name                    types.String  `tfsdk:"name"`
 	BillingGroupID          types.String  `tfsdk:"billing_group_id"`
+	ConnectionsCount        types.Int64   `tfsdk:"connections_count"`
 	TrafficType             types.String  `tfsdk:"traffic_type"`
 	ServicePlan             types.String  `tfsdk:"service_plan"`
 	ConcurrentCallLimit     types.Int64   `tfsdk:"concurrent_call_limit"`
@@ -234,6 +235,7 @@ func (r *OutboundVoiceProfileResource) Create(ctx context.Context, req resource.
 	profile, err := r.client.CreateOutboundVoiceProfile(telnyx.OutboundVoiceProfile{
 		Name:                    plan.Name.ValueString(),
 		BillingGroupID:          plan.BillingGroupID.ValueString(),
+		ConnectionsCount:        plan.ConnectionsCount.ValueInt64(),
 		TrafficType:             plan.TrafficType.ValueString(),
 		ServicePlan:             plan.ServicePlan.ValueString(),
 		ConcurrentCallLimit:     concurrentCallLimitPointer,
